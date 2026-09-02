@@ -1,14 +1,14 @@
-# template-compliance
+# 🧭 template-compliance
 
-A standalone analysis skill for read-only inspection of Azure Developer CLI (`azd`) templates against a bundled, repository-owned rule catalog.
+Welcome! `template-compliance` is a standalone analysis skill that helps you inspect Azure Developer CLI (`azd`) templates against a bundled, repository-owned rule catalog. Every inspection is read-only, so the skill reports what it finds without changing the template.
 
-## Install
+## 📦 Install
 
-Copy this directory into the skills location supported by your agent runtime. The installed directory name and frontmatter name must remain `template-compliance`. No runtime-specific installer is bundled or assumed.
+To get started, copy this directory into the skills location supported by your agent runtime. Keep the installed directory name and frontmatter name as `template-compliance`. The skill does not bundle or assume a runtime-specific installer.
 
-## Use
+## 🔍 Use
 
-Ask the agent to inspect named template files or directories for compliance. The skill:
+Ask your agent to inspect named template files or directories for compliance. The skill:
 
 - uses only active rules in `references/compliance-rules.md`;
 - reports `PASS`, `FAIL`, or `UNABLE TO DETERMINE`;
@@ -22,17 +22,17 @@ Example request:
 
 Ask explicitly for **Awesome AZD publication readiness** when collection rules should also apply. The skill does not assume publication intent. If scope cannot be resolved, it limits the inspection to core rules and reports the limitation.
 
-The bundled, repository-owned catalog is the skill's only compliance authority. Active approved rules define enforceable requirements; descriptive guidance, optional enhancements, and optional repository assets such as dev containers or CI/CD pipeline definitions are not compliance failures. External validation automation is evidence, not authority: a run establishes only the checks it records. Review and version catalog changes in this repository.
+The bundled, repository-owned catalog is the skill's only compliance authority. Active approved rules define enforceable requirements; descriptive guidance, optional enhancements, and optional repository assets such as dev containers or CI/CD pipeline definitions are not compliance failures. External validation automation is evidence, not authority: a run establishes only the checks it records. Review and version catalog changes in this repository so the policy stays clear and intentional.
 
-## Customize policy
+## 🛠️ Customize policy
 
-Edit the modules indexed by `references/compliance-rules.md` and add organization-approved rules using its schema. Give each rule a stable ID, explicit applicability, evidence instructions, deterministic pass/fail criteria, and remediation. Placeholder or example rules are never enforced.
+The catalog is designed to grow with your needs. Edit the modules indexed by `references/compliance-rules.md` and add organization-approved rules using its schema. Give each rule a stable ID, explicit applicability, evidence instructions, deterministic pass/fail criteria, and remediation. Placeholder or example rules are never enforced.
 
 Keep policy interpretation out of `SKILL.md`: the catalog is authoritative.
 
-## Evaluate
+## 🧪 Evaluate
 
-`evals/eval.yaml` indexes runner-neutral YAML fixtures covering:
+The repository includes runner-neutral evaluation fixtures. `evals/eval.yaml` indexes coverage for:
 
 - correct routing;
 - the report contract and remediation;
@@ -43,12 +43,14 @@ Keep policy interpretation out of `SKILL.md`: the catalog is authoritative.
 
 The fixtures are declarative and do not assume a particular evaluation runner. Load them with a YAML-capable tool or adapt them to the evaluator used by your runtime. Review expected assertions manually if no evaluator is available.
 
-## Layout
+## 🗂️ Layout
 
-- `SKILL.md` — routing, constraints, and analysis workflow
-- `references/compliance-rules.md` — authoritative rule schema and catalog
-- `references/core-azd-rules.md` — repository-owned core `azd` requirements
-- `references/awesome-azd-rules.md` — repository-owned collection-specific requirements
-- `references/report-format.md` — required report contract
-- `evals/eval.yaml` — evaluation suite manifest
-- `evals/tasks/*.yaml` — evaluation scenarios
+Here is where everything lives:
+
+- `SKILL.md`: routing, constraints, and analysis workflow
+- `references/compliance-rules.md`: authoritative rule schema and catalog
+- `references/core-azd-rules.md`: repository-owned core `azd` requirements
+- `references/awesome-azd-rules.md`: repository-owned collection-specific requirements
+- `references/report-format.md`: required report contract
+- `evals/eval.yaml`: evaluation suite manifest
+- `evals/tasks/*.yaml`: evaluation scenarios
