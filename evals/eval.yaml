@@ -1,0 +1,38 @@
+name: template-compliance
+version: 3
+description: Declarative evaluation manifest for routing and analysis behavior.
+skill: ../SKILL.md
+tasks:
+  - id: compliant-template
+    file: tasks/compliant-template.yaml
+  - id: remediation-needed
+    file: tasks/remediation-needed.yaml
+  - id: ambiguous-evidence
+    file: tasks/ambiguous-evidence.yaml
+  - id: should-not-trigger
+    file: tasks/should-not-trigger.yaml
+  - id: all-rules-pass
+    file: tasks/all-rules-pass.yaml
+  - id: all-rules-fail
+    file: tasks/all-rules-fail.yaml
+  - id: all-rules-unknown
+    file: tasks/all-rules-unknown.yaml
+  - id: ambiguous-publication-scope
+    file: tasks/ambiguous-publication-scope.yaml
+  - id: optional-assets-and-validator-limits
+    file: tasks/optional-assets-and-validator-limits.yaml
+coverage:
+  routing: [compliant-template, should-not-trigger, ambiguous-publication-scope]
+  report_contract: [compliant-template, remediation-needed, all-rules-pass, all-rules-fail]
+  unknown_handling: [ambiguous-evidence, all-rules-unknown, optional-assets-and-validator-limits]
+  non_trigger: [should-not-trigger]
+  all_rules_positive: [all-rules-pass]
+  all_rules_negative: [all-rules-fail]
+  all_rules_ambiguity: [all-rules-unknown, ambiguous-publication-scope]
+  optional_asset_non_enforcement: [optional-assets-and-validator-limits]
+  validation_evidence_limits: [optional-assets-and-validator-limits]
+notes:
+  - Fixtures are runner-neutral YAML declarations.
+  - Every finding references an active rule in the bundled catalog.
+  - All-rules fixtures cover positive, negative, and indeterminate outcomes for every active catalog rule.
+  - Optional repository assets and unrecorded validation checks must never produce a failure.

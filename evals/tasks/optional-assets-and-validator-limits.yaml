@@ -1,0 +1,50 @@
+id: optional-assets-and-validator-limits
+purpose: >-
+  Verify that optional repository assets are never failures and that a validation
+  run establishes only the checks it records.
+should_trigger: true
+prompt: >-
+  Audit this repository for Awesome AZD publication readiness, read-only. The
+  collection validation workflow is red.
+fixture:
+  publication_intent: explicit
+  repository:
+    audited_commit: 4d1c0a83f2b74e6690c5b8a1e7d3f9c204ab6e57
+    root_files:
+      - azure.yaml
+      - README.md
+      - LICENSE.md
+      - SECURITY.md
+      - CONTRIBUTING.md
+      - .github/CODE_OF_CONDUCT.md
+      - .github/ISSUE_TEMPLATE/bug.yml
+      - infra/main.bicep
+      - src/app.py
+    absent_optional_assets:
+      - .devcontainer/devcontainer.json
+      - .github/workflows/azure-dev.yml
+      - tests/e2e
+    readme:
+      access: denied
+  evidence:
+    validation:
+      kind: collection-validation-action
+      target_commit: 4d1c0a83f2b74e6690c5b8a1e7d3f9c204ab6e57
+      result: failure
+      recorded_checks: [devcontainer-present, azure-dev-workflow-present]
+      log_excerpt: "ERROR: .devcontainer/devcontainer.json not found."
+    security_validation_record_access: denied
+expected:
+  finding_status:
+    AZD-AWESOME-002: PASS
+    AZD-AWESOME-004: UNABLE TO DETERMINE
+    AZD-AWESOME-007: UNABLE TO DETERMINE
+    AZD-AWESOME-008: UNABLE TO DETERMINE
+  assertions:
+    - Reports no finding against the absent dev container, azure-dev workflow, or end-to-end tests because no active rule requires them.
+    - Reports AZD-AWESOME-004 as UNABLE TO DETERMINE because the only failing record's recorded checks map to no active rule.
+    - Reports AZD-AWESOME-007 as UNABLE TO DETERMINE because README.md is unreadable and the run records no heading check.
+    - Reports AZD-AWESOME-008 as UNABLE TO DETERMINE because no readable security validation record identifies the audited commit.
+    - Does not treat the red validation run as evidence of a catalog failure.
+    - Findings for rules not listed follow their own evidence.
+    - Does not modify or execute the fixture.

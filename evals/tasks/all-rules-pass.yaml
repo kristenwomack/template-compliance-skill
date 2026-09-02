@@ -1,0 +1,182 @@
+id: all-rules-pass
+purpose: Verify positive behavior for every active repository-owned catalog rule.
+should_trigger: true
+prompt: Audit this repository for core azd and Awesome AZD publication readiness, read-only.
+fixture:
+  publication_intent: explicit
+  repository:
+    audited_commit: a17b39f452a6d7c18d2a0f5e901b4667d24de811
+    root_files:
+      - azure.yaml
+      - README.md
+      - LICENSE.md
+      - SECURITY.md
+      - CONTRIBUTING.md
+      - .github/CODE_OF_CONDUCT.md
+      - .github/ISSUE_TEMPLATE/bug.yml
+      - infra/main.bicep
+      - src/app.py
+    tracked_files:
+      source: git-ls-files
+      at_commit: a17b39f452a6d7c18d2a0f5e901b4667d24de811
+      paths:
+        - azure.yaml
+        - README.md
+        - LICENSE.md
+        - SECURITY.md
+        - CONTRIBUTING.md
+        - .github/CODE_OF_CONDUCT.md
+        - .github/ISSUE_TEMPLATE/bug.yml
+        - infra/main.bicep
+        - src/app.py
+    azure_yaml:
+      content: |
+        name: python-appservice-template
+        metadata:
+          template: python-appservice-template@1.0.0
+        infra:
+          provider: bicep
+          path: infra
+        services:
+          web:
+            project: src
+            host: appservice
+            language: python
+    infrastructure:
+      path: infra
+      files:
+        - path: infra/main.bicep
+          content_excerpt: |
+            resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01'
+            resource webApp 'Microsoft.Web/sites@2023-12-01'
+    readme:
+      content: |
+        # Python App Service template
+
+        ## Important Security Notice
+        This template helps you get started on Azure. Review authentication,
+        secrets handling, and networking before production use.
+
+        ## Features
+        Creates an Azure App Service plan and web app and deploys the Python
+        application from `src/app.py`.
+
+        ## Getting Started
+
+        ### Prerequisites
+        Install Azure Developer CLI 1.9 or later and use an Azure subscription
+        where you can create App Service resources.
+
+        ### Quickstart
+        Run `azd auth login`, `azd init`, and `azd up`. The documented `azd up`
+        path reads `azure.yaml`, `infra/main.bicep`, and `src/app.py`.
+
+        Verify the deployment by opening the HTTPS endpoint printed by
+        `azd up`; the page must display "Hello from the Python App Service
+        template."
+
+        Clean up by running `azd down` and confirming deletion when prompted.
+
+        ## Guidance
+
+        ### Security
+        The web app authenticates to Azure with a system-assigned managed
+        identity; no secrets are stored in the repository.
+
+        ## Resources
+        - Azure App Service documentation
+    metadata:
+      source: github-api
+      description: Deploy a Python web application to Azure App Service with azd.
+      topics: [azd-templates, ai-azd-templates, python, appservice, bicep]
+  schema_validation:
+    schema_url: https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/azd-schema
+    retrieved_at: "2026-08-30T12:00:00Z"
+    target_commit: a17b39f452a6d7c18d2a0f5e901b4667d24de811
+    result: pass
+    output_excerpt: "azure.yaml: 0 schema errors"
+  evidence:
+    azd_up:
+      kind: github-actions-workflow
+      url: https://github.com/example/python-appservice-template/actions/runs/18420001
+      target_commit: a17b39f452a6d7c18d2a0f5e901b4667d24de811
+      completed_at: "2026-08-30T12:18:00Z"
+      path: azd auth login; azd init; azd up
+      result: success
+      log_excerpt: "SUCCESS: Python application provisioned and deployed; endpoint returned HTTP 200."
+    teardown:
+      kind: workflow-log
+      url: https://github.com/example/python-appservice-template/actions/runs/18420001
+      target_commit: a17b39f452a6d7c18d2a0f5e901b4667d24de811
+      completed_at: "2026-08-30T12:31:00Z"
+      path: azd down
+      result: success
+      log_excerpt: "SUCCESS: App Service plan and web app deleted."
+    validation:
+      kind: github-actions-workflow
+      url: https://github.com/example/python-appservice-template/actions/runs/18420001
+      target_commit: a17b39f452a6d7c18d2a0f5e901b4667d24de811
+      completed_at: "2026-08-30T12:18:00Z"
+      result: success
+      recorded_checks: [schema-validation, azd-up, endpoint-smoke-test, readme-h2-headings, security-analysis]
+      log_excerpt: "All 5 validation checks passed for a17b39f."
+    security_validation:
+      kind: psrule-for-azure
+      url: https://github.com/example/python-appservice-template/actions/runs/18420001
+      target_commit: a17b39f452a6d7c18d2a0f5e901b4667d24de811
+      completed_at: "2026-08-30T12:18:00Z"
+      result: pass
+      warnings: 0
+      errors: 0
+      log_excerpt: "PSRule for Azure: 0 errors, 0 warnings."
+    gallery:
+      title: Python App Service Starter
+      short_description: Deploy a Python web app to Azure App Service with Bicep and azd.
+      source: https://github.com/example/python-appservice-template
+      author: Example Templates Team
+      image:
+        url: https://raw.githubusercontent.com/example/python-appservice-template/a17b39f/assets/gallery.png
+        http_status: 200
+        content_type: image/png
+      tags:
+        technology: web
+        language: python
+        framework: flask
+        azure_service: app-service
+        iac: bicep
+      uuid: 123e4567-e89b-12d3-a456-426614174000
+    submission:
+      kind: direct-awesome-azd-pull-request
+      url: https://github.com/Azure/awesome-azd/pull/9999
+      catalog_rule: AZD-AWESOME-006
+expected:
+  overall_result: PASS
+  finding_status:
+    AZD-CORE-001: PASS
+    AZD-CORE-002: PASS
+    AZD-CORE-003: PASS
+    AZD-CORE-004: PASS
+    AZD-CORE-005: PASS
+    AZD-CORE-006: PASS
+    AZD-AWESOME-001: PASS
+    AZD-AWESOME-002: PASS
+    AZD-AWESOME-003: PASS
+    AZD-AWESOME-004: PASS
+    AZD-AWESOME-005: PASS
+    AZD-AWESOME-006: PASS
+    AZD-AWESOME-007: PASS
+    AZD-AWESOME-008: PASS
+  assertions:
+    - Applies both core and collection rule sets because publication intent is explicit.
+    - Every PASS cites a concrete file listing, content excerpt, metadata field, URL, commit, or recorded result.
+    - Schema validation identifies the official schema URL, retrieval time, target commit, and zero-error result.
+    - Infrastructure evidence maps the README scenario and azure.yaml infra path to tracked Bicep resources.
+    - The documented azd up path names every required code and configuration path.
+    - azd up, teardown, and validation records identify the audited commit and successful result.
+    - README evidence separately states the scenario, prerequisites, deployment, verification, and cleanup.
+    - README evidence contains every required H2 heading, evaluated from README content rather than from the validation run alone.
+    - Repository topics evidence includes azd-templates and ai-azd-templates plus a technology topic present in README.md or azure.yaml.
+    - Security validation evidence identifies the audited commit and records zero warnings and zero errors.
+    - Repository and gallery metadata contain descriptive values, and image evidence records a successful response.
+    - Submission evidence uses a submission path authorized by the repository-owned catalog.
+    - Does not modify the fixture.

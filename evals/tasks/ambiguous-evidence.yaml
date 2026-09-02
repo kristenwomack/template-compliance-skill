@@ -1,0 +1,24 @@
+id: ambiguous-evidence
+purpose: Verify uncertainty is preserved when evidence is inaccessible.
+should_trigger: true
+prompt: >-
+  Check the supplied template for compliance and report what can and cannot be
+  determined. Do not infer inaccessible content.
+fixture:
+  publication_intent: none
+  repository:
+    root_access: denied
+expected:
+  overall_result: UNABLE TO DETERMINE
+  finding_status:
+    AZD-CORE-001: UNABLE TO DETERMINE
+    AZD-CORE-002: UNABLE TO DETERMINE
+    AZD-CORE-003: UNABLE TO DETERMINE
+    AZD-CORE-004: UNABLE TO DETERMINE
+    AZD-CORE-005: UNABLE TO DETERMINE
+    AZD-CORE-006: UNABLE TO DETERMINE
+  assertions:
+    - Reports all bundled core rules as UNABLE TO DETERMINE.
+    - Identifies root access denial and rule-specific missing evidence.
+    - States which readable repository or execution evidence would resolve each finding.
+    - Includes the limitation and no-modification integrity statement.

@@ -1,0 +1,70 @@
+id: compliant-template
+purpose: Verify positive routing and the complete report contract.
+should_trigger: true
+prompt: >-
+  Use template-compliance to inspect this azd template repository read-only
+  for core compliance and return the complete report.
+fixture:
+  publication_intent: none
+  repository:
+    audited_commit: 7c92d640f1e845ea4f4f6ea4a68c37d834ffe201
+    root_files: [azure.yaml, README.md, infra/main.bicep, src/app.py]
+    tracked_files:
+      source: git-ls-files
+      at_commit: 7c92d640f1e845ea4f4f6ea4a68c37d834ffe201
+      paths: [azure.yaml, README.md, infra/main.bicep, src/app.py]
+    azure_yaml:
+      content: |
+        name: webapp-template
+        metadata:
+          template: webapp-template@1.0.0
+        infra:
+          provider: bicep
+          path: infra
+        services:
+          web:
+            project: src
+            host: appservice
+            language: python
+    readme:
+      content: |
+        This template creates an Azure App Service plan and web app.
+        Run `azd up`; it reads `azure.yaml`, `infra/main.bicep`, and `src/app.py`.
+        Run `azd down` to delete the App Service plan and web app.
+    infrastructure:
+      path: infra
+      file: infra/main.bicep
+      content_excerpt: >-
+        resource plan 'Microsoft.Web/serverfarms@2023-12-01';
+        resource app 'Microsoft.Web/sites@2023-12-01'
+  schema_validation:
+    schema_url: https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/azd-schema
+    retrieved_at: "2026-08-30T12:00:00Z"
+    target_commit: 7c92d640f1e845ea4f4f6ea4a68c37d834ffe201
+    result: pass
+    output_excerpt: "azure.yaml: 0 schema errors"
+  evidence:
+    azd_up:
+      target_commit: 7c92d640f1e845ea4f4f6ea4a68c37d834ffe201
+      path: azd up
+      result: success
+      log_excerpt: "SUCCESS: Your application was provisioned and deployed."
+    teardown:
+      target_commit: 7c92d640f1e845ea4f4f6ea4a68c37d834ffe201
+      path: azd down
+      result: success
+      log_excerpt: "SUCCESS: All template resources were deleted."
+expected:
+  overall_result: PASS
+  finding_status:
+    AZD-CORE-001: PASS
+    AZD-CORE-002: PASS
+    AZD-CORE-003: PASS
+    AZD-CORE-004: PASS
+    AZD-CORE-005: PASS
+    AZD-CORE-006: PASS
+  assertions:
+    - Reports six PASS findings using only bundled core rule IDs.
+    - Each PASS cites concrete repository, configuration, tracked-file, or execution evidence.
+    - Includes scope, read-only mode, summary counts, findings, and integrity statement.
+    - Does not modify or propose modifying the fixture during inspection.

@@ -1,0 +1,16 @@
+id: should-not-trigger
+purpose: Verify editing requests route away from this analysis skill.
+should_trigger: false
+prompt: >-
+  Rewrite my deployment template to add an owner field and reformat every
+  section. Apply the changes directly.
+fixture:
+  target:
+    path: templates/deployment.yaml
+    content: |
+      metadata: {}
+expected:
+  assertions:
+    - Does not invoke template-compliance for a template-editing request.
+    - Does not present a compliance verdict.
+    - Routes to a template editing or generation capability if one is available.

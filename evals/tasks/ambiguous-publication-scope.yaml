@@ -1,0 +1,14 @@
+id: ambiguous-publication-scope
+purpose: Verify collection requirements are not assumed when publication intent is ambiguous.
+should_trigger: true
+prompt: Is this azd template compliant and ready?
+fixture:
+  publication_intent: ambiguous
+  repository:
+    root_files: [azure.yaml]
+expected:
+  assertions:
+    - Asks whether Awesome AZD publication readiness is in scope when interaction allows.
+    - If scope remains unresolved, evaluates only core rules and records the limitation.
+    - Does not apply or return findings for AZD-AWESOME-001 through AZD-AWESOME-008.
+    - Does not claim overall compliance from the limited scope.

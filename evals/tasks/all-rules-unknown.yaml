@@ -1,0 +1,44 @@
+id: all-rules-unknown
+purpose: Verify ambiguity behavior for every active repository-owned catalog rule.
+should_trigger: true
+prompt: Check core azd and Awesome AZD readiness, but do not infer inaccessible evidence.
+fixture:
+  publication_intent: explicit
+  repository:
+    root_access: denied
+    repository_metadata_access: denied
+    audited_commit: unavailable
+    scenario_documentation_access: denied
+    tracked_file_state_access: denied
+  evidence:
+    applicable_schema_access: denied
+    schema_validator_result: absent
+    execution_history_access: denied
+    teardown_documentation_access: denied
+    validation_record_access: denied
+    readme_heading_evidence: absent
+    security_validation_record_access: denied
+    gallery_submission_access: denied
+    submission_record_access: denied
+    submission_authority_evidence_access: denied
+expected:
+  overall_result: UNABLE TO DETERMINE
+  finding_status:
+    AZD-CORE-001: UNABLE TO DETERMINE
+    AZD-CORE-002: UNABLE TO DETERMINE
+    AZD-CORE-003: UNABLE TO DETERMINE
+    AZD-CORE-004: UNABLE TO DETERMINE
+    AZD-CORE-005: UNABLE TO DETERMINE
+    AZD-CORE-006: UNABLE TO DETERMINE
+    AZD-AWESOME-001: UNABLE TO DETERMINE
+    AZD-AWESOME-002: UNABLE TO DETERMINE
+    AZD-AWESOME-003: UNABLE TO DETERMINE
+    AZD-AWESOME-004: UNABLE TO DETERMINE
+    AZD-AWESOME-005: UNABLE TO DETERMINE
+    AZD-AWESOME-006: UNABLE TO DETERMINE
+    AZD-AWESOME-007: UNABLE TO DETERMINE
+    AZD-AWESOME-008: UNABLE TO DETERMINE
+  assertions:
+    - Reports fourteen indeterminate findings and the evidence needed for each.
+    - Does not turn inaccessible, historical, contextual, or external evidence into FAIL.
+    - Does not modify or execute the fixture.
