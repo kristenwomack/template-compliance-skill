@@ -47,10 +47,16 @@ The fixtures are declarative and do not assume a particular evaluation runner. L
 
 Here is where everything lives:
 
-- `SKILL.md`: routing, constraints, and analysis workflow
-- `references/compliance-rules.md`: authoritative rule schema and catalog
-- `references/core-azd-rules.md`: repository-owned core `azd` requirements
-- `references/awesome-azd-rules.md`: repository-owned collection-specific requirements
-- `references/report-format.md`: required report contract
-- `evals/eval.yaml`: evaluation suite manifest
-- `evals/tasks/*.yaml`: evaluation scenarios
+```text
+template-compliance/
+├── SKILL.md                         # Routing, constraints, and analysis workflow
+├── references/
+│   ├── compliance-rules.md          # Authoritative rule schema and catalog
+│   ├── core-azd-rules.md            # Core azd requirements
+│   ├── awesome-azd-rules.md         # Collection-specific requirements
+│   └── report-format.md             # Required report contract
+└── evals/
+    ├── eval.yaml                    # Evaluation suite manifest
+    └── tasks/
+        └── *.yaml                   # Evaluation scenarios
+```
