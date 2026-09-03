@@ -60,3 +60,7 @@ template-compliance/
     └── tasks/
         └── *.yaml                   # Evaluation scenarios
 ```
+
+## 🔗 Related resources
+
+The [azd-template-artifacts repository](https://github.com/Azure-Samples/azd-template-artifacts) informed this catalog and provides example templates and supporting artifacts. It is a helpful reference, but it is not a compliance authority. This skill evaluates only the rules bundled in its repository-owned catalog.
