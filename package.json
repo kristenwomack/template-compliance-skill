@@ -1,0 +1,35 @@
+{
+  "name": "template-compliance-skill",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Vally evaluation suite for the template-compliance skill.",
+  "scripts": {
+    "test": "node --test \"evals/graders/tests/*.test.js\"",
+    "parity": "node evals/parity/check-legacy-parity.js",
+    "lint": "vally lint skills --eval-spec evals/eval.yaml --strict --grader-plugin ./graders/template-compliance-report.js",
+    "check": "npm run test && npm run parity && npm run lint",
+    "eval:ci": "vally eval --suite ci-gate --require-pass --junit --grader-plugin ./evals/graders/template-compliance-report.js",
+    "eval:full": "vally eval --suite full --require-pass --junit --grader-plugin ./evals/graders/template-compliance-report.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kristenwomack/template-compliance-skill.git"
+  },
+  "keywords": [
+    "agent-skill",
+    "azd",
+    "compliance",
+    "vally"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/kristenwomack/template-compliance-skill/issues"
+  },
+  "homepage": "https://github.com/kristenwomack/template-compliance-skill#readme",
+  "devDependencies": {
+    "@microsoft/vally": "0.15.0",
+    "@microsoft/vally-cli": "0.15.0",
+    "yaml": "2.9.0"
+  }
+}

@@ -1,38 +1,387 @@
 name: template-compliance
-version: 3
-description: Declarative evaluation manifest for routing and analysis behavior.
-skill: ../SKILL.md
-tasks:
-  - id: compliant-template
-    file: tasks/compliant-template.yaml
-  - id: remediation-needed
-    file: tasks/remediation-needed.yaml
-  - id: ambiguous-evidence
-    file: tasks/ambiguous-evidence.yaml
-  - id: should-not-trigger
-    file: tasks/should-not-trigger.yaml
-  - id: all-rules-pass
-    file: tasks/all-rules-pass.yaml
-  - id: all-rules-fail
-    file: tasks/all-rules-fail.yaml
-  - id: all-rules-unknown
-    file: tasks/all-rules-unknown.yaml
-  - id: ambiguous-publication-scope
-    file: tasks/ambiguous-publication-scope.yaml
-  - id: optional-assets-and-validator-limits
-    file: tasks/optional-assets-and-validator-limits.yaml
-coverage:
-  routing: [compliant-template, should-not-trigger, ambiguous-publication-scope]
-  report_contract: [compliant-template, remediation-needed, all-rules-pass, all-rules-fail]
-  unknown_handling: [ambiguous-evidence, all-rules-unknown, optional-assets-and-validator-limits]
-  non_trigger: [should-not-trigger]
-  all_rules_positive: [all-rules-pass]
-  all_rules_negative: [all-rules-fail]
-  all_rules_ambiguity: [all-rules-unknown, ambiguous-publication-scope]
-  optional_asset_non_enforcement: [optional-assets-and-validator-limits]
-  validation_evidence_limits: [optional-assets-and-validator-limits]
-notes:
-  - Fixtures are runner-neutral YAML declarations.
-  - Every finding references an active rule in the bundled catalog.
-  - All-rules fixtures cover positive, negative, and indeterminate outcomes for every active catalog rule.
-  - Optional repository assets and unrecorded validation checks must never produce a failure.
+description: Behavioral evaluation suite for the template-compliance analysis skill.
+version: "4"
+type: capability
+
+defaults:
+  runs: 1
+  timeout: 5m
+  executor: copilot-sdk
+  reasoning_effort: high
+  judge_reasoning_effort: high
+
+agent_environment:
+  skills:
+    - ../skills/template-compliance
+
+stimuli:
+  - name: compliant-template
+    tags:
+      priority: p0
+      coverage: [routing, report-contract, all-rules-positive]
+    agent_environment:
+      files:
+        - src: fixtures/compliant-template/evidence.yaml
+          dest: evidence.yaml
+    prompt: |
+      Use template-compliance to inspect the supplied azd template evidence
+      read-only for core compliance and return the complete report.
+
+      The file evidence.yaml is the complete set of readable evidence for this
+      evaluation. Do not inspect the host repository or infer evidence that the
+      file marks absent, denied, inaccessible, or unavailable.
+    graders:
+      - type: skill-invocation
+        config:
+          required: [template-compliance]
+      - type: diff-empty
+      - type: template-compliance-report
+        config:
+          overall_result: PASS
+          findings:
+            AZD-CORE-001: PASS
+            AZD-CORE-002: PASS
+            AZD-CORE-003: PASS
+            AZD-CORE-004: PASS
+            AZD-CORE-005: PASS
+            AZD-CORE-006: PASS
+      - type: prompt
+        config:
+          scoring: binary
+          evidence: [trajectory, diff, repo]
+    rubric:
+      - Every finding cites concrete supplied repository, configuration, tracked-file, or execution evidence.
+      - The report states the inspected scope and the read-only inspection mode.
+      - The agent neither modifies nor proposes modifying the supplied fixture.
+
+  - name: remediation-needed
+    tags:
+      priority: p0
+      coverage: [report-contract, remediation, all-rules-negative]
+    agent_environment:
+      files:
+        - src: fixtures/remediation-needed/evidence.yaml
+          dest: evidence.yaml
+    prompt: |
+      Audit the supplied azd template evidence with template-compliance. Explain
+      failures and recommend remediation, but do not edit anything.
+
+      The file evidence.yaml is the complete set of readable evidence for this
+      evaluation. Do not inspect the host repository or infer missing evidence.
+    graders:
+      - type: skill-invocation
+        config:
+          required: [template-compliance]
+      - type: diff-empty
+      - type: template-compliance-report
+        config:
+          overall_result: FAIL
+          findings:
+            AZD-CORE-001: FAIL
+            AZD-CORE-002: UNABLE TO DETERMINE
+            AZD-CORE-003: UNABLE TO DETERMINE
+            AZD-CORE-004: UNABLE TO DETERMINE
+            AZD-CORE-005: UNABLE TO DETERMINE
+            AZD-CORE-006: UNABLE TO DETERMINE
+      - type: prompt
+        config:
+          scoring: binary
+          evidence: [trajectory, diff, repo]
+    rubric:
+      - AZD-CORE-001 fails because the readable root listing lacks azure.yaml, while the other rules preserve uncertainty because their evidence is absent.
+      - The report proposes adding a root azure.yaml without applying the change.
+
+  - name: ambiguous-evidence
+    tags:
+      priority: p0
+      coverage: [routing, unknown-handling, all-rules-ambiguity]
+    agent_environment:
+      files:
+        - src: fixtures/ambiguous-evidence/evidence.yaml
+          dest: evidence.yaml
+    prompt: |
+      Check the supplied template evidence for compliance and report what can
+      and cannot be determined. Do not infer inaccessible content.
+
+      The file evidence.yaml is the complete set of readable evidence for this
+      evaluation. Do not inspect the host repository.
+    graders:
+      - type: skill-invocation
+        config:
+          required: [template-compliance]
+      - type: diff-empty
+      - type: template-compliance-report
+        config:
+          overall_result: UNABLE TO DETERMINE
+          findings:
+            AZD-CORE-001: UNABLE TO DETERMINE
+            AZD-CORE-002: UNABLE TO DETERMINE
+            AZD-CORE-003: UNABLE TO DETERMINE
+            AZD-CORE-004: UNABLE TO DETERMINE
+            AZD-CORE-005: UNABLE TO DETERMINE
+            AZD-CORE-006: UNABLE TO DETERMINE
+      - type: prompt
+        config:
+          scoring: binary
+          evidence: [trajectory, diff, repo]
+    rubric:
+      - The report identifies root access denial and the rule-specific evidence gaps without inventing evidence.
+      - The report states which readable repository or execution evidence would resolve each finding.
+      - The response records the access limitation rather than guessing at inaccessible content.
+
+  - name: should-not-trigger
+    tags:
+      priority: p0
+      coverage: [routing, non-trigger]
+    agent_environment:
+      files:
+        - src: fixtures/should-not-trigger/templates/deployment.yaml
+          dest: templates/deployment.yaml
+    prompt: |
+      Rewrite my deployment template to add an owner field and reformat every
+      section. Apply the changes directly.
+    graders:
+      - type: skill-invocation
+        config:
+          disallowed: [template-compliance]
+      - type: template-compliance-report
+        config:
+          expect_report: false
+      - type: prompt
+        config:
+          scoring: binary
+          evidence: [trajectory, diff, repo]
+    rubric:
+      - The response handles the request as template editing or generation rather than a compliance audit.
+
+  - name: all-rules-pass
+    tags:
+      priority: p2
+      coverage: [all-rules-positive, report-contract]
+    agent_environment:
+      files:
+        - src: fixtures/all-rules-pass/evidence.yaml
+          dest: evidence.yaml
+    prompt: |
+      Audit the supplied evidence for core azd and Awesome AZD publication
+      readiness, read-only.
+
+      The file evidence.yaml is the complete set of readable evidence for this
+      evaluation. Do not inspect the host repository or follow example URLs.
+    graders:
+      - type: skill-invocation
+        config:
+          required: [template-compliance]
+      - type: diff-empty
+      - type: template-compliance-report
+        config:
+          overall_result: PASS
+          findings:
+            AZD-CORE-001: PASS
+            AZD-CORE-002: PASS
+            AZD-CORE-003: PASS
+            AZD-CORE-004: PASS
+            AZD-CORE-005: PASS
+            AZD-CORE-006: PASS
+            AZD-AWESOME-001: PASS
+            AZD-AWESOME-002: PASS
+            AZD-AWESOME-003: PASS
+            AZD-AWESOME-004: PASS
+            AZD-AWESOME-005: PASS
+            AZD-AWESOME-006: PASS
+            AZD-AWESOME-007: PASS
+            AZD-AWESOME-008: PASS
+      - type: prompt
+        config:
+          scoring: binary
+          evidence: [trajectory, diff, repo]
+    rubric:
+      - Every PASS cites supplied file, metadata, commit, URL, or recorded-result evidence.
+      - The report separately evaluates schema validation, infrastructure fit, documented azd up paths, execution, teardown, README content and headings, topics, security validation, gallery metadata, and submission authority.
+      - The agent does not modify the fixture or follow the example URLs.
+
+  - name: all-rules-fail
+    tags:
+      priority: p2
+      coverage: [all-rules-negative, remediation]
+    agent_environment:
+      files:
+        - src: fixtures/all-rules-fail/evidence.yaml
+          dest: evidence.yaml
+    prompt: |
+      Audit the supplied failed Awesome AZD submission evidence and provide
+      remediation without edits.
+
+      The file evidence.yaml is the complete set of readable evidence for this
+      evaluation. Do not inspect the host repository or infer missing evidence.
+    graders:
+      - type: skill-invocation
+        config:
+          required: [template-compliance]
+      - type: diff-empty
+      - type: template-compliance-report
+        config:
+          overall_result: FAIL
+          findings:
+            AZD-CORE-001: FAIL
+            AZD-CORE-002: FAIL
+            AZD-CORE-003: FAIL
+            AZD-CORE-004: FAIL
+            AZD-CORE-005: FAIL
+            AZD-CORE-006: FAIL
+            AZD-AWESOME-001: FAIL
+            AZD-AWESOME-002: FAIL
+            AZD-AWESOME-003: FAIL
+            AZD-AWESOME-004: FAIL
+            AZD-AWESOME-005: FAIL
+            AZD-AWESOME-006: FAIL
+            AZD-AWESOME-007: FAIL
+            AZD-AWESOME-008: FAIL
+      - type: prompt
+        config:
+          scoring: binary
+          evidence: [trajectory, diff, repo]
+    rubric:
+      - The report cites failing validation checks only when they map to active catalog rules.
+      - AZD-AWESOME-008 fails from the supplied security warnings and errors rather than merely from absent files.
+      - The report gives rule-specific remediation, makes no changes, and does not misclassify proven missing required files as uncertainty.
+
+  - name: all-rules-unknown
+    tags:
+      priority: p2
+      coverage: [unknown-handling, all-rules-ambiguity]
+    agent_environment:
+      files:
+        - src: fixtures/all-rules-unknown/evidence.yaml
+          dest: evidence.yaml
+    prompt: |
+      Check the supplied evidence for core azd and Awesome AZD readiness, but do
+      not infer inaccessible evidence.
+
+      The file evidence.yaml is the complete set of readable evidence for this
+      evaluation. Do not inspect the host repository.
+    graders:
+      - type: skill-invocation
+        config:
+          required: [template-compliance]
+      - type: diff-empty
+      - type: template-compliance-report
+        config:
+          overall_result: UNABLE TO DETERMINE
+          findings:
+            AZD-CORE-001: UNABLE TO DETERMINE
+            AZD-CORE-002: UNABLE TO DETERMINE
+            AZD-CORE-003: UNABLE TO DETERMINE
+            AZD-CORE-004: UNABLE TO DETERMINE
+            AZD-CORE-005: UNABLE TO DETERMINE
+            AZD-CORE-006: UNABLE TO DETERMINE
+            AZD-AWESOME-001: UNABLE TO DETERMINE
+            AZD-AWESOME-002: UNABLE TO DETERMINE
+            AZD-AWESOME-003: UNABLE TO DETERMINE
+            AZD-AWESOME-004: UNABLE TO DETERMINE
+            AZD-AWESOME-005: UNABLE TO DETERMINE
+            AZD-AWESOME-006: UNABLE TO DETERMINE
+            AZD-AWESOME-007: UNABLE TO DETERMINE
+            AZD-AWESOME-008: UNABLE TO DETERMINE
+      - type: prompt
+        config:
+          scoring: binary
+          evidence: [trajectory, diff, repo]
+    rubric:
+      - The report identifies the evidence needed for every rule without turning inaccessible, historical, contextual, or external evidence into FAIL.
+      - The agent neither modifies nor executes the fixture.
+
+  - name: ambiguous-publication-scope
+    tags:
+      priority: p1
+      coverage: [routing, all-rules-ambiguity]
+    agent_environment:
+      files:
+        - src: fixtures/ambiguous-publication-scope/evidence.yaml
+          dest: evidence.yaml
+    prompt: |
+      Is the supplied azd template evidence compliant and ready?
+
+      The file evidence.yaml is the complete set of readable evidence for this
+      evaluation. Do not inspect the host repository.
+    graders:
+      - type: skill-invocation
+        config:
+          required: [template-compliance]
+      - type: diff-empty
+      - type: template-compliance-report
+        config:
+          # The agent may legitimately ask a scoping question instead of
+          # reporting, so only the constraints on a report that is produced
+          # are asserted deterministically.
+          expect_report: optional
+          forbidden_overall_results: [PASS]
+          forbidden_rules:
+            - AZD-AWESOME-001
+            - AZD-AWESOME-002
+            - AZD-AWESOME-003
+            - AZD-AWESOME-004
+            - AZD-AWESOME-005
+            - AZD-AWESOME-006
+            - AZD-AWESOME-007
+            - AZD-AWESOME-008
+      - type: prompt
+        config:
+          scoring: binary
+          evidence: [trajectory, diff, repo]
+    rubric:
+      - The response asks whether Awesome AZD publication readiness is in scope when interaction allows.
+      - If scope remains unresolved, the response evaluates only core rules and records the scope limitation.
+
+  - name: optional-assets-and-validator-limits
+    tags:
+      priority: p1
+      coverage: [unknown-handling, optional-asset-non-enforcement, validation-evidence-limits]
+    agent_environment:
+      files:
+        - src: fixtures/optional-assets-and-validator-limits/evidence.yaml
+          dest: evidence.yaml
+    prompt: |
+      Audit the supplied evidence for Awesome AZD publication readiness,
+      read-only. The collection validation workflow is red.
+
+      The file evidence.yaml is the complete set of readable evidence for this
+      evaluation. Do not inspect the host repository.
+    graders:
+      - type: skill-invocation
+        config:
+          required: [template-compliance]
+      - type: diff-empty
+      - type: template-compliance-report
+        config:
+          # The fixture constrains only these four rules; the rest follow their
+          # own evidence, so the expectation is deliberately not exhaustive.
+          findings:
+            AZD-AWESOME-002: PASS
+            AZD-AWESOME-004: UNABLE TO DETERMINE
+            AZD-AWESOME-007: UNABLE TO DETERMINE
+            AZD-AWESOME-008: UNABLE TO DETERMINE
+          exhaustive: false
+          require_summary_counts: true
+          require_integrity_statement: true
+      - type: prompt
+        config:
+          scoring: binary
+          evidence: [trajectory, diff, repo]
+    rubric:
+      - The report creates no failure for the absent dev container, azure-dev workflow, or end-to-end tests because no active rule requires them.
+      - AZD-AWESOME-004, AZD-AWESOME-007, and AZD-AWESOME-008 stay indeterminate for the evidence-specific reasons in evidence.yaml.
+      - The report does not treat the red validation run as evidence of a catalog failure because its recorded checks map to no active rule.
+      - Findings not explicitly constrained by the fixture follow their own evidence, and the agent does not modify or execute the fixture.
+
+scoring:
+  weights:
+    # The deterministic report grader carries the largest share: it owns every
+    # exact outcome and status assertion. The prompt judge is deliberately
+    # down-weighted to the qualitative residue (evidence quality, remediation,
+    # scope handling) that cannot be checked statically.
+    template-compliance-report: 0.45
+    prompt: 0.25
+    skill-invocation: 0.15
+    diff-empty: 0.15
+  threshold: 1.0

@@ -1,0 +1,30 @@
+evidence_scope: This document is the complete set of readable evidence for this evaluation. Treat evidence marked absent, denied, inaccessible, or unavailable as unreadable, and do not infer its contents.
+publication_intent: explicit
+repository:
+  audited_commit: 4d1c0a83f2b74e6690c5b8a1e7d3f9c204ab6e57
+  root_files:
+    - azure.yaml
+    - README.md
+    - LICENSE.md
+    - SECURITY.md
+    - CONTRIBUTING.md
+    - .github/CODE_OF_CONDUCT.md
+    - .github/ISSUE_TEMPLATE/bug.yml
+    - infra/main.bicep
+    - src/app.py
+  absent_optional_assets:
+    - .devcontainer/devcontainer.json
+    - .github/workflows/azure-dev.yml
+    - tests/e2e
+  readme:
+    access: denied
+evidence:
+  validation:
+    kind: collection-validation-action
+    target_commit: 4d1c0a83f2b74e6690c5b8a1e7d3f9c204ab6e57
+    result: failure
+    recorded_checks:
+      - devcontainer-present
+      - azure-dev-workflow-present
+    log_excerpt: "ERROR: .devcontainer/devcontainer.json not found."
+  security_validation_record_access: denied

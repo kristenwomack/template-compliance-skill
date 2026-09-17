@@ -1,0 +1,58 @@
+evidence_scope: This document is the complete set of readable evidence for this evaluation. Treat evidence marked absent, denied, inaccessible, or unavailable as unreadable, and do not infer its contents.
+publication_intent: explicit
+repository:
+  audited_commit: b51a9b74c24cf470e57cc87b3b52d3b592f7850a
+  root_files: []
+  tracked_files:
+    source: git-ls-files
+    at_commit: b51a9b74c24cf470e57cc87b3b52d3b592f7850a
+    paths: []
+  scenario:
+    documentation_excerpt: This template provisions an Azure App Service web app from src/app.py with Bicep in infra/main.bicep. Run azd up to deploy it.
+    infrastructure_path: infra
+    required_paths:
+      - azure.yaml
+      - infra/main.bicep
+      - src/app.py
+  metadata:
+    source: github-api
+    description: ""
+    topics: []
+  readme:
+    access: readable
+    present: false
+schema_validation:
+  schema_url: https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/azd-schema
+  retrieved_at: 2026-08-30T12:00:00Z
+  target_commit: b51a9b74c24cf470e57cc87b3b52d3b592f7850a
+  result: fail
+  output_excerpt: "azure.yaml: services.web.project must be a string"
+evidence:
+  azd_up:
+    target_commit: b51a9b74c24cf470e57cc87b3b52d3b592f7850a
+    path: azd up
+    result: failure
+    log_excerpt: "ERROR: required file src/app.py was not found."
+  teardown:
+    provisioning_creates_azure_resources: true
+    documented_path: absent
+  validation:
+    target_commit: b51a9b74c24cf470e57cc87b3b52d3b592f7850a
+    result: failure
+    recorded_checks:
+      - required-repository-files
+      - readme-h2-headings
+      - security-analysis
+    log_excerpt: "Validation failed: required repository files are missing."
+  security_validation:
+    kind: psrule-for-azure
+    target_commit: b51a9b74c24cf470e57cc87b3b52d3b592f7850a
+    result: failure
+    warnings: 3
+    errors: 1
+    log_excerpt: "PSRule for Azure: 1 error, 3 warnings; storage account allows shared key access."
+  gallery: {}
+  submission:
+    kind: email-to-maintainer
+    result: unsupported-path
+    catalog_rule: AZD-AWESOME-006

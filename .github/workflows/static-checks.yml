@@ -1,0 +1,50 @@
+name: Static checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Read-only: nothing in this workflow writes to the repository or packages.
+permissions:
+  contents: read
+
+concurrency:
+  group: static-checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Tests, parity, and Vally lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # Vally's usage telemetry is off in CI.
+      VALLY_TELEMETRY_OPTOUT: "1"
+      DO_NOT_TRACK: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      # `npm ci` (not `npm install`) so the committed lockfile is authoritative
+      # and the tree cannot drift between a contributor's machine and CI.
+      - name: Install pinned dependencies
+        run: npm ci
+
+      - name: Grader unit tests
+        run: npm test
+
+      - name: Legacy fixture parity
+        run: npm run parity
+
+      # Loads the local grader plugin explicitly; without it the eval spec's
+      # `template-compliance-report` grader would lint as an unknown type.
+      - name: Vally lint (strict)
+        run: npm run lint

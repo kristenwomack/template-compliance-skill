@@ -1,0 +1,95 @@
+name: Vally evaluation
+
+# Manual only, on purpose. The behavioural suite spends Copilot requests and
+# has not yet been observed to run green end to end, so it must never fire
+# automatically on a push or a pull request. Move it onto a schedule or a
+# merge gate only after COPILOT_CLI_TOKEN exists and the suite has been
+# demonstrably stable across several manual runs.
+on:
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: Vally suite to run
+        required: true
+        default: ci-gate
+        type: choice
+        options:
+          - ci-gate
+          - full
+      confirm:
+        description: Type "run" to confirm this will spend Copilot requests
+        required: true
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vally-eval
+  cancel-in-progress: false
+
+jobs:
+  evaluate:
+    name: Behavioural suite (${{ inputs.suite }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      VALLY_TELEMETRY_OPTOUT: "1"
+      DO_NOT_TRACK: "1"
+    steps:
+      - name: Confirm deliberate run
+        shell: bash
+        env:
+          CONFIRM: ${{ inputs.confirm }}
+        run: |
+          if [ "$CONFIRM" != "run" ]; then
+            echo "::error::Type 'run' in the confirm input to start a billable evaluation."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install pinned dependencies
+        run: npm ci
+
+      - name: Require Copilot evaluation token
+        shell: bash
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_CLI_TOKEN }}
+        run: |
+          if [ -z "$COPILOT_GITHUB_TOKEN" ]; then
+            echo "::error::Configure the COPILOT_CLI_TOKEN repository secret with the Copilot Requests permission."
+            exit 1
+          fi
+
+      # Both scripts pass --require-pass, --junit, and the explicit local
+      # grader plugin, so the run fails loudly on any stimulus regression.
+      - name: Run Vally suite
+        shell: bash
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_CLI_TOKEN }}
+          SUITE: ${{ inputs.suite }}
+        run: |
+          if [ "$SUITE" = "full" ]; then
+            npm run eval:full
+          else
+            npm run eval:ci
+          fi
+
+      - name: Upload Vally results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vally-results-${{ inputs.suite }}-${{ github.run_id }}
+          path: vally-results/
+          if-no-files-found: warn
+          retention-days: 14

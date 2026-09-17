@@ -1,0 +1,14 @@
+paths:
+  skills: skills
+  evals: evals
+  results: vally-results
+
+suites:
+  ci-gate:
+    description: Fast routing, report-contract, and uncertainty checks.
+    evals: evals/eval.yaml
+    filter:
+      priority: [p0, p1]
+  full:
+    description: Complete template-compliance behavioral evaluation.
+    evals: evals/eval.yaml

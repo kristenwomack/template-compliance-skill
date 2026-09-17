@@ -1,0 +1,19 @@
+evidence_scope: This document is the complete set of readable evidence for this evaluation. Treat evidence marked absent, denied, inaccessible, or unavailable as unreadable, and do not infer its contents.
+publication_intent: explicit
+repository:
+  root_access: denied
+  repository_metadata_access: denied
+  audited_commit: unavailable
+  scenario_documentation_access: denied
+  tracked_file_state_access: denied
+evidence:
+  applicable_schema_access: denied
+  schema_validator_result: absent
+  execution_history_access: denied
+  teardown_documentation_access: denied
+  validation_record_access: denied
+  readme_heading_evidence: absent
+  security_validation_record_access: denied
+  gallery_submission_access: denied
+  submission_record_access: denied
+  submission_authority_evidence_access: denied
