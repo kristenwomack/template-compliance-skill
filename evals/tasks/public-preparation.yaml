@@ -1,13 +1,22 @@
 id: public-preparation
-purpose: Verify public readiness before a submission exists.
+purpose: Separate public preparation from submission using supplied synthetic evidence.
 should_trigger: true
-prompt: Check readiness to submit to Awesome AZD while preparing materials, not submitting.
+prompt: |
+  Check whether this template is ready to submit to public Awesome AZD.
+  We are preparing materials, not submitting yet. Inspect read-only.
+  public-evidence.yaml is supplied synthetic evidence for this evaluation only,
+  not an azd or customer configuration format. Treat it as the complete supplied
+  record, not a live verification of deployment or publication.
+  Do not inspect the host, execute targets, or follow URLs.
 fixture:
-  evidence_files: [evals/fixtures/public-preparation/public-evidence.yaml, evals/fixtures/public-preparation/context.yaml]
+  evidence_files:
+    - evals/fixtures/public-preparation/public-evidence.yaml
 expected:
   destination_profile: public-awesome-azd
   public_stage: preparation
-  readiness: {core: PASS, destination: PASS}
+  readiness:
+    core: PASS
+    destination: PASS
   overall_result: PASS
   finding_status:
     AZD-CORE-001: PASS
@@ -24,6 +33,6 @@ expected:
     AZD-AWESOME-007: PASS
     AZD-AWESOME-008: PASS
   assertions:
-    - Assesses preparation rules without an open submission or AZD-AWESOME-006 finding.
-    - Reports core and destination readiness separately with policy versions.
-    - Does not imply gallery acceptance or an in-progress submission.
+    - Does not require an open PR or submission issue and emits no AZD-AWESOME-006 finding.
+    - Assesses seven public preparation rules plus six core rules with visible catalog and source versions.
+    - Does not claim a submission is underway or gallery acceptance is guaranteed.

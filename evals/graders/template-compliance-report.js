@@ -257,8 +257,8 @@ function checkReadiness(parsed, resolved) {
       problems.push("Core-only/unresolved profiles must not assess a destination");
     }
   } else if (profile === "organization-catalog") {
-    if (Object.keys(destinationFindings).some((id) => !/^AZD-ORG-[A-Z0-9]+-\d{3}$/.test(id))) {
-      problems.push("Organization reports must not contain public or unscoped destination rules");
+    if (Object.keys(destinationFindings).some((id) => id.startsWith("AZD-AWESOME-"))) {
+      problems.push("Organization reports must not contain public destination rules");
     }
     // A policy-resolution gap has no fabricated finding but must block readiness.
     if (!(Object.keys(destinationFindings).length === 0 && destination === "UNABLE TO DETERMINE") &&

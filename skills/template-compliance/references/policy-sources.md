@@ -1,6 +1,6 @@
 # Policy sources and interpretation
 
-Catalog identity: `template-compliance@3`.
+Catalog identity: `template-compliance@4`.
 
 ## Versioned guidance baseline
 
@@ -12,9 +12,13 @@ diff, resolve applicability and conflicts, update rule versions and fixtures, an
 release a new catalog version.
 
 The upstream collection requirements apply only to `public-awesome-azd`.
-Organization readiness uses a separately selected policy with its own owner and
-version under [organization-policy.md](organization-policy.md); the public
+Organization readiness uses existing requirements selected by the user as
+described in [organization-policy.md](organization-policy.md); the public
 guidance baseline does not impose internal governance requirements.
+
+The bundled catalog IDs, report labels, and scope profiles are conventions of
+this tool, not standards defined by azd, Copilot, or Vally. Internal requirements
+do not need to be converted to this catalog's format.
 
 The catalog remains locally maintained. A PASS means the inspected evidence
 satisfies this catalog, not that azd or Awesome AZD maintainers have certified,

@@ -1,13 +1,13 @@
 # Compliance Rule Catalog
 
-This repository-owned index and its linked modules define the skill's compliance authority and its organization-policy extension boundary. Enforce only selected entries with `status: active` and `policy_kind: approved`. Catalog maintainers own, review, and version bundled requirements; organization owners approve explicitly selected internal policies.
+This repository-owned index defines the bundled core and public checks. Enforce only bundled entries with `status: active` and `policy_kind: approved`. For internal catalogs, inspect existing requirements explicitly selected by the user; do not require organizations to adopt this catalog's schema.
 
-Catalog identity: `template-compliance@3`. See [policy sources and interpretation](policy-sources.md) for the pinned upstream revision, source-to-rule mapping, local evidence safeguards, and conflict decisions. Upstream requirements inform this catalog; catalog approval is not official azd certification or collection acceptance.
+Catalog identity: `template-compliance@4`. See [policy sources and interpretation](policy-sources.md) for the pinned upstream revision, source-to-rule mapping, local evidence safeguards, and conflict decisions. Upstream requirements inform this catalog; catalog approval is not official azd certification or collection acceptance.
 
 ## Active modules
 
 - [Policy profiles](policy-profiles.md) — core, public preparation/submission, and organization selection.
-- [Organization policy contract](organization-policy.md) — explicit approved internal-policy extension.
+- [Organization requirements](organization-policy.md) — inspecting selected existing documents without a new format.
 - [Core azd rules](core-azd-rules.md) — apply to an `azd` template.
 - [Awesome AZD evaluation terms](awesome-azd-rules.md) — shared definitions for collection rules.
 - [Awesome AZD publication rules](awesome-azd-publication-rules.md) — repository publication requirements.
@@ -28,7 +28,7 @@ Optional repository assets must not be reported as failures unless a selected ac
 
 ## Extensible rule schema
 
-Each rule must define:
+Each bundled rule must define (this is a project-local catalog structure, not an azd or organization-policy standard):
 
 | Field | Required | Meaning |
 |---|---:|---|
@@ -49,7 +49,7 @@ Each rule must define:
 | `remediation` | yes | Proposed corrective action; never auto-apply. |
 | `references` | yes | Policy citations or an empty list. |
 | `source_revision` | yes | Pinned upstream revision, organization source release, or an explicit live platform-reference designation. |
-| `requirement_kind` | yes | `upstream-guidance`, `platform-constraint`, or `organization-policy`; not a validator default. |
+| `requirement_kind` | yes | `upstream-guidance` or `platform-constraint`; not a validator default. |
 | `local_evidence_policy` | yes | Locally chosen evidence safeguards, explicitly distinguished from upstream requirements. |
 | `metadata` | no | Extensible owner, tags, dates, or notes map. |
 
@@ -59,8 +59,8 @@ Rules may add fields, but additions cannot weaken authority, evidence, uncertain
 
 - Evaluate each rule-target pair independently.
 - Unknown applicability of an active approved rule is an UNABLE TO DETERMINE finding, not silent exclusion. Exclude a conditional rule only when readable evidence establishes non-applicability.
-- Scope bundled `AZD-CORE-*` to all profiles, bundled `AZD-AWESOME-*` only to public readiness, and `AZD-ORG-<namespace>-NNN` only to a validated selected organization policy. Organization rules cannot override bundled rules. Resolve profile and public stage before selecting rules.
-- Missing or invalid organization policy is a destination-layer evidence gap, not a new finding. Do not declare organization readiness from core results alone.
+- Scope bundled `AZD-CORE-*` to all profiles and bundled `AZD-AWESOME-*` only to public readiness. Organization requirements keep their existing source IDs or section headings and cannot override bundled rules. Resolve profile and public stage before selecting requirements.
+- Missing or ambiguous organization requirements are a destination-layer evidence gap, not a new finding. Do not declare organization readiness from core results alone.
 - A missing readable artifact may be a deterministic failure only when the rule says the artifact must exist.
 - Missing historical, execution, repository-setting, or external evidence is `UNABLE TO DETERMINE`, not `FAIL`, unless readable evidence directly contradicts the rule.
 - Scenario fit requires the documentation, configuration, resource declarations, and tracked-file state defined by the applicable rule. If any named evidence is absent or unreadable, return `UNABLE TO DETERMINE`.

@@ -1,20 +1,33 @@
 id: organization-policy-missing
-purpose: Preserve uncertainty when organization readiness is requested without a selected policy.
+purpose: Inspect ordinary project files with user-selected scope and existing requirements.
 should_trigger: true
-prompt: Audit the Contoso internal collection with no selected policy; follow-up interaction is unavailable.
+prompt: |
+  Check project/ for our internal catalog. No organization requirements have been selected. Report that gap; do not discover or invent a policy.
+
+  Inspect only the staged project and explicitly selected requirements, read-only.
+  For this evaluation, the staged project files represent tracked files at the
+  audited revision. No schema-validation, provisioning, or teardown records are
+  supplied. Do not infer successful execution from the presence of source files.
+  Do not inspect the host repository, execute targets, follow URLs, or change files.
+  No follow-up interaction is available; preserve unresolved evidence gaps.
 fixture:
-  evidence_files: [evals/fixtures/organization-policy-missing/core-evidence.yaml, evals/fixtures/organization-policy-missing/context.yaml]
+  evidence_files:
+    - evals/fixtures/organization-policy-missing/project/azure.yaml
+    - evals/fixtures/organization-policy-missing/project/README.md
+    - evals/fixtures/organization-policy-missing/project/infra/main.bicep
 expected:
   destination_profile: organization-catalog
-  readiness: {core: PASS, destination: UNABLE TO DETERMINE}
+  readiness:
+    core: UNABLE TO DETERMINE
+    destination: UNABLE TO DETERMINE
   overall_result: UNABLE TO DETERMINE
   finding_status:
     AZD-CORE-001: PASS
-    AZD-CORE-002: PASS
+    AZD-CORE-002: UNABLE TO DETERMINE
     AZD-CORE-003: PASS
     AZD-CORE-004: PASS
-    AZD-CORE-005: PASS
-    AZD-CORE-006: PASS
+    AZD-CORE-005: UNABLE TO DETERMINE
+    AZD-CORE-006: UNABLE TO DETERMINE
   assertions:
-    - States the approved policy selection needed for organization readiness.
-    - Does not infer organization approval from core PASS or invent policy findings.
+    - Explains that user-selected existing organization requirements are needed to assess internal readiness.
+    - Does not invent policy findings or apply public requirements; core and destination both remain UNABLE TO DETERMINE.

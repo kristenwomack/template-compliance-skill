@@ -10,7 +10,7 @@ To get started, copy `skills/template-compliance` into the skills location suppo
 
 Ask your agent to inspect named template files or directories for compliance. The skill:
 
-- uses only active approved rules in the selected catalog profile or organization policy;
+- checks the selected bundled catalog rules or existing organization requirements;
 - reports `PASS`, `FAIL`, or `UNABLE TO DETERMINE`;
 - cites evidence or describes the evidence gap;
 - proposes, but never applies, remediation; and
@@ -26,7 +26,7 @@ Example request:
 | --- | --- | --- |
 | `core-only` | Building or inspecting any azd project, public or private | Shared azd requirements only; no collection assessment. |
 | `public-awesome-azd` | Preparing a public contribution or inspecting an in-progress submission | Core plus the pinned public requirements. Preparation does not require an open submission; submission adds the process check. |
-| `organization-catalog` | Preparing a template for an internal collection | Core plus an explicitly selected approved organization policy; no public requirements. |
+| `organization-catalog` | Preparing a template for an internal collection | Core plus existing organization requirements selected by the user; no public requirements. |
 
 Examples:
 
@@ -36,47 +36,42 @@ Examples:
 
 > Audit this in-progress Awesome AZD submission, including its submission process.
 
-> Check this template for our internal catalog using the approved policy at `policies/internal-templates.yaml`.
+> Check this template for our internal catalog using our existing requirements in `docs/internal-template-requirements.md`.
 
 Repository visibility does not select a profile. If the destination is unresolved,
 the skill asks; if it remains unresolved, it assesses core only and reports
 destination readiness as **NOT ASSESSED**. Reports show core and destination
-readiness separately, with the relevant policy versions.
+readiness separately, with source revisions when available.
 
 Private projects do not inherit public license conventions, README headings,
 gallery images, topics, or submission requirements. For an organization-catalog
-assessment, a missing, inaccessible, invalid, or unapproved policy leaves
+assessment, missing, inaccessible, or ambiguous requirements leave
 organization readiness **UNABLE TO DETERMINE**, even if core checks pass.
-An empty approved policy has **NO ACTIVE APPLICABLE RULES**, not PASS.
+An organization document with no applicable mandatory requirements has **NO ACTIVE APPLICABLE RULES**, not PASS.
 Policy-resolution gaps are limitations, not fabricated rule findings.
 
-The bundled, repository-owned catalog defines the skill's compliance authority and its explicit organization-policy extension boundary. Selected active approved rules define enforceable requirements; descriptive guidance and optional enhancements are not compliance failures. Assets such as dev containers or CI/CD pipeline definitions are required only if a selected active approved rule explicitly requires them. External validation automation is evidence, not authority: a run establishes only the checks it records. Review and version catalog changes in this repository so the policy stays clear and intentional.
+The bundled, repository-owned catalog defines core and public checks. Organization checks use existing requirements explicitly selected by the user; descriptive guidance and optional enhancements are not compliance failures. Assets such as dev containers or CI/CD pipeline definitions are required only if a selected requirement explicitly requires them. External validation automation is evidence, not authority: a run establishes only the checks it records. Review and version catalog changes in this repository so the policy stays clear and intentional.
 
 ## 🛠️ Customize policy
 
-For an internal catalog, supply a separate policy using
-[the organization-policy contract](skills/template-compliance/references/organization-policy.md).
-It records a policy ID/version, owner, approval evidence, scope, source references,
-and rules with namespaced IDs such as `AZD-ORG-CONTOSO-001`. The policy must be
-explicitly selected; finding a file in a repository does not authorize it.
-No organization policy is bundled as an active default.
+For an internal catalog, point the skill at your team's existing requirements:
+Markdown documentation, an internal handbook, or another readable source.
+There is no required YAML format, approval-record structure, metadata schema,
+or organization rule namespace. The skill cites your existing section headings
+or identifiers and asks when authority, scope, or wording is unclear.
+See [organization requirements](skills/template-compliance/references/organization-policy.md).
 
-Policy approval evidence must identify the selected policy ID/version and
-approver; a policy's self-declared approved status is not enough. If an active
-rule's applicability is unknown, it remains an indeterminate finding rather
-than silently disappearing from the assessment.
+Organization requirements supplement core checks and cannot override them or
+weaken read-only boundaries. Finding a policy file does not authorize its use;
+select it explicitly. Public-gallery requirements remain separate.
 
-Organization rules are additive to core and cannot override its findings,
-weaken read-only boundaries, or require credential collection or uploads.
-Placeholder, example, inactive, and deprecated rules are never enforced.
-The contract includes an unapproved example for illustration, not a default
-policy. Maintain public requirements separately in the bundled modules.
-
-Keep policy interpretation out of `skills/template-compliance/SKILL.md`: the catalog is authoritative.
+Keep core/public policy interpretation in the references, rather than duplicating
+it in `skills/template-compliance/SKILL.md`. The catalog structure and profile
+names are local conventions of this tool, not azd or Copilot standards.
 
 ### Policy provenance and guidance
 
-Catalog `template-compliance@3` records its upstream baseline, per-rule source links,
+Catalog `template-compliance@4` records its upstream baseline, per-rule source links,
 local evidence safeguards, and source/validator differences in
 [policy-sources.md](skills/template-compliance/references/policy-sources.md).
 The baseline is `Azure-Samples/azd-template-artifacts` at commit
@@ -92,6 +87,19 @@ is not official certification or a guarantee of gallery acceptance.
 ## 🧪 Evaluate
 
 The behavioral suite runs on [Vally](https://www.npmjs.com/package/@microsoft/vally-cli), Microsoft's evaluation platform for AI agents.
+
+### Fixture boundaries
+
+Private/internal profile cases stage small azd project files (`azure.yaml`,
+`README.md`, and Bicep) and ordinary Markdown requirements where selected. Scope,
+simulated tracked-file state, and access limitations are supplied in the test
+prompt, not in a special project configuration file.
+
+Other cases use clearly synthetic evidence summaries to exercise results for
+external metadata, historical execution, or denied access without deploying
+resources. These evaluation inputs are not azd configuration formats or customer
+requirements. Static checks establish parser/configuration consistency, not live
+agent effectiveness, successful deployment, or catalog acceptance.
 
 ### Before you start
 
@@ -184,7 +192,9 @@ Three config shapes cover the suite:
 
 Profile scenarios also set `destination_profile`, optional `public_stage`, and
 `readiness: {core: PASS, destination: UNABLE TO DETERMINE}` (or the appropriate
-verdicts). The parser recognizes namespaced organization rule IDs and validates
+verdicts). For organization fixtures, the evaluation config's `rule_id_pattern`
+matches the selected document's existing identifiers or headings; it does not
+impose an organization naming convention. The grader validates
 layer consistency and profile isolation. Existing pre-profile report fixtures
 remain supported by the grader; current skill reports must include layer labels.
 
@@ -212,7 +222,7 @@ template-compliance-skill/
 │           ├── compliance-rules.md      # Authoritative rule schema and catalog
 │           ├── policy-sources.md        # Pinned sources, interpretations, and guidance
 │           ├── policy-profiles.md       # Core, public stages, and organization selection
-│           ├── organization-policy.md   # Selected internal-policy contract
+│           ├── organization-policy.md   # Using existing internal requirements
 │           ├── core-azd-rules.md        # Core azd requirements
 │           ├── awesome-azd-rules.md     # Shared collection evaluation terms
 │           ├── awesome-azd-publication-rules.md

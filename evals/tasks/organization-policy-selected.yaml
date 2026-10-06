@@ -1,25 +1,39 @@
 id: organization-policy-selected
-purpose: Verify active approved organization rules apply only from the selected policy.
+purpose: Inspect ordinary project files with user-selected scope and existing requirements.
 should_trigger: true
-prompt: Audit the Contoso internal templates collection using context.yaml#policy_document, read-only.
+prompt: |
+  Check project/ for our internal catalog. Use internal-requirements.md as the governing organization requirements for this audit. The intended environment classification is unavailable; do not assume production or development.
+
+  Inspect only the staged project and explicitly selected requirements, read-only.
+  For this evaluation, the staged project files represent tracked files at the
+  audited revision. No schema-validation, provisioning, or teardown records are
+  supplied. Do not infer successful execution from the presence of source files.
+  Do not inspect the host repository, execute targets, follow URLs, or change files.
+  No follow-up interaction is available; preserve unresolved evidence gaps.
 fixture:
-  evidence_files: [evals/fixtures/organization-policy-selected/core-evidence.yaml, evals/fixtures/organization-policy-selected/context.yaml]
+  evidence_files:
+    - evals/fixtures/organization-policy-selected/project/azure.yaml
+    - evals/fixtures/organization-policy-selected/project/README.md
+    - evals/fixtures/organization-policy-selected/project/infra/main.bicep
+    - evals/fixtures/organization-policy-selected/internal-requirements.md
 expected:
   destination_profile: organization-catalog
-  readiness: {core: PASS, destination: FAIL}
+  readiness:
+    core: UNABLE TO DETERMINE
+    destination: FAIL
   overall_result: FAIL
   finding_status:
     AZD-CORE-001: PASS
-    AZD-CORE-002: PASS
+    AZD-CORE-002: UNABLE TO DETERMINE
     AZD-CORE-003: PASS
     AZD-CORE-004: PASS
-    AZD-CORE-005: PASS
-    AZD-CORE-006: PASS
-    AZD-ORG-CONTOSO-001: PASS
-    AZD-ORG-CONTOSO-002: FAIL
-    AZD-ORG-CONTOSO-003: UNABLE TO DETERMINE
+    AZD-CORE-005: UNABLE TO DETERMINE
+    AZD-CORE-006: UNABLE TO DETERMINE
+    Ownership: PASS
+    Support: FAIL
+    Production review: UNABLE TO DETERMINE
   assertions:
-    - Records the selected policy ID, version, owner, approval reference, and location.
-    - Reports ownership PASS and support route FAIL with actionable remediation.
-    - Does not enforce inactive example rules or public requirements.
-    - Preserves the denied environment-classification gap as an indeterminate active rule rather than silently excluding it.
+    - Cites the selected internal-requirements.md sections; requires no new IDs, YAML fields, or approval records.
+    - Reports Ownership PASS and Support FAIL with remediation to document a support contact or channel.
+    - Keeps Production review UNABLE TO DETERMINE because applicability cannot be resolved.
+    - Does not enforce optional screenshot recommendations or public requirements; reports core uncertainty separately from destination FAIL.

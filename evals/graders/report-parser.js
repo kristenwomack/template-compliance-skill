@@ -21,8 +21,8 @@ export const OVERALL_RESULTS = Object.freeze([
 /** Statuses allowed on an individual finding. */
 export const FINDING_STATUSES = Object.freeze(["PASS", "FAIL", "UNABLE TO DETERMINE"]);
 
-/** Bundled IDs and organization IDs scoped to an explicit policy namespace. */
-export const DEFAULT_RULE_ID_PATTERN = "AZD-(?:[A-Z]+|ORG-[A-Z0-9]+)-\\d{3}";
+/** Bundled IDs; fixture-specific document headings use rule_id_pattern. */
+export const DEFAULT_RULE_ID_PATTERN = "AZD-[A-Z]+-\\d{3}";
 
 export const DESTINATION_PROFILES = Object.freeze([
   "core-only", "public-awesome-azd", "organization-catalog", "unresolved",

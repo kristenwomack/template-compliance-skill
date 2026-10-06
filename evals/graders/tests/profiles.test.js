@@ -7,20 +7,22 @@ import { AWESOME_RULES, CORE_RULES, report, uniform } from "./report-fixtures.js
 
 const grader = new TemplateComplianceReportGrader();
 const core = uniform(CORE_RULES, "PASS");
+// Test-local headings from an ordinary document, not an organization ID standard.
+const policyPattern = "AZD-[A-Z]+-\\d{3}|Ownership|Support|Production review";
 
 async function grade(options, config = {}) {
-  return grader.grade({ trajectory: { output: report(options) }, config });
+  return grader.grade({ trajectory: { output: report(options) }, config: { rule_id_pattern: policyPattern, ...config } });
 }
 
 describe("profile report parsing", () => {
-  it("parses namespaced organization IDs and readiness without counting layer labels", () => {
+  it("parses existing document headings and readiness without counting layer labels", () => {
     const parsed = parseReport(report({
       overall: "FAIL",
       profile: "organization-catalog",
       readiness: { core: "PASS", destination: "FAIL" },
-      statuses: { ...core, "AZD-ORG-CONTOSO-001": "FAIL" },
-    }));
-    assert.equal(parsed.findings["AZD-ORG-CONTOSO-001"], "FAIL");
+      statuses: { ...core, Ownership: "FAIL" },
+    }), { ruleIdPattern: policyPattern });
+    assert.equal(parsed.findings.Ownership, "FAIL");
     assert.deepEqual(parsed.readiness, { profile: "organization-catalog", stage: null, core: "PASS", destination: "FAIL" });
     assert.equal(parsed.summary.applicable, 7);
     assert.equal(parsed.malformed.length, 0);
@@ -107,19 +109,19 @@ describe("readiness layer checks", () => {
 
   it("grades organization findings and verifies expected layer values", async () => {
     const result = await grade({
-      overall: "FAIL", statuses: { ...core, "AZD-ORG-TEAM1-001": "FAIL" }, profile: "organization-catalog",
+      overall: "FAIL", statuses: { ...core, Support: "FAIL" }, profile: "organization-catalog",
       readiness: { core: "PASS", destination: "FAIL" },
     }, {
       destination_profile: "organization-catalog",
       readiness: { core: "PASS", destination: "FAIL" },
-      findings: { ...core, "AZD-ORG-TEAM1-001": "FAIL" },
+      findings: { ...core, Support: "FAIL" },
     });
     assert.equal(result.passed, true, result.evidence);
   });
 
   it("allows organization readiness PASS when core and selected organization findings pass", async () => {
     const result = await grade({
-      overall: "PASS", statuses: { ...core, "AZD-ORG-CONTOSO-001": "PASS" }, profile: "organization-catalog",
+      overall: "PASS", statuses: { ...core, Ownership: "PASS" }, profile: "organization-catalog",
       readiness: { core: "PASS", destination: "PASS" },
     });
     assert.equal(result.passed, true, result.evidence);
@@ -132,7 +134,7 @@ describe("readiness layer checks", () => {
     }, { destination_profile: "organization-catalog" })).passed, false);
     assert.equal((await grade({ overall: "PASS", statuses: core }, { destination_profile: "core-only" })).passed, false);
     assert.equal((await grade({
-      overall: "PASS", statuses: { ...core, "AZD-ORG-CONTOSO-001": "PASS" }, profile: "public-awesome-azd",
+      overall: "PASS", statuses: { ...core, Ownership: "PASS" }, profile: "public-awesome-azd",
       stage: "preparation", readiness: { core: "PASS", destination: "PASS" },
     })).passed, false);
   });
@@ -168,5 +170,16 @@ describe("readiness layer checks", () => {
     assert.equal((await grade({ ...publicOptions, statuses: { ...core, "AZD-AWESOME-001": "PASS" } })).passed, false);
     const publicRules = uniform(AWESOME_RULES.filter((id) => id !== "AZD-AWESOME-006"), "PASS");
     assert.equal((await grade({ ...publicOptions, statuses: { ...core, ...publicRules, "AZD-AWESOME-999": "PASS" } })).passed, false);
+  });
+
+  it("keeps unknown organization applicability as a finding rather than claiming readiness", async () => {
+    const options = {
+      overall: "UNABLE TO DETERMINE",
+      statuses: { ...core, "Production review": "UNABLE TO DETERMINE" },
+      profile: "organization-catalog",
+      readiness: { core: "PASS", destination: "UNABLE TO DETERMINE" },
+    };
+    assert.equal((await grade(options)).passed, true);
+    assert.equal((await grade({ ...options, readiness: { core: "PASS", destination: "PASS" } })).passed, false);
   });
 });

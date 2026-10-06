@@ -11,7 +11,7 @@ import { ALL_RULES, CORE_RULES, report } from "./report-fixtures.js";
 describe("legacy fixture parity", () => {
   it("keeps the legacy tasks and policy/profile regressions", () => {
     const tasks = loadLegacyTasks();
-    assert.equal(tasks.length, 18, "legacy tasks and policy/profile regressions must retain suite parity");
+    assert.equal(tasks.length, 16, "legacy tasks and policy/profile regressions must retain suite parity");
     assert.deepEqual(
       tasks.map((t) => t.id).sort(),
       [
@@ -22,10 +22,8 @@ describe("legacy fixture parity", () => {
         "ambiguous-publication-scope",
         "compliant-template",
         "optional-assets-and-validator-limits",
-        "organization-approval-mismatch",
         "organization-policy-empty",
         "organization-policy-inaccessible",
-        "organization-policy-invalid",
         "organization-policy-missing",
         "organization-policy-selected",
         "policy-interpretation",
@@ -53,7 +51,7 @@ describe("legacy fixture parity", () => {
       0,
       violations.map((v) => `[${v.code}] ${v.subject}: ${v.message}`).join("\n"),
     );
-    assert.equal(checked, 18);
+    assert.equal(checked, 16);
   });
 
   it("gives every stimulus a deterministic template-compliance-report grader", () => {

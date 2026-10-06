@@ -29,54 +29,49 @@ describe("catalog provenance", () => {
   });
 
   describe("profile policy fixtures", () => {
-    function context(name) {
-      return YAML.parse(fs.readFileSync(path.join(REPO_ROOT, "evals", "fixtures", name, "context.yaml"), "utf8"));
+    function fixture(name, file) {
+      return fs.readFileSync(path.join(REPO_ROOT, "evals", "fixtures", name, file), "utf8");
     }
 
-    it("keeps the packaged organization example unapproved and non-enforcing", () => {
+    it("does not prescribe a policy serialization or namespace", () => {
       const text = fs.readFileSync(path.join(REFERENCES, "organization-policy.md"), "utf8");
-      const example = YAML.parse(text.match(/```yaml\r?\n([\s\S]*?)```/)[1]);
-      assert.equal(example.approval.status, "unapproved");
-      assert.ok(example.rules.every((rule) => rule.status !== "active" && rule.policy_kind !== "approved"));
+      assert.ok(!text.includes("```yaml"));
+      assert.match(text, /does not define an organization-policy file format/);
+      assert.match(text, /existing rule ID or section heading/);
     });
 
-    it("supplies complete namespaced rules and approval evidence for the selected policy", () => {
-      const evidence = context("organization-policy-selected");
-      const policy = evidence.policy_document;
-      assert.equal(policy.schema_version, 1);
-      assert.equal(policy.profile, "organization-catalog");
-      assert.equal(policy.approval.status, "approved");
-      assert.equal(evidence.approval_record.reference, policy.approval.reference);
-      assert.equal(evidence.approval_record.policy_id, policy.id);
-      assert.equal(evidence.approval_record.version, policy.version);
-      assert.equal(new Set(policy.rules.map((rule) => rule.id)).size, policy.rules.length);
-      for (const rule of policy.rules) {
-        assert.match(rule.id, new RegExp(`^AZD-ORG-${policy.namespace}-\\d{3}$`));
-        for (const field of [
-          "title", "version", "status", "policy_kind", "authority", "requirement", "rationale",
-          "applies", "inspect", "pass", "fail", "unknown", "severity", "remediation",
-          "references", "source_revision", "requirement_kind", "local_evidence_policy",
-        ]) assert.ok(rule[field], `${rule.id} missing ${field}`);
-        assert.equal(rule.requirement_kind, "organization-policy");
+    it("supplies actual azd project files without claimed schema or deployment results", () => {
+      for (const name of [
+        "private-core-only", "organization-policy-selected", "organization-policy-missing",
+        "organization-policy-inaccessible", "organization-policy-empty",
+      ]) {
+        const config = YAML.parse(fixture(name, "project/azure.yaml"));
+        const readme = fixture(name, "project/README.md");
+        const bicep = fixture(name, "project/infra/main.bicep");
+        assert.equal(config.infra.provider, "bicep");
+        assert.equal(config.infra.path, undefined);
+        assert.match(readme, /Microsoft\.Storage\/storageAccounts/);
+        assert.match(readme, /azd up/);
+        assert.match(readme, /azd down/);
+        assert.match(bicep, /Microsoft\.Storage\/storageAccounts@/);
+        assert.ok(!fs.existsSync(path.join(REPO_ROOT, "evals", "fixtures", name, "context.yaml")));
       }
-      assert.equal(policy.rules.filter((rule) => rule.status === "active" && rule.policy_kind === "approved").length, 3);
-      assert.equal(evidence.internal_metadata.environment_class_access, "denied");
     });
 
-    it("keeps missing, denied, invalid, and empty policy cases distinct", () => {
-      assert.equal(context("organization-policy-missing").policy_selection, "none");
-      assert.equal(context("organization-policy-inaccessible").policy_access, "denied");
-      assert.equal(context("organization-policy-invalid").policy_document.approval.status, "unapproved");
-      assert.deepEqual(context("organization-policy-empty").policy_document.rules, []);
-      const mismatch = context("organization-approval-mismatch");
-      assert.equal(mismatch.policy_document.approval.status, "approved");
-      assert.notEqual(mismatch.policy_document.version, mismatch.approval_record.version);
+    it("uses ordinary document headings for selected organization requirements", () => {
+      const policy = fixture("organization-policy-selected", "internal-requirements.md");
+      assert.match(policy, /^## Ownership$/m);
+      assert.match(policy, /^## Support$/m);
+      assert.match(policy, /^## Production review$/m);
+      assert.match(fixture("organization-policy-selected", "project/README.md"), /Owner: Platform Engineering/);
+      assert.ok(!fixture("organization-policy-selected", "project/README.md").includes("Support:"));
+      assert.ok(!fixture("organization-policy-empty", "internal-requirements.md").includes("must"));
     });
 
     it("contains no submission evidence in the public preparation case", () => {
       const evidence = YAML.parse(fs.readFileSync(path.join(REPO_ROOT, "evals", "fixtures", "public-preparation", "public-evidence.yaml"), "utf8"));
       assert.equal(evidence.evidence.submission, undefined);
-      assert.equal(context("public-preparation").public_stage, "preparation");
+      assert.match(evidence.evidence_scope, /Synthetic/);
     });
   });
 

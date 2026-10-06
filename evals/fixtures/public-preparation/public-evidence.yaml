@@ -1,4 +1,4 @@
-evidence_scope: This document and context.yaml together are the complete readable evidence. Preserve all stated evidence gaps.
+evidence_scope: Synthetic records for evaluation only, not an azd or customer configuration format. This document is the complete supplied evidence; it does not verify a real deployment or publication.
 publication_intent: explicit
 repository:
   audited_commit: a17b39f452a6d7c18d2a0f5e901b4667d24de811

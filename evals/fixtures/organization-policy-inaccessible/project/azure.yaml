@@ -1,0 +1,3 @@
+name: internal-storage
+infra:
+  provider: bicep

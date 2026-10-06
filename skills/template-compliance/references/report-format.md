@@ -14,7 +14,7 @@ The deterministic grader evaluates one target/profile report at a time.
 - **Policy baseline:** upstream revision and any interpretation relevant to this target
 - **Revision:** inspected commit and working-tree state, or the evidence gap
 - **Inspection mode:** read-only
-- **Organization policy:** selected ID, version, owner, location and approval reference for organization reports, or the policy-resolution gap
+- **Organization requirements:** selected document location and existing title/revision when available, or the source-resolution gap; no custom metadata or approval record is required
 - **Core readiness:** `PASS`, `FAIL`, `UNABLE TO DETERMINE`, or `NO ACTIVE APPLICABLE RULES`
 - **Destination readiness:** the same four verdicts for a selected collection, or `NOT ASSESSED` for core-only/unresolved profiles
 - **Overall result:** `PASS`, `FAIL`, `UNABLE TO DETERMINE`, or `NO ACTIVE APPLICABLE RULES`
@@ -22,7 +22,7 @@ The deterministic grader evaluates one target/profile report at a time.
 Overall result rules:
 
 1. Derive core readiness from core findings and destination readiness from applicable destination findings: FAIL if any fail, otherwise UNABLE TO DETERMINE if any are indeterminate, otherwise PASS if at least one passes, otherwise NO ACTIVE APPLICABLE RULES.
-2. Missing, inaccessible, invalid, unapproved, or unresolved-applicability organization policy sets destination readiness to UNABLE TO DETERMINE, even when all core findings pass. No policy-gap finding is fabricated.
+2. Missing, inaccessible, or ambiguous organization requirements set destination readiness to UNABLE TO DETERMINE, even when all core findings pass. No source-gap finding is fabricated.
 3. Overall result is `FAIL` if any finding or assessed layer fails.
 4. Otherwise, `UNABLE TO DETERMINE` if any finding/layer is indeterminate or a selected collection has NO ACTIVE APPLICABLE RULES. That empty destination does not establish readiness.
 5. Otherwise, `PASS` if at least one applicable rule passes.
@@ -30,7 +30,7 @@ Overall result rules:
 
 Never describe NO ACTIVE APPLICABLE RULES as compliant. For core-only or unresolved
 profiles, overall result covers core only; destination is NOT ASSESSED and must
-not be described as ready for any collection. A valid empty organization policy
+not be described as ready for any collection. An organization document with no applicable mandatory requirements
 must be described as having no active applicable rules, not as approved readiness.
 
 Keep readiness labels distinct from finding Status fields and summary count
@@ -46,7 +46,7 @@ rules, recommendations, and readiness labels are not findings and are not counte
 
 Use one subsection or table row per rule-target pair:
 
-- **Rule:** ID and title
+- **Rule:** bundled ID and title, or the selected organization document's existing identifier/section heading
 - **Layer:** `core` or `destination`
 - **Target:** exact inspected target
 - **Status:** `PASS`, `FAIL`, or `UNABLE TO DETERMINE`

@@ -1,6 +1,0 @@
-destination_profile: organization-catalog
-organization_collection: Contoso internal templates
-policy_selection: none
-policy_availability: absent
-interaction: No follow-up policy selection is available for this evaluation.
-evidence_scope: core-evidence.yaml and this document are the complete readable evidence. No organization policy is supplied or authorized.
