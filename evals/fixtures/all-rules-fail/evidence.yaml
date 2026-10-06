@@ -22,7 +22,7 @@ repository:
     access: readable
     present: false
 schema_validation:
-  schema_url: https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/azd-schema
+  schema_url: https://aka.ms/azure.yaml.json
   retrieved_at: 2026-08-30T12:00:00Z
   target_commit: b51a9b74c24cf470e57cc87b3b52d3b592f7850a
   result: fail

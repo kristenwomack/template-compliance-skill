@@ -90,7 +90,7 @@ fixture:
       description: Deploy a Python web application to Azure App Service with azd.
       topics: [azd-templates, ai-azd-templates, python, appservice, bicep]
   schema_validation:
-    schema_url: https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/azd-schema
+    schema_url: https://aka.ms/azure.yaml.json
     retrieved_at: "2026-08-30T12:00:00Z"
     target_commit: a17b39f452a6d7c18d2a0f5e901b4667d24de811
     result: pass

@@ -1,4 +1,4 @@
-// Static parity test: the nine legacy `evals/tasks/*.yaml` fixtures must still
+// Static parity test: the `evals/tasks/*.yaml` fixtures must still
 // describe exactly what the Vally suite asserts.
 
 import assert from "node:assert/strict";
@@ -9,9 +9,9 @@ import { TemplateComplianceReportGrader, resolveConfig } from "../template-compl
 import { ALL_RULES, CORE_RULES, report } from "./report-fixtures.js";
 
 describe("legacy fixture parity", () => {
-  it("keeps all nine legacy task fixtures", () => {
+  it("keeps the nine legacy tasks and the policy interpretation regression", () => {
     const tasks = loadLegacyTasks();
-    assert.equal(tasks.length, 9, "legacy evals/tasks fixtures must be preserved until live parity is observed");
+    assert.equal(tasks.length, 10, "legacy tasks and policy regression must retain suite parity");
     assert.deepEqual(
       tasks.map((t) => t.id).sort(),
       [
@@ -22,6 +22,7 @@ describe("legacy fixture parity", () => {
         "ambiguous-publication-scope",
         "compliant-template",
         "optional-assets-and-validator-limits",
+        "policy-interpretation",
         "remediation-needed",
         "should-not-trigger",
       ],
@@ -44,7 +45,7 @@ describe("legacy fixture parity", () => {
       0,
       violations.map((v) => `[${v.code}] ${v.subject}: ${v.message}`).join("\n"),
     );
-    assert.equal(checked, 9);
+    assert.equal(checked, 10);
   });
 
   it("gives every stimulus a deterministic template-compliance-report grader", () => {

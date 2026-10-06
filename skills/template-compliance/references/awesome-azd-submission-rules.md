@@ -10,12 +10,15 @@ defaults: &defaults
   status: active
   policy_kind: approved
   authority: "template-compliance repository-owned catalog"
-  rationale: Required by the active approved Awesome AZD catalog.
+  rationale: Tests the cited submission requirement using the catalog's explicit local evidence criteria.
   severity: collection-required
-  references: ["compliance-rules.md", "awesome-azd-rules.md"]
+  source_revision: "22de60335bd77269a2e952cd0e3e8fab56ed4aa1"
+  requirement_kind: upstream-guidance
+  local_evidence_policy: "Use policy-sources.md safeguards; only recorded checks establish validation coverage."
 rules:
   - id: AZD-AWESOME-005
     <<: *defaults
+    references: ["https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/publishing-guidelines.md#4-submit-to-awesome-azd"]
     title: Gallery metadata and asset
     requirement: Submission MUST prepare title, short description, source link, author, gallery image, technology/language/framework/Azure-service/IaC tags, and a unique template UUID.
     applies: Explicit Awesome AZD publication readiness.
@@ -26,6 +29,7 @@ rules:
     remediation: Prepare the missing gallery metadata or image required by this catalog rule.
   - id: AZD-AWESOME-006
     <<: *defaults
+    references: ["https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/publishing-guidelines.md#4-submit-to-awesome-azd"]
     title: Submission process
     requirement: Awesome AZD submissions MUST use one of the submission-authority paths.
     applies: An explicit in-progress Awesome AZD submission.
@@ -36,6 +40,8 @@ rules:
     remediation: Use a direct Awesome AZD pull request or the automated template-submission issue.
   - id: AZD-AWESOME-007
     <<: *defaults
+    version: 2
+    references: ["https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/development-guidelines/definition-of-done.md#awesome-azd-repository-baseline", "https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/development-guidelines/definition-of-done.md#should"]
     title: Required README headings
     requirement: README.md MUST contain each required README heading as an H2 heading.
     applies: Explicit Awesome AZD publication readiness.
@@ -46,6 +52,8 @@ rules:
     remediation: Add the missing H2 headings to README.md and move existing content under the matching heading.
   - id: AZD-AWESOME-008
     <<: *defaults
+    version: 2
+    references: ["https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/development-guidelines/definition-of-done.md#review-and-publication-readiness"]
     title: Security validation result
     requirement: The security validation MUST pass without warnings.
     applies: Explicit Awesome AZD publication readiness.

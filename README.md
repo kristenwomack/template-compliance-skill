@@ -1,6 +1,6 @@
 # 🧭 template-compliance
 
-Welcome! `template-compliance` is a standalone analysis skill that helps you inspect Azure Developer CLI (`azd`) templates against a bundled, repository-owned rule catalog. Every inspection is read-only, so the skill reports what it finds without changing the template.
+Welcome! `template-compliance` is a standalone analysis skill for testing and guiding Azure Developer CLI (`azd`) template compliance against a bundled, repository-owned rule catalog. This project is tooling for template authors and coding agents, not a deployable template. Every inspection is read-only, so the skill reports what it finds and recommends next actions without changing the template.
 
 ## 📦 Install
 
@@ -29,6 +29,21 @@ The bundled, repository-owned catalog is the skill's only compliance authority. 
 The catalog is designed to grow with your needs. Edit the modules indexed by `skills/template-compliance/references/compliance-rules.md` and add organization-approved rules using its schema. Give each rule a stable ID, explicit applicability, evidence instructions, deterministic pass/fail criteria, and remediation. Placeholder or example rules are never enforced.
 
 Keep policy interpretation out of `skills/template-compliance/SKILL.md`: the catalog is authoritative.
+
+### Policy provenance and guidance
+
+Catalog `template-compliance@2` records its upstream baseline, per-rule source links,
+local evidence safeguards, and source/validator differences in
+[policy-sources.md](skills/template-compliance/references/policy-sources.md).
+The baseline is `Azure-Samples/azd-template-artifacts` at commit
+`22de60335bd77269a2e952cd0e3e8fab56ed4aa1`. New upstream guidance is reviewed,
+not silently imported.
+
+The skill resolves a template's documented working directory, supports azd's
+default infrastructure path, and distinguishes upstream requirements from local
+evidence criteria. Source-backed SHOULD and MAY guidance is reported separately
+as Recommended or Optional and never changes a compliance result. A catalog PASS
+is not official certification or a guarantee of gallery acceptance.
 
 ## 🧪 Evaluate
 
@@ -131,7 +146,7 @@ Both point at the same file.
 
 ### Legacy fixtures
 
-`evals/tasks/*.yaml` holds the nine pre-Vally fixtures. They are **still the human-readable source of truth** for what each scenario expects, and they are deliberately retained until the Vally suite has been observed to reproduce their behavior on live runs. `npm run parity` fails the build if the two descriptions drift: it checks name coverage in both directions, fixture staging, overall results, `{rule ID: status}` maps, exhaustiveness, trigger intent, and rubric coverage. Delete the legacy directory only after live behavioral parity, not before.
+`evals/tasks/*.yaml` holds the nine pre-Vally fixtures plus the policy-interpretation regression. They are **still the human-readable source of truth** for what each scenario expects, and they are deliberately retained until the Vally suite has been observed to reproduce their behavior on live runs. `npm run parity` fails the build if the two descriptions drift: it checks name coverage in both directions, fixture staging, overall results, `{rule ID: status}` maps, exhaustiveness, trigger intent, and rubric coverage. Delete the legacy directory only after live behavioral parity, not before.
 
 ## 🗂️ Layout
 
@@ -144,6 +159,7 @@ template-compliance-skill/
 │       ├── SKILL.md                     # Routing, constraints, and analysis workflow
 │       └── references/
 │           ├── compliance-rules.md      # Authoritative rule schema and catalog
+│           ├── policy-sources.md        # Pinned sources, interpretations, and guidance
 │           ├── core-azd-rules.md        # Core azd requirements
 │           ├── awesome-azd-rules.md     # Shared collection evaluation terms
 │           ├── awesome-azd-publication-rules.md
@@ -169,4 +185,4 @@ template-compliance-skill/
 
 ## 🔗 Related resources
 
-The [azd-template-artifacts repository](https://github.com/Azure-Samples/azd-template-artifacts) informed this catalog and provides example templates and supporting artifacts. It is a helpful reference, but it is **not** a compliance authority: nothing in it is enforceable here. This skill evaluates only the rules bundled in its repository-owned catalog.
+The [azd-template-artifacts repository](https://github.com/Azure-Samples/azd-template-artifacts) provides guidance and copyable assets for template authors. Its pinned requirements inform this catalog; the skill enforces only requirements explicitly adopted in the bundled catalog, with source provenance and local interpretation recorded alongside them.

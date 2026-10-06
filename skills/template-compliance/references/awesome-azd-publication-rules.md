@@ -10,12 +10,15 @@ defaults: &defaults
   status: active
   policy_kind: approved
   authority: "template-compliance repository-owned catalog"
-  rationale: Required by the active approved Awesome AZD catalog.
+  rationale: Tests the cited publication requirement using the catalog's explicit local evidence criteria.
   severity: collection-required
-  references: ["compliance-rules.md", "awesome-azd-rules.md"]
+  source_revision: "22de60335bd77269a2e952cd0e3e8fab56ed4aa1"
+  requirement_kind: upstream-guidance
+  local_evidence_policy: "Use policy-sources.md safeguards; validator defaults do not replace the pinned guidance."
 rules:
   - id: AZD-AWESOME-001
     <<: *defaults
+    references: ["https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/development-guidelines/definition-of-done.md#awesome-azd-repository-baseline"]
     title: Publication README
     requirement: README.md MUST explain the scenario, prerequisites, deployment steps, verification steps, and cleanup guidance.
     applies: Explicit Awesome AZD publication readiness.
@@ -26,6 +29,7 @@ rules:
     remediation: Add the missing publication-readiness topics to README.md.
   - id: AZD-AWESOME-002
     <<: *defaults
+    references: ["https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/development-guidelines/definition-of-done.md#awesome-azd-repository-baseline"]
     title: OSS governance files
     requirement: LICENSE.md, SECURITY.md, CONTRIBUTING.md, .github/CODE_OF_CONDUCT.md, and an issue template MUST be present.
     applies: Explicit Awesome AZD publication readiness.
@@ -36,6 +40,7 @@ rules:
     remediation: Add the missing baseline OSS or governance artifacts.
   - id: AZD-AWESOME-003
     <<: *defaults
+    references: ["https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/development-guidelines/definition-of-done.md#awesome-azd-repository-baseline"]
     version: 2
     title: Repository discoverability
     requirement: The repository description MUST state the deployed scenario, and topics MUST include the required repository topics plus at least one language, model, or technology topic that describes the template.
@@ -47,7 +52,8 @@ rules:
     remediation: Set a repository description that states the scenario, and add the required repository topics plus the language, model, and technology topics the template uses.
   - id: AZD-AWESOME-004
     <<: *defaults
-    version: 2
+    version: 3
+    references: ["https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/development-guidelines/definition-of-done.md#review-and-publication-readiness"]
     title: Reviewable validation evidence
     requirement: Reviewers MUST be able to access evidence of a successful validation, test, or manual verification that identifies the audited commit.
     applies: Explicit Awesome AZD publication readiness.

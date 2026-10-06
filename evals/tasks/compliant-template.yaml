@@ -38,7 +38,7 @@ fixture:
         resource plan 'Microsoft.Web/serverfarms@2023-12-01';
         resource app 'Microsoft.Web/sites@2023-12-01'
   schema_validation:
-    schema_url: https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/azd-schema
+    schema_url: https://aka.ms/azure.yaml.json
     retrieved_at: "2026-08-30T12:00:00Z"
     target_commit: 7c92d640f1e845ea4f4f6ea4a68c37d834ffe201
     result: pass

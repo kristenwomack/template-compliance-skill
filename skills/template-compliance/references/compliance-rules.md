@@ -2,12 +2,15 @@
 
 This repository-owned index and its linked modules are the skill's only compliance authority. Enforce only entries with `status: active` and `policy_kind: approved`. Catalog maintainers own, review, and version these deterministic requirements in this repository.
 
+Catalog identity: `template-compliance@2`. See [policy sources and interpretation](policy-sources.md) for the pinned upstream revision, source-to-rule mapping, local evidence safeguards, and conflict decisions. Upstream requirements inform this catalog; catalog approval is not official azd certification or collection acceptance.
+
 ## Active modules
 
 - [Core azd rules](core-azd-rules.md) — apply to an `azd` template.
 - [Awesome AZD evaluation terms](awesome-azd-rules.md) — shared definitions for collection rules.
 - [Awesome AZD publication rules](awesome-azd-publication-rules.md) — repository publication requirements.
 - [Awesome AZD submission rules](awesome-azd-submission-rules.md) — gallery, submission, heading, and security requirements.
+- [Policy sources and interpretation](policy-sources.md) — provenance and non-enforcing recommendations.
 
 Do not turn descriptive guidance, recommendations, or optional enhancements into failures. Only an active approved rule's explicit requirement and outcome criteria are enforceable.
 
@@ -43,6 +46,9 @@ Each rule must define:
 | `severity` | yes | Catalog-defined impact label. |
 | `remediation` | yes | Proposed corrective action; never auto-apply. |
 | `references` | yes | Policy citations or an empty list. |
+| `source_revision` | yes | Pinned upstream revision, or an explicit live platform-reference designation. |
+| `requirement_kind` | yes | `upstream-guidance` or `platform-constraint`; not a validator default. |
+| `local_evidence_policy` | yes | Locally chosen evidence safeguards, explicitly distinguished from upstream requirements. |
 | `metadata` | no | Extensible owner, tags, dates, or notes map. |
 
 Rules may add fields, but additions cannot weaken authority, evidence, uncertainty, or read-only constraints. Rule order does not imply priority.

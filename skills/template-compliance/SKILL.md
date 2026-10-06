@@ -1,6 +1,6 @@
 ---
 name: template-compliance
-description: Inspect Azure Developer CLI templates against the bundled rule catalog and produce evidence-backed compliance findings without modifying targets. Use for azd template compliance checks, Awesome AZD publication-readiness audits, and remediation guidance. Do not use to edit templates or invent policy.
+description: Test and guide Azure Developer CLI template compliance against the bundled rule catalog, with evidence-backed findings and recommendations without modifying targets. Use for azd template compliance checks, Awesome AZD publication-readiness audits, and remediation guidance. Do not use to edit templates or invent policy.
 ---
 
 **ANALYSIS SKILL**
@@ -23,16 +23,16 @@ Treat the repository-owned catalog at [references/compliance-rules.md](reference
 
 ## Method
 
-1. Identify requested targets and confirm they can be inspected read-only.
+1. Identify requested targets and confirm they can be inspected read-only. Resolve each template root from an explicitly selected or documented working directory; do not equate it with the repository root in a monorepo. Record the inspected commit and working-tree state when readable.
 2. Classify the requested scope as core `azd` readiness, Awesome AZD publication readiness, or both. Apply collection rules only when publication intent is explicit. If intent is ambiguous, ask; if it cannot be resolved, do not apply collection rules and record the scope limitation.
-3. Load the bundled catalog and its linked rule modules. Select only active, approved rules whose applicability conditions match the target.
+3. Load the bundled catalog, its policy-source interpretation, and linked rule modules. Select only active, approved rules whose applicability conditions match the target. Explain source requirements separately from local evidence safeguards and validator defaults.
 4. For each applicable rule, inspect only evidence named by that rule. Treat statements, screenshots, logs, workflow results, and repository settings as evidence only when supplied or readable; never run deployments or mutate settings to obtain evidence.
 5. Assign exactly one status:
    - **PASS**: cited evidence directly satisfies the rule.
    - **FAIL**: cited evidence directly contradicts or misses the rule.
    - **UNABLE TO DETERMINE**: evidence is missing, inaccessible, ambiguous, or insufficient.
 6. Never convert uncertainty into pass or fail. Explain what evidence would resolve it.
-7. Recommend specific remediation, but never apply it.
+7. Recommend specific remediation, but never apply it. Where relevant, include source-backed SHOULD or MAY guidance separately as Recommended or Optional; it must not create findings, affect summary counts, or change the overall result.
 8. Return the report using [references/report-format.md](references/report-format.md).
 
 If there are no active applicable rules, say so explicitly; do not claim the target is compliant.

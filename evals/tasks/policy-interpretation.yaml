@@ -1,0 +1,25 @@
+id: policy-interpretation
+purpose: Verify template-root resolution, default infrastructure, source provenance, and validator coverage limits.
+should_trigger: true
+prompt: >-
+  Audit the supplied evidence for core azd and Awesome AZD readiness. Explain
+  relevant policy interpretations and give source-backed guidance separately.
+fixture:
+  evidence_file: evals/fixtures/policy-interpretation/evidence.yaml
+expected:
+  finding_status:
+    AZD-CORE-001: PASS
+    AZD-CORE-002: UNABLE TO DETERMINE
+    AZD-CORE-003: PASS
+    AZD-AWESOME-002: PASS
+    AZD-AWESOME-003: PASS
+    AZD-AWESOME-007: FAIL
+  assertions:
+    - Resolves examples/web as the template root without failing the monorepo root.
+    - Resolves omitted infra.path to the default infra directory within examples/web.
+    - Does not accept a documentation-page review as machine-schema validation.
+    - Uses the pinned guidance filenames and plural topics rather than validator defaults.
+    - Fails the missing Important Security Notice heading despite the successful four-heading check.
+    - Explains the pinned source revision and distinguishes local evidence safeguards.
+    - Keeps Recommended or Optional guidance outside findings and counts without changing the overall result.
+    - Does not modify or execute the fixture or claim official acceptance.

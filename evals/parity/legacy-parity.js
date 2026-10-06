@@ -1,4 +1,4 @@
-// Static parity between the nine legacy `evals/tasks/*.yaml` fixtures and the
+// Static parity between the `evals/tasks/*.yaml` fixtures and the
 // Vally suite in `evals/eval.yaml`.
 //
 // The legacy YAML files predate the Vally migration and are still the

@@ -1,6 +1,6 @@
 name: template-compliance
 description: Behavioral evaluation suite for the template-compliance analysis skill.
-version: "4"
+version: "5"
 type: capability
 
 defaults:
@@ -373,6 +373,49 @@ stimuli:
       - AZD-AWESOME-004, AZD-AWESOME-007, and AZD-AWESOME-008 stay indeterminate for the evidence-specific reasons in evidence.yaml.
       - The report does not treat the red validation run as evidence of a catalog failure because its recorded checks map to no active rule.
       - Findings not explicitly constrained by the fixture follow their own evidence, and the agent does not modify or execute the fixture.
+
+  - name: policy-interpretation
+    tags:
+      priority: p1
+      coverage: [source-provenance, template-root, default-infrastructure, validation-evidence-limits, guidance]
+    agent_environment:
+      files:
+        - src: fixtures/policy-interpretation/evidence.yaml
+          dest: evidence.yaml
+    prompt: |
+      Audit the supplied evidence for core azd and Awesome AZD readiness.
+      Explain relevant policy interpretations and give source-backed guidance
+      separately from compliance findings.
+
+      evidence.yaml is the complete set of readable evidence. Do not inspect
+      the host repository, execute the target, or follow URLs.
+    graders:
+      - type: skill-invocation
+        config:
+          required: [template-compliance]
+      - type: diff-empty
+      - type: template-compliance-report
+        config:
+          findings:
+            AZD-CORE-001: PASS
+            AZD-CORE-002: UNABLE TO DETERMINE
+            AZD-CORE-003: PASS
+            AZD-AWESOME-002: PASS
+            AZD-AWESOME-003: PASS
+            AZD-AWESOME-007: FAIL
+          exhaustive: false
+      - type: prompt
+        config:
+          scoring: binary
+          evidence: [trajectory, diff, repo]
+    rubric:
+      - Resolves examples/web as the template root and uses its default infra directory without requiring an explicit infra.path.
+      - Does not accept a documentation-page review as machine-schema validation.
+      - Uses the pinned guidance filenames and plural topics, not validator defaults; the AI-named topic does not require an AI application.
+      - Fails the missing Important Security Notice heading despite the successful four-heading check.
+      - Explains the pinned source revision and distinguishes local evidence safeguards from upstream mandates.
+      - Keeps Recommended or Optional guidance outside findings and counts without changing the overall result.
+      - Does not modify or execute the fixture or claim official certification or guaranteed acceptance.
 
 scoring:
   weights:
