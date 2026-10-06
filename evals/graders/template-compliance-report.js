@@ -12,6 +12,8 @@
 
 import {
   DEFAULT_INTEGRITY_STATEMENT,
+  DESTINATION_PROFILES,
+  DESTINATION_RESULTS,
   FINDING_STATUSES,
   OVERALL_RESULTS,
   countFindings,
@@ -77,12 +79,41 @@ export function resolveConfig(raw) {
     "require_integrity_statement",
     "integrity_statement",
     "rule_id_pattern",
+    "destination_profile",
+    "public_stage",
+    "readiness",
   ]);
   for (const key of Object.keys(config)) {
     if (!known.has(key)) fail(`unknown config key ${JSON.stringify(key)}`);
   }
 
   const expectReport = resolveExpectReport(config.expect_report);
+
+  if (config.destination_profile !== undefined && !DESTINATION_PROFILES.includes(config.destination_profile)) {
+    fail("config.destination_profile must be a supported destination profile");
+  }
+  if (config.public_stage !== undefined &&
+      (!["preparation", "submission"].includes(config.public_stage) || config.destination_profile !== "public-awesome-azd")) {
+    fail("config.public_stage requires a public-awesome-azd profile and preparation or submission");
+  }
+  let readiness;
+  if (config.readiness !== undefined) {
+    const value = config.readiness;
+    if (!value || typeof value !== "object" || Array.isArray(value) ||
+        Object.keys(value).some((key) => !["core", "destination"].includes(key)) ||
+        !OVERALL_SET.has(value.core) || !DESTINATION_RESULTS.includes(value.destination)) {
+      fail("config.readiness must declare valid core and destination verdicts");
+    }
+    readiness = { core: value.core, destination: value.destination };
+    if (["core-only", "unresolved"].includes(config.destination_profile) &&
+        readiness.destination !== "NOT ASSESSED") {
+      fail("config.readiness.destination must be NOT ASSESSED for a core-only or unresolved profile");
+    }
+    if (["public-awesome-azd", "organization-catalog"].includes(config.destination_profile) &&
+        readiness.destination === "NOT ASSESSED") {
+      fail("config.readiness.destination cannot be NOT ASSESSED for a selected collection");
+    }
+  }
 
   let overallResult;
   if (config.overall_result !== undefined) {
@@ -148,6 +179,9 @@ export function resolveConfig(raw) {
     requireIntegrityStatement,
     integrityStatement: config.integrity_statement ?? DEFAULT_INTEGRITY_STATEMENT,
     ruleIdPattern: config.rule_id_pattern,
+    destinationProfile: config.destination_profile,
+    publicStage: config.public_stage,
+    readiness,
   };
 }
 
@@ -173,6 +207,81 @@ function deriveOverallResult(findings) {
   if (statuses.includes("UNABLE TO DETERMINE")) return "UNABLE TO DETERMINE";
   if (statuses.includes("PASS")) return "PASS";
   return "NO ACTIVE APPLICABLE RULES";
+}
+
+function deriveLayeredOverall(parsed) {
+  const findingsResult = deriveOverallResult(parsed.findings);
+  const layers = [parsed.readiness.core, parsed.readiness.destination];
+  if (findingsResult === "FAIL" || layers.includes("FAIL")) return "FAIL";
+  if (findingsResult === "UNABLE TO DETERMINE" || layers.includes("UNABLE TO DETERMINE") ||
+      (["public-awesome-azd", "organization-catalog"].includes(parsed.readiness.profile) &&
+       parsed.readiness.destination === "NO ACTIVE APPLICABLE RULES")) return "UNABLE TO DETERMINE";
+  return findingsResult;
+}
+
+function checkReadiness(parsed, resolved) {
+  const problems = [];
+  const { profile, stage, core, destination } = parsed.readiness;
+  if (!profile || !core || !destination) problems.push("Missing profile or readiness verdict");
+  if (resolved.destinationProfile !== undefined && profile !== resolved.destinationProfile) {
+    problems.push(`Expected profile ${resolved.destinationProfile}, found ${profile}`);
+  }
+  if (resolved.publicStage !== undefined && stage !== resolved.publicStage) {
+    problems.push(`Expected public stage ${resolved.publicStage}, found ${stage}`);
+  }
+  if (resolved.readiness) {
+    for (const key of ["core", "destination"]) {
+      if (parsed.readiness[key] !== resolved.readiness[key]) problems.push(`Unexpected ${key} readiness`);
+    }
+  }
+  if (profile === "public-awesome-azd" ? !stage : stage !== null) {
+    problems.push("Public stage must be present only for the public profile");
+  }
+  const coreFindings = {};
+  const destinationFindings = {};
+  for (const [id, status] of Object.entries(parsed.findings)) {
+    if (id.startsWith("AZD-CORE-")) coreFindings[id] = status;
+    else destinationFindings[id] = status;
+  }
+  const supportedCoreIds = new Set(Array.from({ length: 6 }, (_, i) => `AZD-CORE-${String(i + 1).padStart(3, "0")}`));
+  if (Object.keys(coreFindings).some((id) => !supportedCoreIds.has(id))) {
+    problems.push("Report contains an unsupported core rule ID");
+  }
+  for (const id of [...supportedCoreIds].slice(0, 5)) {
+    if (!(id in coreFindings)) problems.push(`Missing shared core rule ${id}`);
+  }
+  if (core !== deriveOverallResult(coreFindings)) problems.push("Core readiness contradicts core findings");
+  const destinationResult = deriveOverallResult(destinationFindings);
+  if (profile === "core-only" || profile === "unresolved") {
+    if (destination !== "NOT ASSESSED" || Object.keys(destinationFindings).length) {
+      problems.push("Core-only/unresolved profiles must not assess a destination");
+    }
+  } else if (profile === "organization-catalog") {
+    if (Object.keys(destinationFindings).some((id) => !/^AZD-ORG-[A-Z0-9]+-\d{3}$/.test(id))) {
+      problems.push("Organization reports must not contain public or unscoped destination rules");
+    }
+    // A policy-resolution gap has no fabricated finding but must block readiness.
+    if (!(Object.keys(destinationFindings).length === 0 && destination === "UNABLE TO DETERMINE") &&
+        destination !== destinationResult) problems.push("Organization readiness contradicts findings");
+  } else if (profile === "public-awesome-azd") {
+    const supportedPublicIds = new Set(Array.from({ length: 8 }, (_, i) => `AZD-AWESOME-${String(i + 1).padStart(3, "0")}`));
+    if (Object.keys(destinationFindings).some((id) => !supportedPublicIds.has(id))) {
+      problems.push("Public reports must contain only supported public rule IDs");
+    }
+    for (const id of supportedPublicIds) {
+      if (id !== "AZD-AWESOME-006" && !(id in destinationFindings)) {
+        problems.push(`Missing public readiness rule ${id}`);
+      }
+    }
+    if (stage === "preparation" && "AZD-AWESOME-006" in destinationFindings) {
+      problems.push("Preparation must not require a submission record");
+    }
+    if (stage === "submission" && !("AZD-AWESOME-006" in destinationFindings)) {
+      problems.push("Submission must assess the submission-process rule");
+    }
+    if (destination !== destinationResult) problems.push("Public readiness contradicts findings");
+  }
+  return check("readiness-layers", problems.length === 0, problems.length ? problems.join("; ") : "Profile and readiness layers are consistent.");
 }
 
 /**
@@ -229,7 +338,10 @@ export function evaluateReport(parsed, resolved) {
   }
 
   if (parsed.hasReportSignals) {
-    const expectedOverall = deriveOverallResult(parsed.findings);
+    if (parsed.hasReadiness || resolved.destinationProfile !== undefined || resolved.readiness !== undefined || resolved.publicStage !== undefined) {
+      details.push(checkReadiness(parsed, resolved));
+    }
+    const expectedOverall = parsed.hasReadiness ? deriveLayeredOverall(parsed) : deriveOverallResult(parsed.findings);
     const passed = parsed.overallResult === expectedOverall;
     details.push(
       check(
@@ -385,7 +497,7 @@ export class TemplateComplianceReportGrader {
     name: GRADER_NAME,
     description:
       "Parses a template-compliance Markdown report and asserts the exact overall result, the exact " +
-      "{rule ID: status} map, and report hygiene (no missing, unexpected, duplicate, or malformed " +
+      "{rule ID: status} map, selected profile and readiness layers, and report hygiene (no missing, unexpected, duplicate, or malformed " +
       "findings; summary counts consistent with the findings; integrity statement present).",
     behavior: {},
     determinism: "static",
@@ -443,6 +555,7 @@ export class TemplateComplianceReportGrader {
         overallResult: parsed.overallResult,
         findings: parsed.findings,
         summary: parsed.summary,
+        readiness: parsed.readiness,
         duplicates: parsed.duplicates,
         malformed: parsed.malformed,
         integrityStatementFound: parsed.integrityStatementFound,

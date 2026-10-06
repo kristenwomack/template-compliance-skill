@@ -1,0 +1,20 @@
+id: organization-policy-missing
+purpose: Preserve uncertainty when organization readiness is requested without a selected policy.
+should_trigger: true
+prompt: Audit the Contoso internal collection with no selected policy; follow-up interaction is unavailable.
+fixture:
+  evidence_files: [evals/fixtures/organization-policy-missing/core-evidence.yaml, evals/fixtures/organization-policy-missing/context.yaml]
+expected:
+  destination_profile: organization-catalog
+  readiness: {core: PASS, destination: UNABLE TO DETERMINE}
+  overall_result: UNABLE TO DETERMINE
+  finding_status:
+    AZD-CORE-001: PASS
+    AZD-CORE-002: PASS
+    AZD-CORE-003: PASS
+    AZD-CORE-004: PASS
+    AZD-CORE-005: PASS
+    AZD-CORE-006: PASS
+  assertions:
+    - States the approved policy selection needed for organization readiness.
+    - Does not infer organization approval from core PASS or invent policy findings.

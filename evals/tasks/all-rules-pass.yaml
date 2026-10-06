@@ -1,7 +1,7 @@
 id: all-rules-pass
 purpose: Verify positive behavior for every active repository-owned catalog rule.
 should_trigger: true
-prompt: Audit this repository for core azd and Awesome AZD publication readiness, read-only.
+prompt: Audit core azd and an in-progress Awesome AZD submission, read-only; use the public submission stage.
 fixture:
   publication_intent: explicit
   repository:
@@ -150,6 +150,9 @@ fixture:
       url: https://github.com/Azure/awesome-azd/pull/9999
       catalog_rule: AZD-AWESOME-006
 expected:
+  destination_profile: public-awesome-azd
+  public_stage: submission
+  readiness: {core: PASS, destination: PASS}
   overall_result: PASS
   finding_status:
     AZD-CORE-001: PASS

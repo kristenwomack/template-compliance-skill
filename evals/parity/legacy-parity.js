@@ -235,6 +235,16 @@ export function checkParity() {
     }
 
     const legacyOverall = task.expected?.overall_result;
+    for (const [key, resolvedKey] of [
+      ["destination_profile", "destinationProfile"], ["public_stage", "publicStage"],
+    ]) {
+      if (task.expected?.[key] !== resolved[resolvedKey]) {
+        add("profile-mismatch", id, `Legacy ${key} differs from the grader.`);
+      }
+    }
+    if (!sameMap(task.expected?.readiness, resolved.readiness)) {
+      add("readiness-mismatch", id, "Legacy readiness layers differ from the grader.");
+    }
     if (legacyOverall === undefined) {
       if (resolved.overallResult !== undefined) {
         add(

@@ -1,0 +1,25 @@
+destination_profile: organization-catalog
+organization_collection: Contoso internal templates
+selected_policy: context.yaml#policy_document
+approval_record:
+  reference: "context.yaml#approval_record@1.0.0"
+  owner: Contoso Platform Team
+  approved_by: Contoso Architecture Board
+  status: approved
+  policy_id: contoso-empty
+  version: "1.0.0"
+policy_document:
+  schema_version: 1
+  id: contoso-empty
+  version: "1.0.0"
+  owner: Contoso Platform Team
+  profile: organization-catalog
+  namespace: CONTOSO
+  approval:
+    status: approved
+    approved_by: Contoso Architecture Board
+    reference: "context.yaml#approval_record@1.0.0"
+  applies: Templates targeting the Contoso internal templates collection.
+  references: ["context.yaml#approval_record@1.0.0"]
+  rules: []
+evidence_scope: core-evidence.yaml and this document are the complete readable evidence. The policy has no organization rules.

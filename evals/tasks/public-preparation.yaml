@@ -1,0 +1,29 @@
+id: public-preparation
+purpose: Verify public readiness before a submission exists.
+should_trigger: true
+prompt: Check readiness to submit to Awesome AZD while preparing materials, not submitting.
+fixture:
+  evidence_files: [evals/fixtures/public-preparation/public-evidence.yaml, evals/fixtures/public-preparation/context.yaml]
+expected:
+  destination_profile: public-awesome-azd
+  public_stage: preparation
+  readiness: {core: PASS, destination: PASS}
+  overall_result: PASS
+  finding_status:
+    AZD-CORE-001: PASS
+    AZD-CORE-002: PASS
+    AZD-CORE-003: PASS
+    AZD-CORE-004: PASS
+    AZD-CORE-005: PASS
+    AZD-CORE-006: PASS
+    AZD-AWESOME-001: PASS
+    AZD-AWESOME-002: PASS
+    AZD-AWESOME-003: PASS
+    AZD-AWESOME-004: PASS
+    AZD-AWESOME-005: PASS
+    AZD-AWESOME-007: PASS
+    AZD-AWESOME-008: PASS
+  assertions:
+    - Assesses preparation rules without an open submission or AZD-AWESOME-006 finding.
+    - Reports core and destination readiness separately with policy versions.
+    - Does not imply gallery acceptance or an in-progress submission.

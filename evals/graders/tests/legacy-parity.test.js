@@ -9,9 +9,9 @@ import { TemplateComplianceReportGrader, resolveConfig } from "../template-compl
 import { ALL_RULES, CORE_RULES, report } from "./report-fixtures.js";
 
 describe("legacy fixture parity", () => {
-  it("keeps the nine legacy tasks and the policy interpretation regression", () => {
+  it("keeps the legacy tasks and policy/profile regressions", () => {
     const tasks = loadLegacyTasks();
-    assert.equal(tasks.length, 10, "legacy tasks and policy regression must retain suite parity");
+    assert.equal(tasks.length, 18, "legacy tasks and policy/profile regressions must retain suite parity");
     assert.deepEqual(
       tasks.map((t) => t.id).sort(),
       [
@@ -22,7 +22,15 @@ describe("legacy fixture parity", () => {
         "ambiguous-publication-scope",
         "compliant-template",
         "optional-assets-and-validator-limits",
+        "organization-approval-mismatch",
+        "organization-policy-empty",
+        "organization-policy-inaccessible",
+        "organization-policy-invalid",
+        "organization-policy-missing",
+        "organization-policy-selected",
         "policy-interpretation",
+        "private-core-only",
+        "public-preparation",
         "remediation-needed",
         "should-not-trigger",
       ],
@@ -45,7 +53,7 @@ describe("legacy fixture parity", () => {
       0,
       violations.map((v) => `[${v.code}] ${v.subject}: ${v.message}`).join("\n"),
     );
-    assert.equal(checked, 10);
+    assert.equal(checked, 18);
   });
 
   it("gives every stimulus a deterministic template-compliance-report grader", () => {
@@ -105,11 +113,19 @@ describe("eval.yaml grader configs are satisfiable", () => {
         for (const rule of CORE_RULES) {
           if (!forbidden.has(rule)) statuses[rule] = "UNABLE TO DETERMINE";
         }
+        // Profile-aware partial expectations still require all shared core rules.
+        if (resolved.destinationProfile !== undefined) {
+          for (const rule of CORE_RULES) {
+            if (!(rule in statuses) && !forbidden.has(rule)) {
+              statuses[rule] = resolved.readiness?.core === "PASS" ? "PASS" : "UNABLE TO DETERMINE";
+            }
+          }
+        }
       }
       // A non-exhaustive expectation must tolerate rules it does not pin.
       if (!resolved.exhaustive) {
         const extra = ALL_RULES.find((rule) => !(rule in statuses) && !forbidden.has(rule));
-        if (extra) statuses[extra] = "PASS";
+        if (extra) statuses[extra] = resolved.destinationProfile === "unresolved" ? "UNABLE TO DETERMINE" : "PASS";
       }
 
       const overall = resolved.overallResult ?? deriveOverall(statuses);
@@ -118,7 +134,14 @@ describe("eval.yaml grader configs are satisfiable", () => {
         `${stimulus.name}: the ideal report's overall verdict ${overall} is itself forbidden`,
       );
 
-      const result = await grader.grade({ trajectory: { output: report({ overall, statuses }) }, config });
+      const result = await grader.grade({
+        trajectory: { output: report({
+          overall, statuses,
+          profile: resolved.destinationProfile,
+          stage: resolved.publicStage,
+          readiness: resolved.readiness,
+        }) }, config,
+      });
       assert.equal(result.passed, true, `${stimulus.name}: ${result.evidence}`);
     });
   }

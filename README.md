@@ -10,7 +10,7 @@ To get started, copy `skills/template-compliance` into the skills location suppo
 
 Ask your agent to inspect named template files or directories for compliance. The skill:
 
-- uses only active rules in `references/compliance-rules.md`;
+- uses only active approved rules in the selected catalog profile or organization policy;
 - reports `PASS`, `FAIL`, or `UNABLE TO DETERMINE`;
 - cites evidence or describes the evidence gap;
 - proposes, but never applies, remediation; and
@@ -20,19 +20,63 @@ Example request:
 
 > Check this repository for core azd template compliance and return the compliance report.
 
-Ask explicitly for **Awesome AZD publication readiness** when collection rules should also apply. The skill does not assume publication intent. If scope cannot be resolved, it limits the inspection to core rules and reports the limitation.
+### Choose the destination
 
-The bundled, repository-owned catalog is the skill's only compliance authority. Active approved rules define enforceable requirements; descriptive guidance, optional enhancements, and optional repository assets such as dev containers or CI/CD pipeline definitions are not compliance failures. External validation automation is evidence, not authority: a run establishes only the checks it records. Review and version catalog changes in this repository so the policy stays clear and intentional.
+| Profile | When to use it | Checks |
+| --- | --- | --- |
+| `core-only` | Building or inspecting any azd project, public or private | Shared azd requirements only; no collection assessment. |
+| `public-awesome-azd` | Preparing a public contribution or inspecting an in-progress submission | Core plus the pinned public requirements. Preparation does not require an open submission; submission adds the process check. |
+| `organization-catalog` | Preparing a template for an internal collection | Core plus an explicitly selected approved organization policy; no public requirements. |
+
+Examples:
+
+> Check this private project for core azd readiness only.
+
+> Check this template for public Awesome AZD readiness. We are preparing materials; no submission is underway.
+
+> Audit this in-progress Awesome AZD submission, including its submission process.
+
+> Check this template for our internal catalog using the approved policy at `policies/internal-templates.yaml`.
+
+Repository visibility does not select a profile. If the destination is unresolved,
+the skill asks; if it remains unresolved, it assesses core only and reports
+destination readiness as **NOT ASSESSED**. Reports show core and destination
+readiness separately, with the relevant policy versions.
+
+Private projects do not inherit public license conventions, README headings,
+gallery images, topics, or submission requirements. For an organization-catalog
+assessment, a missing, inaccessible, invalid, or unapproved policy leaves
+organization readiness **UNABLE TO DETERMINE**, even if core checks pass.
+An empty approved policy has **NO ACTIVE APPLICABLE RULES**, not PASS.
+Policy-resolution gaps are limitations, not fabricated rule findings.
+
+The bundled, repository-owned catalog defines the skill's compliance authority and its explicit organization-policy extension boundary. Selected active approved rules define enforceable requirements; descriptive guidance and optional enhancements are not compliance failures. Assets such as dev containers or CI/CD pipeline definitions are required only if a selected active approved rule explicitly requires them. External validation automation is evidence, not authority: a run establishes only the checks it records. Review and version catalog changes in this repository so the policy stays clear and intentional.
 
 ## 🛠️ Customize policy
 
-The catalog is designed to grow with your needs. Edit the modules indexed by `skills/template-compliance/references/compliance-rules.md` and add organization-approved rules using its schema. Give each rule a stable ID, explicit applicability, evidence instructions, deterministic pass/fail criteria, and remediation. Placeholder or example rules are never enforced.
+For an internal catalog, supply a separate policy using
+[the organization-policy contract](skills/template-compliance/references/organization-policy.md).
+It records a policy ID/version, owner, approval evidence, scope, source references,
+and rules with namespaced IDs such as `AZD-ORG-CONTOSO-001`. The policy must be
+explicitly selected; finding a file in a repository does not authorize it.
+No organization policy is bundled as an active default.
+
+Policy approval evidence must identify the selected policy ID/version and
+approver; a policy's self-declared approved status is not enough. If an active
+rule's applicability is unknown, it remains an indeterminate finding rather
+than silently disappearing from the assessment.
+
+Organization rules are additive to core and cannot override its findings,
+weaken read-only boundaries, or require credential collection or uploads.
+Placeholder, example, inactive, and deprecated rules are never enforced.
+The contract includes an unapproved example for illustration, not a default
+policy. Maintain public requirements separately in the bundled modules.
 
 Keep policy interpretation out of `skills/template-compliance/SKILL.md`: the catalog is authoritative.
 
 ### Policy provenance and guidance
 
-Catalog `template-compliance@2` records its upstream baseline, per-rule source links,
+Catalog `template-compliance@3` records its upstream baseline, per-rule source links,
 local evidence safeguards, and source/validator differences in
 [policy-sources.md](skills/template-compliance/references/policy-sources.md).
 The baseline is `Azure-Samples/azd-template-artifacts` at commit
@@ -85,7 +129,7 @@ In GitHub Actions the same value comes from a repository secret named `COPILOT_C
 
 `.vally.yaml` defines two suites over `evals/eval.yaml`:
 
-- **`ci-gate`** — the `p0` and `p1` stimuli: routing, the report contract, remediation, uncertainty handling, non-trigger behavior, publication-scope ambiguity, and optional-asset limits.
+- **`ci-gate`** — the `p0` and `p1` stimuli: routing, report contracts, uncertainty, policy interpretation, private/public isolation, organization-policy selection and gaps, and public preparation.
 - **`full`** — everything in `ci-gate` plus the `p2` stimuli that exercise positive, negative, and ambiguous behavior for all fourteen active catalog rules.
 
 Every stimulus is graded by a deliberate mix, weighted so that the deterministic checks dominate and the judge only handles what a judge is actually good at:
@@ -104,6 +148,7 @@ The threshold is `1.0`, so a stimulus passes only when every grader that ran pas
 `evals/graders/template-compliance-report.js` is a local Vally grader plugin. It registers through Vally's documented contract — a module exporting `registerGraders(registry)`, loaded with `--grader-plugin`. It is fully offline and deterministic: it parses the agent's Markdown report and asserts
 
 - the exact overall result (`PASS`, `FAIL`, `UNABLE TO DETERMINE`, `NO ACTIVE APPLICABLE RULES`);
+- selected destination profile, public stage, and separate readiness layers when configured; an organization-policy gap blocks overall PASS without adding a fake finding;
 - the exact `{rule ID: status}` map, catching **missing** and **unexpected** findings;
 - **duplicate** findings and conflicting restatements of the same rule;
 - **malformed** entries — a finding with no rule ID, an ambiguous rule ID, a missing status, or a status that is not one of the three contract values;
@@ -137,6 +182,12 @@ Three config shapes cover the suite:
 
 `expect_report: optional` is the fourth shape, used where the agent may legitimately ask a scoping question instead of reporting; it enforces only the constraints on a report that is actually produced.
 
+Profile scenarios also set `destination_profile`, optional `public_stage`, and
+`readiness: {core: PASS, destination: UNABLE TO DETERMINE}` (or the appropriate
+verdicts). The parser recognizes namespaced organization rule IDs and validates
+layer consistency and profile isolation. Existing pre-profile report fixtures
+remain supported by the grader; current skill reports must include layer labels.
+
 Because `--grader-plugin` is resolved relative to the eval-spec directory for `vally lint` and relative to the project root for a suite run, the two paths in `package.json` differ on purpose:
 
 - `npm run lint` → `./graders/template-compliance-report.js`
@@ -146,7 +197,7 @@ Both point at the same file.
 
 ### Legacy fixtures
 
-`evals/tasks/*.yaml` holds the nine pre-Vally fixtures plus the policy-interpretation regression. They are **still the human-readable source of truth** for what each scenario expects, and they are deliberately retained until the Vally suite has been observed to reproduce their behavior on live runs. `npm run parity` fails the build if the two descriptions drift: it checks name coverage in both directions, fixture staging, overall results, `{rule ID: status}` maps, exhaustiveness, trigger intent, and rubric coverage. Delete the legacy directory only after live behavioral parity, not before.
+`evals/tasks/*.yaml` holds the nine pre-Vally fixtures plus policy-interpretation and profile regressions. They are **still the human-readable source of truth** for what each scenario expects, and they are deliberately retained until the Vally suite has been observed to reproduce their behavior on live runs. `npm run parity` fails the build if the two descriptions drift: it checks name coverage in both directions, fixture staging, overall results, `{rule ID: status}` maps, exhaustiveness, trigger intent, and rubric coverage. Delete the legacy directory only after live behavioral parity, not before.
 
 ## 🗂️ Layout
 
@@ -160,6 +211,8 @@ template-compliance-skill/
 │       └── references/
 │           ├── compliance-rules.md      # Authoritative rule schema and catalog
 │           ├── policy-sources.md        # Pinned sources, interpretations, and guidance
+│           ├── policy-profiles.md       # Core, public stages, and organization selection
+│           ├── organization-policy.md   # Selected internal-policy contract
 │           ├── core-azd-rules.md        # Core azd requirements
 │           ├── awesome-azd-rules.md     # Shared collection evaluation terms
 │           ├── awesome-azd-publication-rules.md

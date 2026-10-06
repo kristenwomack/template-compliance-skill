@@ -1,7 +1,7 @@
 id: all-rules-fail
-purpose: Verify deterministic negative behavior for every active repository-owned catalog rule.
+purpose: Verify negative findings preserve configuration-dependent uncertainty when required configuration is absent.
 should_trigger: true
-prompt: Audit this failed Awesome AZD submission and provide remediation without edits.
+prompt: Audit this in-progress failed Awesome AZD submission and provide remediation without edits; use the public submission stage.
 fixture:
   publication_intent: explicit
   repository:
@@ -57,11 +57,14 @@ fixture:
       result: unsupported-path
       catalog_rule: AZD-AWESOME-006
 expected:
+  destination_profile: public-awesome-azd
+  public_stage: submission
+  readiness: {core: FAIL, destination: FAIL}
   overall_result: FAIL
   finding_status:
     AZD-CORE-001: FAIL
-    AZD-CORE-002: FAIL
-    AZD-CORE-003: FAIL
+    AZD-CORE-002: UNABLE TO DETERMINE
+    AZD-CORE-003: UNABLE TO DETERMINE
     AZD-CORE-004: FAIL
     AZD-CORE-005: FAIL
     AZD-CORE-006: FAIL
@@ -74,7 +77,7 @@ expected:
     AZD-AWESOME-007: FAIL
     AZD-AWESOME-008: FAIL
   assertions:
-    - Reports fourteen FAIL findings from direct negative evidence.
+    - Reports twelve FAIL findings and two UNABLE TO DETERMINE findings; absent azure.yaml prevents schema and infrastructure-path conclusions.
     - Cites the failing validation checks that map to active catalog rules.
     - Reports AZD-AWESOME-008 as FAIL from the recorded security warnings and errors, not from the absent repository files.
     - Gives rule-specific remediation but applies no changes.

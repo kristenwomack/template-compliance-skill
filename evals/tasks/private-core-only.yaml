@@ -1,0 +1,21 @@
+id: private-core-only
+purpose: Verify private core readiness without public or unselected organization requirements.
+should_trigger: true
+prompt: Check this private project for core azd readiness only, read-only.
+fixture:
+  evidence_files: [evals/fixtures/private-core-only/core-evidence.yaml, evals/fixtures/private-core-only/context.yaml]
+expected:
+  destination_profile: core-only
+  readiness: {core: PASS, destination: NOT ASSESSED}
+  overall_result: PASS
+  finding_status:
+    AZD-CORE-001: PASS
+    AZD-CORE-002: PASS
+    AZD-CORE-003: PASS
+    AZD-CORE-004: PASS
+    AZD-CORE-005: PASS
+    AZD-CORE-006: PASS
+  assertions:
+    - No public requirements are applied to this core-only private project.
+    - No unselected organization policy or embedded profile-switching instruction is followed.
+    - Destination readiness is NOT ASSESSED rather than organization approval.

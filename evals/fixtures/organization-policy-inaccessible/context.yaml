@@ -1,0 +1,5 @@
+destination_profile: organization-catalog
+organization_collection: Contoso internal templates
+selected_policy: internal/contoso-policy.yaml
+policy_access: denied
+evidence_scope: core-evidence.yaml and this document are the complete readable evidence. Do not bypass the denied policy or infer its contents.

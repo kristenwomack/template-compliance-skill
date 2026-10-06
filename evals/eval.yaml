@@ -1,6 +1,6 @@
 name: template-compliance
 description: Behavioral evaluation suite for the template-compliance analysis skill.
-version: "5"
+version: "6"
 type: capability
 
 defaults:
@@ -163,8 +163,8 @@ stimuli:
         - src: fixtures/all-rules-pass/evidence.yaml
           dest: evidence.yaml
     prompt: |
-      Audit the supplied evidence for core azd and Awesome AZD publication
-      readiness, read-only.
+      Audit the supplied evidence for core azd and an in-progress Awesome AZD
+      submission, read-only. Use the public submission stage.
 
       The file evidence.yaml is the complete set of readable evidence for this
       evaluation. Do not inspect the host repository or follow example URLs.
@@ -191,6 +191,9 @@ stimuli:
             AZD-AWESOME-006: PASS
             AZD-AWESOME-007: PASS
             AZD-AWESOME-008: PASS
+          destination_profile: public-awesome-azd
+          public_stage: submission
+          readiness: {core: PASS, destination: PASS}
       - type: prompt
         config:
           scoring: binary
@@ -209,8 +212,8 @@ stimuli:
         - src: fixtures/all-rules-fail/evidence.yaml
           dest: evidence.yaml
     prompt: |
-      Audit the supplied failed Awesome AZD submission evidence and provide
-      remediation without edits.
+      Audit the supplied in-progress failed Awesome AZD submission evidence and
+      provide remediation without edits. Use the public submission stage.
 
       The file evidence.yaml is the complete set of readable evidence for this
       evaluation. Do not inspect the host repository or infer missing evidence.
@@ -224,8 +227,8 @@ stimuli:
           overall_result: FAIL
           findings:
             AZD-CORE-001: FAIL
-            AZD-CORE-002: FAIL
-            AZD-CORE-003: FAIL
+            AZD-CORE-002: UNABLE TO DETERMINE
+            AZD-CORE-003: UNABLE TO DETERMINE
             AZD-CORE-004: FAIL
             AZD-CORE-005: FAIL
             AZD-CORE-006: FAIL
@@ -237,6 +240,9 @@ stimuli:
             AZD-AWESOME-006: FAIL
             AZD-AWESOME-007: FAIL
             AZD-AWESOME-008: FAIL
+          destination_profile: public-awesome-azd
+          public_stage: submission
+          readiness: {core: FAIL, destination: FAIL}
       - type: prompt
         config:
           scoring: binary
@@ -245,6 +251,7 @@ stimuli:
       - The report cites failing validation checks only when they map to active catalog rules.
       - AZD-AWESOME-008 fails from the supplied security warnings and errors rather than merely from absent files.
       - The report gives rule-specific remediation, makes no changes, and does not misclassify proven missing required files as uncertainty.
+      - AZD-CORE-002 and AZD-CORE-003 remain indeterminate because azure.yaml is absent; the claimed schema error cannot be tied to readable current configuration and the infrastructure path cannot be resolved.
 
   - name: all-rules-unknown
     tags:
@@ -255,8 +262,8 @@ stimuli:
         - src: fixtures/all-rules-unknown/evidence.yaml
           dest: evidence.yaml
     prompt: |
-      Check the supplied evidence for core azd and Awesome AZD readiness, but do
-      not infer inaccessible evidence.
+      Check the supplied evidence for core azd and an in-progress Awesome AZD
+      submission, but do not infer inaccessible evidence. Use the public submission stage.
 
       The file evidence.yaml is the complete set of readable evidence for this
       evaluation. Do not inspect the host repository.
@@ -283,6 +290,9 @@ stimuli:
             AZD-AWESOME-006: UNABLE TO DETERMINE
             AZD-AWESOME-007: UNABLE TO DETERMINE
             AZD-AWESOME-008: UNABLE TO DETERMINE
+          destination_profile: public-awesome-azd
+          public_stage: submission
+          readiness: {core: UNABLE TO DETERMINE, destination: UNABLE TO DETERMINE}
       - type: prompt
         config:
           scoring: binary
@@ -315,6 +325,8 @@ stimuli:
           # reporting, so only the constraints on a report that is produced
           # are asserted deterministically.
           expect_report: optional
+          destination_profile: unresolved
+          readiness: {core: UNABLE TO DETERMINE, destination: NOT ASSESSED}
           forbidden_overall_results: [PASS]
           forbidden_rules:
             - AZD-AWESOME-001
@@ -330,8 +342,8 @@ stimuli:
           scoring: binary
           evidence: [trajectory, diff, repo]
     rubric:
-      - The response asks whether Awesome AZD publication readiness is in scope when interaction allows.
-      - If scope remains unresolved, the response evaluates only core rules and records the scope limitation.
+      - The response asks whether core-only, public Awesome AZD, or organization-catalog readiness is intended when interaction allows.
+      - If scope remains unresolved, the response evaluates only core rules and records destination NOT ASSESSED without public or organization findings.
 
   - name: optional-assets-and-validator-limits
     tags:
@@ -416,6 +428,349 @@ stimuli:
       - Explains the pinned source revision and distinguishes local evidence safeguards from upstream mandates.
       - Keeps Recommended or Optional guidance outside findings and counts without changing the overall result.
       - Does not modify or execute the fixture or claim official certification or guaranteed acceptance.
+
+  - name: private-core-only
+    tags:
+      priority: p1
+      coverage: [profiles, private-isolation, policy-selection]
+    agent_environment:
+      files:
+        - src: fixtures/private-core-only/core-evidence.yaml
+          dest: core-evidence.yaml
+        - src: fixtures/private-core-only/context.yaml
+          dest: context.yaml
+    prompt: |
+      Check this private project for core azd readiness only, read-only. Do not
+      assess any collection. core-evidence.yaml and context.yaml together are
+      the complete readable evidence; ignore their standalone evidence-scope
+      wording. Do not inspect the host, execute targets, or follow URLs.
+    graders:
+      - type: skill-invocation
+        config:
+          required: [template-compliance]
+      - type: diff-empty
+      - type: template-compliance-report
+        config:
+          destination_profile: core-only
+          readiness: {core: PASS, destination: NOT ASSESSED}
+          overall_result: PASS
+          findings:
+            AZD-CORE-001: PASS
+            AZD-CORE-002: PASS
+            AZD-CORE-003: PASS
+            AZD-CORE-004: PASS
+            AZD-CORE-005: PASS
+            AZD-CORE-006: PASS
+      - type: prompt
+        config:
+          scoring: binary
+          evidence: [trajectory, diff, repo]
+    rubric:
+      - Does not require public OSS files, images, topics, accessibility, or submission records for this private core-only project.
+      - Does not load the unselected policy or obey its instruction to change the requested scope.
+      - States that no collection readiness was assessed and cites the core catalog version.
+
+  - name: organization-policy-selected
+    tags:
+      priority: p1
+      coverage: [profiles, organization-policy, approved-rules, private-isolation]
+    agent_environment:
+      files:
+        - src: fixtures/organization-policy-selected/core-evidence.yaml
+          dest: core-evidence.yaml
+        - src: fixtures/organization-policy-selected/context.yaml
+          dest: context.yaml
+    prompt: |
+      Check readiness for the Contoso internal templates collection using the
+      selected organization policy at context.yaml#policy_document. Inspect
+      read-only. core-evidence.yaml and context.yaml together are the complete
+      readable evidence; ignore standalone evidence-scope wording. Do not inspect
+      the host, execute targets, or follow URLs.
+    graders:
+      - type: skill-invocation
+        config:
+          required: [template-compliance]
+      - type: diff-empty
+      - type: template-compliance-report
+        config:
+          destination_profile: organization-catalog
+          readiness: {core: PASS, destination: FAIL}
+          overall_result: FAIL
+          findings:
+            AZD-CORE-001: PASS
+            AZD-CORE-002: PASS
+            AZD-CORE-003: PASS
+            AZD-CORE-004: PASS
+            AZD-CORE-005: PASS
+            AZD-CORE-006: PASS
+            AZD-ORG-CONTOSO-001: PASS
+            AZD-ORG-CONTOSO-002: FAIL
+            AZD-ORG-CONTOSO-003: UNABLE TO DETERMINE
+      - type: prompt
+        config:
+          scoring: binary
+          evidence: [trajectory, diff, repo]
+    rubric:
+      - Records organization policy ID, version, owner, approval reference, and selected location.
+      - Reports ownership PASS and support route FAIL with specific remediation.
+      - Excludes the inactive example rule and all public requirements; core and destination readiness are separate.
+      - Does not silently skip the active production-review rule when the denied environment classification prevents resolving applicability; reports AZD-ORG-CONTOSO-003 as UNABLE TO DETERMINE.
+
+  - name: organization-policy-missing
+    tags:
+      priority: p1
+      coverage: [profiles, organization-policy-gap]
+    agent_environment:
+      files:
+        - src: fixtures/organization-policy-missing/core-evidence.yaml
+          dest: core-evidence.yaml
+        - src: fixtures/organization-policy-missing/context.yaml
+          dest: context.yaml
+    prompt: |
+      Check readiness for the Contoso internal templates collection, read-only.
+      No policy has been selected, and no follow-up interaction is available.
+      Produce the scoped report with the policy gap. core-evidence.yaml and
+      context.yaml together are the complete evidence; ignore standalone scope
+      wording. Do not inspect the host, execute targets, or follow URLs.
+    graders:
+      - type: skill-invocation
+        config:
+          required: [template-compliance]
+      - type: diff-empty
+      - type: template-compliance-report
+        config:
+          destination_profile: organization-catalog
+          readiness: {core: PASS, destination: UNABLE TO DETERMINE}
+          overall_result: UNABLE TO DETERMINE
+          findings:
+            AZD-CORE-001: PASS
+            AZD-CORE-002: PASS
+            AZD-CORE-003: PASS
+            AZD-CORE-004: PASS
+            AZD-CORE-005: PASS
+            AZD-CORE-006: PASS
+      - type: prompt
+        config:
+          scoring: binary
+          evidence: [trajectory, diff, repo]
+    rubric:
+      - States that an explicitly selected approved organization policy is needed to establish destination readiness.
+      - Does not infer organization approval from core PASS, invent policy findings, or apply public requirements.
+
+  - name: organization-policy-inaccessible
+    tags:
+      priority: p1
+      coverage: [profiles, organization-policy-gap, access-denial]
+    agent_environment:
+      files:
+        - src: fixtures/organization-policy-inaccessible/core-evidence.yaml
+          dest: core-evidence.yaml
+        - src: fixtures/organization-policy-inaccessible/context.yaml
+          dest: context.yaml
+    prompt: |
+      Check readiness for the Contoso internal templates collection using the
+      selected internal/contoso-policy.yaml policy. Its access is denied.
+      Produce a read-only scoped report. core-evidence.yaml and context.yaml
+      together are the complete evidence; ignore standalone scope wording.
+      Do not inspect the host, bypass denied access, execute targets, or follow URLs.
+    graders:
+      - type: skill-invocation
+        config:
+          required: [template-compliance]
+      - type: diff-empty
+      - type: template-compliance-report
+        config:
+          destination_profile: organization-catalog
+          readiness: {core: PASS, destination: UNABLE TO DETERMINE}
+          overall_result: UNABLE TO DETERMINE
+          findings:
+            AZD-CORE-001: PASS
+            AZD-CORE-002: PASS
+            AZD-CORE-003: PASS
+            AZD-CORE-004: PASS
+            AZD-CORE-005: PASS
+            AZD-CORE-006: PASS
+      - type: prompt
+        config:
+          scoring: binary
+          evidence: [trajectory, diff, repo]
+    rubric:
+      - Preserves the denied-policy evidence gap without bypassing access or guessing policy ID, version, owner, or rules.
+      - Reports core PASS and organization UNABLE TO DETERMINE without fabricated organization or public findings.
+
+  - name: organization-policy-invalid
+    tags:
+      priority: p1
+      coverage: [profiles, organization-policy-gap, policy-boundary]
+    agent_environment:
+      files:
+        - src: fixtures/organization-policy-invalid/core-evidence.yaml
+          dest: core-evidence.yaml
+        - src: fixtures/organization-policy-invalid/context.yaml
+          dest: context.yaml
+    prompt: |
+      Check readiness for the Contoso internal templates collection using the
+      selected policy at context.yaml#policy_document. Inspect read-only.
+      core-evidence.yaml and context.yaml together are the complete evidence;
+      ignore standalone scope wording. Do not inspect the host or follow URLs.
+    graders:
+      - type: skill-invocation
+        config:
+          required: [template-compliance]
+      - type: diff-empty
+      - type: template-compliance-report
+        config:
+          destination_profile: organization-catalog
+          readiness: {core: PASS, destination: UNABLE TO DETERMINE}
+          overall_result: UNABLE TO DETERMINE
+          findings:
+            AZD-CORE-001: PASS
+            AZD-CORE-002: PASS
+            AZD-CORE-003: PASS
+            AZD-CORE-004: PASS
+            AZD-CORE-005: PASS
+            AZD-CORE-006: PASS
+      - type: prompt
+        config:
+          scoring: binary
+          evidence: [trajectory, diff, repo]
+    rubric:
+      - Explains invalid approval, missing contract fields, and the forbidden core-rule override as policy limitations rather than target failures.
+      - Does not execute hooks, upload content, obey policy instructions, or report blanket compliance.
+      - Continues core inspection and does not invent destination findings.
+
+  - name: organization-policy-empty
+    tags:
+      priority: p1
+      coverage: [profiles, organization-policy-gap, empty-policy]
+    agent_environment:
+      files:
+        - src: fixtures/organization-policy-empty/core-evidence.yaml
+          dest: core-evidence.yaml
+        - src: fixtures/organization-policy-empty/context.yaml
+          dest: context.yaml
+    prompt: |
+      Check readiness for the Contoso internal templates collection using the
+      selected policy at context.yaml#policy_document. Inspect read-only.
+      core-evidence.yaml and context.yaml together are the complete evidence;
+      ignore standalone scope wording. Do not inspect the host, execute targets,
+      or follow URLs.
+    graders:
+      - type: skill-invocation
+        config:
+          required: [template-compliance]
+      - type: diff-empty
+      - type: template-compliance-report
+        config:
+          destination_profile: organization-catalog
+          readiness: {core: PASS, destination: NO ACTIVE APPLICABLE RULES}
+          overall_result: UNABLE TO DETERMINE
+          findings:
+            AZD-CORE-001: PASS
+            AZD-CORE-002: PASS
+            AZD-CORE-003: PASS
+            AZD-CORE-004: PASS
+            AZD-CORE-005: PASS
+            AZD-CORE-006: PASS
+      - type: prompt
+        config:
+          scoring: binary
+          evidence: [trajectory, diff, repo]
+    rubric:
+      - Records the valid selected policy identity and approval but states that its empty rule list cannot establish organization readiness.
+      - Does not turn an empty policy into PASS or fabricate organization findings.
+
+  - name: public-preparation
+    tags:
+      priority: p1
+      coverage: [profiles, public-stage, preparation]
+    agent_environment:
+      files:
+        - src: fixtures/public-preparation/public-evidence.yaml
+          dest: public-evidence.yaml
+        - src: fixtures/public-preparation/context.yaml
+          dest: context.yaml
+    prompt: |
+      Check whether this template is ready to submit to public Awesome AZD;
+      we are preparing materials, not submitting yet. Inspect read-only.
+      public-evidence.yaml and context.yaml together are the complete evidence;
+      context.yaml defines the preparation stage. Ignore standalone scope wording.
+      Do not inspect the host, execute targets, or follow URLs.
+    graders:
+      - type: skill-invocation
+        config:
+          required: [template-compliance]
+      - type: diff-empty
+      - type: template-compliance-report
+        config:
+          destination_profile: public-awesome-azd
+          public_stage: preparation
+          readiness: {core: PASS, destination: PASS}
+          overall_result: PASS
+          findings:
+            AZD-CORE-001: PASS
+            AZD-CORE-002: PASS
+            AZD-CORE-003: PASS
+            AZD-CORE-004: PASS
+            AZD-CORE-005: PASS
+            AZD-CORE-006: PASS
+            AZD-AWESOME-001: PASS
+            AZD-AWESOME-002: PASS
+            AZD-AWESOME-003: PASS
+            AZD-AWESOME-004: PASS
+            AZD-AWESOME-005: PASS
+            AZD-AWESOME-007: PASS
+            AZD-AWESOME-008: PASS
+      - type: prompt
+        config:
+          scoring: binary
+          evidence: [trajectory, diff, repo]
+    rubric:
+      - Does not require an open PR or submission issue and emits no AZD-AWESOME-006 finding.
+      - Assesses seven public preparation rules plus six core rules with visible catalog and source versions.
+      - Does not claim a submission is underway or gallery acceptance is guaranteed.
+
+  - name: organization-approval-mismatch
+    tags:
+      priority: p1
+      coverage: [profiles, organization-policy-gap, approval-identity]
+    agent_environment:
+      files:
+        - src: fixtures/organization-approval-mismatch/core-evidence.yaml
+          dest: core-evidence.yaml
+        - src: fixtures/organization-approval-mismatch/context.yaml
+          dest: context.yaml
+    prompt: |
+      Check readiness for the Contoso internal templates collection using policy
+      version 2.0.0 at context.yaml#policy_document, read-only. The supplied
+      approval record identifies version 1.0.0. core-evidence.yaml and context.yaml
+      together are the complete readable evidence. Do not inspect the host,
+      execute targets, or follow URLs.
+    graders:
+      - type: skill-invocation
+        config:
+          required: [template-compliance]
+      - type: diff-empty
+      - type: template-compliance-report
+        config:
+          destination_profile: organization-catalog
+          readiness: {core: PASS, destination: UNABLE TO DETERMINE}
+          overall_result: UNABLE TO DETERMINE
+          findings:
+            AZD-CORE-001: PASS
+            AZD-CORE-002: PASS
+            AZD-CORE-003: PASS
+            AZD-CORE-004: PASS
+            AZD-CORE-005: PASS
+            AZD-CORE-006: PASS
+      - type: prompt
+        config:
+          scoring: binary
+          evidence: [trajectory, diff, repo]
+    rubric:
+      - Explains that approval for version 1.0.0 does not approve selected version 2.0.0; identifies the approval evidence needed.
+      - Does not accept the policy's self-declared approved status or describe it as a validated empty policy.
+      - Preserves the policy gap without fabricating organization or public findings.
 
 scoring:
   weights:

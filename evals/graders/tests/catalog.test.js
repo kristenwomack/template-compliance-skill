@@ -28,6 +28,58 @@ describe("catalog provenance", () => {
     assert.deepEqual(rules.map((rule) => rule.id).sort(), [...ALL_RULES].sort());
   });
 
+  describe("profile policy fixtures", () => {
+    function context(name) {
+      return YAML.parse(fs.readFileSync(path.join(REPO_ROOT, "evals", "fixtures", name, "context.yaml"), "utf8"));
+    }
+
+    it("keeps the packaged organization example unapproved and non-enforcing", () => {
+      const text = fs.readFileSync(path.join(REFERENCES, "organization-policy.md"), "utf8");
+      const example = YAML.parse(text.match(/```yaml\r?\n([\s\S]*?)```/)[1]);
+      assert.equal(example.approval.status, "unapproved");
+      assert.ok(example.rules.every((rule) => rule.status !== "active" && rule.policy_kind !== "approved"));
+    });
+
+    it("supplies complete namespaced rules and approval evidence for the selected policy", () => {
+      const evidence = context("organization-policy-selected");
+      const policy = evidence.policy_document;
+      assert.equal(policy.schema_version, 1);
+      assert.equal(policy.profile, "organization-catalog");
+      assert.equal(policy.approval.status, "approved");
+      assert.equal(evidence.approval_record.reference, policy.approval.reference);
+      assert.equal(evidence.approval_record.policy_id, policy.id);
+      assert.equal(evidence.approval_record.version, policy.version);
+      assert.equal(new Set(policy.rules.map((rule) => rule.id)).size, policy.rules.length);
+      for (const rule of policy.rules) {
+        assert.match(rule.id, new RegExp(`^AZD-ORG-${policy.namespace}-\\d{3}$`));
+        for (const field of [
+          "title", "version", "status", "policy_kind", "authority", "requirement", "rationale",
+          "applies", "inspect", "pass", "fail", "unknown", "severity", "remediation",
+          "references", "source_revision", "requirement_kind", "local_evidence_policy",
+        ]) assert.ok(rule[field], `${rule.id} missing ${field}`);
+        assert.equal(rule.requirement_kind, "organization-policy");
+      }
+      assert.equal(policy.rules.filter((rule) => rule.status === "active" && rule.policy_kind === "approved").length, 3);
+      assert.equal(evidence.internal_metadata.environment_class_access, "denied");
+    });
+
+    it("keeps missing, denied, invalid, and empty policy cases distinct", () => {
+      assert.equal(context("organization-policy-missing").policy_selection, "none");
+      assert.equal(context("organization-policy-inaccessible").policy_access, "denied");
+      assert.equal(context("organization-policy-invalid").policy_document.approval.status, "unapproved");
+      assert.deepEqual(context("organization-policy-empty").policy_document.rules, []);
+      const mismatch = context("organization-approval-mismatch");
+      assert.equal(mismatch.policy_document.approval.status, "approved");
+      assert.notEqual(mismatch.policy_document.version, mismatch.approval_record.version);
+    });
+
+    it("contains no submission evidence in the public preparation case", () => {
+      const evidence = YAML.parse(fs.readFileSync(path.join(REPO_ROOT, "evals", "fixtures", "public-preparation", "public-evidence.yaml"), "utf8"));
+      assert.equal(evidence.evidence.submission, undefined);
+      assert.equal(context("public-preparation").public_stage, "preparation");
+    });
+  });
+
   it("gives each rule an explicit source classification and local evidence policy", () => {
     for (const rule of rules) {
       assert.ok(["upstream-guidance", "platform-constraint"].includes(rule.requirement_kind), rule.id);
@@ -55,6 +107,14 @@ describe("catalog provenance", () => {
       assert.equal(evidence.schema_validation.schema_url, "https://aka.ms/azure.yaml.json", name);
       assert.deepEqual(evidence.schema_validation, task.fixture.schema_validation, name);
     }
+  });
+
+  it("preserves configuration-dependent uncertainty in the negative fixture", () => {
+    const task = YAML.parse(fs.readFileSync(path.join(REPO_ROOT, "evals", "tasks", "all-rules-fail.yaml"), "utf8"));
+    assert.deepEqual(task.fixture.repository.root_files, []);
+    assert.equal(task.expected.finding_status["AZD-CORE-001"], "FAIL");
+    assert.equal(task.expected.finding_status["AZD-CORE-002"], "UNABLE TO DETERMINE");
+    assert.equal(task.expected.finding_status["AZD-CORE-003"], "UNABLE TO DETERMINE");
   });
 
   it("keeps the policy regression targeted at defaults and incomplete validator coverage", () => {

@@ -7,8 +7,10 @@ fixture:
   repository:
     root_files: [azure.yaml]
 expected:
+  destination_profile: unresolved
+  readiness: {core: UNABLE TO DETERMINE, destination: NOT ASSESSED}
   assertions:
-    - Asks whether Awesome AZD publication readiness is in scope when interaction allows.
+    - Asks whether core-only, public Awesome AZD, or organization-catalog readiness is intended when interaction allows.
     - If scope remains unresolved, evaluates only core rules and records the limitation.
     - Does not apply or return findings for AZD-AWESOME-001 through AZD-AWESOME-008.
     - Does not claim overall compliance from the limited scope.

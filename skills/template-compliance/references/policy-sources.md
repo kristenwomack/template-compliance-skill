@@ -1,6 +1,6 @@
 # Policy sources and interpretation
 
-Catalog identity: `template-compliance@2`.
+Catalog identity: `template-compliance@3`.
 
 ## Versioned guidance baseline
 
@@ -10,6 +10,11 @@ reviewed on 2026-10-05. Each rule links directly to a document and section at th
 revision. Upstream changes do not automatically change this catalog: review the
 diff, resolve applicability and conflicts, update rule versions and fixtures, and
 release a new catalog version.
+
+The upstream collection requirements apply only to `public-awesome-azd`.
+Organization readiness uses a separately selected policy with its own owner and
+version under [organization-policy.md](organization-policy.md); the public
+guidance baseline does not impose internal governance requirements.
 
 The catalog remains locally maintained. A PASS means the inspected evidence
 satisfies this catalog, not that azd or Awesome AZD maintainers have certified,
@@ -37,6 +42,10 @@ These are testing decisions owned by this catalog, not additional upstream manda
 - Map readable scenario documentation to tracked resource declarations when
   establishing infrastructure fit. Resolve omitted `infra.path` to azd's default
   `infra` directory relative to the template root; omission is not a defect.
+- Require documented component paths and a scenario-describing repository
+  description with at least one matching technology topic to make the source's
+  broader usability/discoverability guidance deterministic. These are local
+  evidence criteria, not verbatim upstream requirements.
 - Require reviewable validator output identifying the actual schema and target.
   Record the schema retrieval time and version or digest when supplied; do not
   invent one. A documentation URL alone does not identify a machine schema.
@@ -61,7 +70,7 @@ without asserting guaranteed gallery acceptance.
 
 ## Guidance without enforcement
 
-Keep upstream SHOULD and MAY guidance separate from compliance findings and
+Keep profile-applicable SHOULD and MAY guidance separate from compliance findings and
 summary counts. Cite its source and condition, and label it **Recommended** or
 **Optional**. Do not assign a rule status or change the overall result for it.
 

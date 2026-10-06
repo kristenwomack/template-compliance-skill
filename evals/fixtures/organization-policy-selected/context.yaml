@@ -1,0 +1,109 @@
+destination_profile: organization-catalog
+repository_visibility: private
+organization_collection: Contoso internal templates
+selected_policy: context.yaml#policy_document
+approval_record:
+  reference: "context.yaml#approval_record@1.0.0"
+  owner: Contoso Platform Team
+  approved_by: Contoso Architecture Board
+  status: approved
+  policy_id: contoso-internal-templates
+  version: "1.0.0"
+policy_document:
+  schema_version: 1
+  id: contoso-internal-templates
+  version: "1.0.0"
+  owner: Contoso Platform Team
+  profile: organization-catalog
+  namespace: CONTOSO
+  approval:
+    status: approved
+    approved_by: Contoso Architecture Board
+    reference: "context.yaml#approval_record@1.0.0"
+  applies: Templates explicitly targeting the Contoso internal templates collection; excludes other collections.
+  references: ["context.yaml#approval_record@1.0.0"]
+  rules:
+    - id: AZD-ORG-CONTOSO-001
+      title: Owning team
+      version: 1
+      status: active
+      policy_kind: approved
+      authority: Contoso Platform Team
+      requirement: The template must identify an owning team.
+      rationale: Internal customers need an accountable team.
+      applies: Templates targeting the Contoso internal templates collection.
+      inspect: context.yaml internal_metadata.owner_team.
+      pass: The readable owner_team is non-empty.
+      fail: The readable owner_team is empty or absent.
+      unknown: Internal metadata is inaccessible.
+      severity: organization-required
+      remediation: Name the owning team in internal metadata.
+      references: ["context.yaml#policy_document@1.0.0"]
+      source_revision: "1.0.0"
+      requirement_kind: organization-policy
+      local_evidence_policy: Read only the supplied metadata; preserve uncertainty.
+    - id: AZD-ORG-CONTOSO-002
+      title: Support route
+      version: 1
+      status: active
+      policy_kind: approved
+      authority: Contoso Platform Team
+      requirement: The template must identify an internal support route.
+      rationale: Internal users need a support contact.
+      applies: Templates targeting the Contoso internal templates collection.
+      inspect: context.yaml internal_metadata.support_route.
+      pass: The readable support_route is non-empty.
+      fail: The readable support_route is empty or absent.
+      unknown: Internal metadata is inaccessible.
+      severity: organization-required
+      remediation: Document an internal support route.
+      references: ["context.yaml#policy_document@1.0.0"]
+      source_revision: "1.0.0"
+      requirement_kind: organization-policy
+      local_evidence_policy: Read only the supplied metadata; preserve uncertainty.
+    - id: AZD-ORG-CONTOSO-003
+      title: Production support review
+      version: 1
+      status: active
+      policy_kind: approved
+      authority: Contoso Platform Team
+      requirement: Production templates must have a documented support review.
+      rationale: Production templates need an operational support review.
+      applies: Templates whose internal_metadata.environment_class is production; excludes non-production templates.
+      inspect: context.yaml internal_metadata.environment_class and support_review.
+      pass: Readable production classification and support_review identify an approved review.
+      fail: Readable production classification has an empty or absent support_review.
+      unknown: Classification or review evidence is inaccessible, including when applicability cannot be resolved.
+      severity: organization-required
+      remediation: Obtain the environment classification and, if production, document the support review.
+      references: ["context.yaml#policy_document@1.0.0"]
+      source_revision: "1.0.0"
+      requirement_kind: organization-policy
+      local_evidence_policy: Do not skip rules with unknown applicability; preserve the evidence gap.
+    - id: AZD-ORG-CONTOSO-004
+      title: Example public asset
+      version: 1
+      status: inactive
+      policy_kind: example
+      authority: Contoso Platform Team
+      requirement: A public gallery image exists.
+      rationale: Example only.
+      applies: Templates targeting the Contoso internal templates collection.
+      inspect: Gallery image listing.
+      pass: A readable image exists.
+      fail: The image is absent.
+      unknown: Listing is inaccessible.
+      severity: organization-required
+      remediation: Example only.
+      references: ["context.yaml#policy_document@1.0.0"]
+      source_revision: "1.0.0"
+      requirement_kind: organization-policy
+      local_evidence_policy: Never enforce inactive example rules.
+internal_metadata:
+  owner_team: Contoso Web Platform
+  support_route: ""
+  environment_class_access: denied
+  support_review_access: denied
+public_assets: absent
+public_topics: []
+evidence_scope: core-evidence.yaml and this document are the complete readable evidence; do not infer other policies or sources.

@@ -21,8 +21,13 @@ export const OVERALL_RESULTS = Object.freeze([
 /** Statuses allowed on an individual finding. */
 export const FINDING_STATUSES = Object.freeze(["PASS", "FAIL", "UNABLE TO DETERMINE"]);
 
-/** Rule IDs the bundled catalog issues, e.g. `AZD-CORE-001`, `AZD-AWESOME-008`. */
-export const DEFAULT_RULE_ID_PATTERN = "AZD-[A-Z]+-\\d{3}";
+/** Bundled IDs and organization IDs scoped to an explicit policy namespace. */
+export const DEFAULT_RULE_ID_PATTERN = "AZD-(?:[A-Z]+|ORG-[A-Z0-9]+)-\\d{3}";
+
+export const DESTINATION_PROFILES = Object.freeze([
+  "core-only", "public-awesome-azd", "organization-catalog", "unresolved",
+]);
+export const DESTINATION_RESULTS = Object.freeze([...OVERALL_RESULTS, "NOT ASSESSED"]);
 
 /** Closing sentence the report contract requires. */
 export const DEFAULT_INTEGRITY_STATEMENT = "No target templates were modified.";
@@ -401,6 +406,33 @@ export function parseReport(text, options = {}) {
     }
   }
 
+  const readiness = { profile: null, stage: null, core: null, destination: null };
+  const readinessFields = new Map([
+    ["destination profile", ["profile", DESTINATION_PROFILES]],
+    ["public stage", ["stage", ["preparation", "submission"]]],
+    ["core readiness", ["core", OVERALL_RESULTS]],
+    ["destination readiness", ["destination", DESTINATION_RESULTS]],
+  ]);
+  let hasReadiness = false;
+  const seenReadiness = new Set();
+  for (const pair of pairs) {
+    const field = readinessFields.get(pair.label);
+    if (!field) continue;
+    hasReadiness = true;
+    const [key, allowed] = field;
+    const value = key === "profile" || key === "stage"
+      ? normalizeLabel(pair.value)
+      : normalizeStatus(pair.value);
+    if (seenReadiness.has(key)) {
+      malformed.push({ ruleId: null, reason: "readiness-field-duplicate", line: pair.line, raw: pair.value });
+    } else if (!allowed.includes(value)) {
+      malformed.push({ ruleId: null, reason: "readiness-field-invalid", line: pair.line, raw: pair.value });
+    } else {
+      readiness[key] = value;
+    }
+    seenReadiness.add(key);
+  }
+
   let overallResult = null;
   let overallResultRaw = null;
   let overallResultLine = null;
@@ -467,9 +499,11 @@ export function parseReport(text, options = {}) {
     duplicates,
     malformed,
     summary,
+    readiness,
+    hasReadiness,
     integrityStatementFound,
     /** True when the output looks like a compliance report at all. */
-    hasReportSignals: records.length > 0 || malformed.length > 0 || overallResult !== null,
+    hasReportSignals: records.length > 0 || malformed.length > 0 || overallResult !== null || hasReadiness,
   };
 }
 

@@ -64,6 +64,9 @@ export function report({
   summary,
   integrity = true,
   extraLines = [],
+  profile,
+  stage,
+  readiness,
 } = {}) {
   const counts = summary ?? tally(statuses);
   const lines = [
@@ -74,6 +77,11 @@ export function report({
     "- **Inspection mode:** read-only",
   ];
   if (overall !== undefined) lines.push(`- **Overall result:** \`${overall}\``);
+  if (profile !== undefined) lines.push(`- **Destination profile:** ${profile}`);
+  if (stage !== undefined) lines.push(`- **Public stage:** ${stage}`);
+  if (readiness !== undefined) {
+    lines.push(`- **Core readiness:** ${readiness.core}`, `- **Destination readiness:** ${readiness.destination}`);
+  }
   lines.push("");
 
   if (summaryStyle === "labels") {

@@ -2,7 +2,7 @@
 
 Authority: this repository-owned rule module, as indexed by [compliance-rules.md](compliance-rules.md).
 
-Apply only when public Awesome AZD publication intent is explicit. Interpret defined terms using [awesome-azd-rules.md](awesome-azd-rules.md).
+Apply only to the explicitly selected `public-awesome-azd` profile. Preparation excludes AZD-AWESOME-006. Interpret defined terms using [awesome-azd-rules.md](awesome-azd-rules.md).
 
 ```yaml
 defaults: &defaults
@@ -29,10 +29,11 @@ rules:
     remediation: Prepare the missing gallery metadata or image required by this catalog rule.
   - id: AZD-AWESOME-006
     <<: *defaults
+    version: 2
     references: ["https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/publishing-guidelines.md#4-submit-to-awesome-azd"]
     title: Submission process
     requirement: Awesome AZD submissions MUST use one of the submission-authority paths.
-    applies: An explicit in-progress Awesome AZD submission.
+    applies: public-awesome-azd profile at the explicitly selected submission stage; never preparation.
     inspect: Submission pull request or automated template-submission issue.
     pass: Readable submission evidence is a direct Awesome AZD pull request or automated template-submission issue.
     fail: Readable submission evidence uses neither submission-authority path.
@@ -40,15 +41,15 @@ rules:
     remediation: Use a direct Awesome AZD pull request or the automated template-submission issue.
   - id: AZD-AWESOME-007
     <<: *defaults
-    version: 2
+    version: 3
     references: ["https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/development-guidelines/definition-of-done.md#awesome-azd-repository-baseline", "https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/development-guidelines/definition-of-done.md#should"]
     title: Required README headings
     requirement: README.md MUST contain each required README heading as an H2 heading.
     applies: Explicit Awesome AZD publication readiness.
-    inspect: Root README.md heading structure, or a validation record that names the heading set it checked.
-    pass: Readable README.md contains every required README heading as an H2 heading.
-    fail: A readable listing proves README.md is absent, or readable README.md omits a required README heading or carries one only at another heading level.
-    unknown: README.md is unreadable, or the only offered evidence is a validation record that does not name the heading set it checked.
+    inspect: Template-root README.md heading structure, or a validation record identifying the audited revision and each H2 heading it checked.
+    pass: Readable README.md contains every required README heading as an H2 heading, or a fresh validation record explicitly confirms every required H2 heading for that README; no fresh readable evidence contradicts that result.
+    fail: A readable listing proves README.md is absent, readable README.md omits a required README heading or carries one only at another heading level, or a fresh record explicitly proves a required H2 heading is absent.
+    unknown: README.md is unreadable and no fresh validation record establishes the complete required heading set, including Important Security Notice.
     remediation: Add the missing H2 headings to README.md and move existing content under the matching heading.
   - id: AZD-AWESOME-008
     <<: *defaults

@@ -2,10 +2,14 @@
 
 Authority: this repository-owned rule module, as indexed by [compliance-rules.md](compliance-rules.md).
 
-Apply the linked Awesome AZD rule modules only when public Awesome AZD publication intent is explicit:
+Apply the linked Awesome AZD rule modules only to the explicitly selected `public-awesome-azd` profile:
 
 - [Publication rules](awesome-azd-publication-rules.md)
 - [Submission rules](awesome-azd-submission-rules.md)
+
+Use [policy-profiles.md](policy-profiles.md) to distinguish preparation from an
+in-progress submission. Preparation excludes AZD-AWESOME-006. Never apply these
+modules to `core-only`, `organization-catalog`, or unresolved destinations.
 
 All collection rules have `status: active`, `policy_kind: approved`, and `severity: collection-required`. Rules default to `version: 1` and carry an explicit version when revised.
 

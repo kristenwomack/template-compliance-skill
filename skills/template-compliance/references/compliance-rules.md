@@ -1,11 +1,13 @@
 # Compliance Rule Catalog
 
-This repository-owned index and its linked modules are the skill's only compliance authority. Enforce only entries with `status: active` and `policy_kind: approved`. Catalog maintainers own, review, and version these deterministic requirements in this repository.
+This repository-owned index and its linked modules define the skill's compliance authority and its organization-policy extension boundary. Enforce only selected entries with `status: active` and `policy_kind: approved`. Catalog maintainers own, review, and version bundled requirements; organization owners approve explicitly selected internal policies.
 
-Catalog identity: `template-compliance@2`. See [policy sources and interpretation](policy-sources.md) for the pinned upstream revision, source-to-rule mapping, local evidence safeguards, and conflict decisions. Upstream requirements inform this catalog; catalog approval is not official azd certification or collection acceptance.
+Catalog identity: `template-compliance@3`. See [policy sources and interpretation](policy-sources.md) for the pinned upstream revision, source-to-rule mapping, local evidence safeguards, and conflict decisions. Upstream requirements inform this catalog; catalog approval is not official azd certification or collection acceptance.
 
 ## Active modules
 
+- [Policy profiles](policy-profiles.md) — core, public preparation/submission, and organization selection.
+- [Organization policy contract](organization-policy.md) — explicit approved internal-policy extension.
 - [Core azd rules](core-azd-rules.md) — apply to an `azd` template.
 - [Awesome AZD evaluation terms](awesome-azd-rules.md) — shared definitions for collection rules.
 - [Awesome AZD publication rules](awesome-azd-publication-rules.md) — repository publication requirements.
@@ -22,7 +24,7 @@ Catalog modules mirror the requirement layers of the guidance they encode:
 - **SHOULD** — recommended default; never a compliance failure.
 - **MAY** — optional enhancement; never a compliance failure.
 
-Optional repository assets are outside this catalog and must not be reported as failures unless an active rule names them. These include dev container and GitHub Codespaces configuration, checked-in CI/CD pipeline definitions such as an `azure-dev` workflow, end-to-end test suites, and screenshots, demo videos, or architecture diagrams.
+Optional repository assets must not be reported as failures unless a selected active approved rule names them. These include dev container and GitHub Codespaces configuration, checked-in CI/CD pipeline definitions such as an `azure-dev` workflow, end-to-end test suites, and screenshots, demo videos, or architecture diagrams.
 
 ## Extensible rule schema
 
@@ -46,8 +48,8 @@ Each rule must define:
 | `severity` | yes | Catalog-defined impact label. |
 | `remediation` | yes | Proposed corrective action; never auto-apply. |
 | `references` | yes | Policy citations or an empty list. |
-| `source_revision` | yes | Pinned upstream revision, or an explicit live platform-reference designation. |
-| `requirement_kind` | yes | `upstream-guidance` or `platform-constraint`; not a validator default. |
+| `source_revision` | yes | Pinned upstream revision, organization source release, or an explicit live platform-reference designation. |
+| `requirement_kind` | yes | `upstream-guidance`, `platform-constraint`, or `organization-policy`; not a validator default. |
 | `local_evidence_policy` | yes | Locally chosen evidence safeguards, explicitly distinguished from upstream requirements. |
 | `metadata` | no | Extensible owner, tags, dates, or notes map. |
 
@@ -56,6 +58,9 @@ Rules may add fields, but additions cannot weaken authority, evidence, uncertain
 ## Interpretation
 
 - Evaluate each rule-target pair independently.
+- Unknown applicability of an active approved rule is an UNABLE TO DETERMINE finding, not silent exclusion. Exclude a conditional rule only when readable evidence establishes non-applicability.
+- Scope bundled `AZD-CORE-*` to all profiles, bundled `AZD-AWESOME-*` only to public readiness, and `AZD-ORG-<namespace>-NNN` only to a validated selected organization policy. Organization rules cannot override bundled rules. Resolve profile and public stage before selecting rules.
+- Missing or invalid organization policy is a destination-layer evidence gap, not a new finding. Do not declare organization readiness from core results alone.
 - A missing readable artifact may be a deterministic failure only when the rule says the artifact must exist.
 - Missing historical, execution, repository-setting, or external evidence is `UNABLE TO DETERMINE`, not `FAIL`, unless readable evidence directly contradicts the rule.
 - Scenario fit requires the documentation, configuration, resource declarations, and tracked-file state defined by the applicable rule. If any named evidence is absent or unreadable, return `UNABLE TO DETERMINE`.

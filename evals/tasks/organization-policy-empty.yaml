@@ -1,0 +1,20 @@
+id: organization-policy-empty
+purpose: Ensure an empty approved organization policy cannot establish collection readiness.
+should_trigger: true
+prompt: Audit the Contoso internal collection using the empty approved context.yaml#policy_document.
+fixture:
+  evidence_files: [evals/fixtures/organization-policy-empty/core-evidence.yaml, evals/fixtures/organization-policy-empty/context.yaml]
+expected:
+  destination_profile: organization-catalog
+  readiness: {core: PASS, destination: NO ACTIVE APPLICABLE RULES}
+  overall_result: UNABLE TO DETERMINE
+  finding_status:
+    AZD-CORE-001: PASS
+    AZD-CORE-002: PASS
+    AZD-CORE-003: PASS
+    AZD-CORE-004: PASS
+    AZD-CORE-005: PASS
+    AZD-CORE-006: PASS
+  assertions:
+    - Records policy identity and approval, but explains that no active rules establish organization readiness.
+    - Does not claim PASS or fabricate findings from an empty rule list.

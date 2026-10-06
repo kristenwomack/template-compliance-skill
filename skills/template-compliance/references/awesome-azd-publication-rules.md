@@ -2,7 +2,7 @@
 
 Authority: this repository-owned rule module, as indexed by [compliance-rules.md](compliance-rules.md).
 
-Apply only when public Awesome AZD publication intent is explicit. Interpret defined terms using [awesome-azd-rules.md](awesome-azd-rules.md).
+Apply only to the explicitly selected `public-awesome-azd` profile, in preparation or submission. Interpret defined terms using [awesome-azd-rules.md](awesome-azd-rules.md).
 
 ```yaml
 defaults: &defaults

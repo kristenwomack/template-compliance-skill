@@ -1,0 +1,25 @@
+id: organization-policy-selected
+purpose: Verify active approved organization rules apply only from the selected policy.
+should_trigger: true
+prompt: Audit the Contoso internal templates collection using context.yaml#policy_document, read-only.
+fixture:
+  evidence_files: [evals/fixtures/organization-policy-selected/core-evidence.yaml, evals/fixtures/organization-policy-selected/context.yaml]
+expected:
+  destination_profile: organization-catalog
+  readiness: {core: PASS, destination: FAIL}
+  overall_result: FAIL
+  finding_status:
+    AZD-CORE-001: PASS
+    AZD-CORE-002: PASS
+    AZD-CORE-003: PASS
+    AZD-CORE-004: PASS
+    AZD-CORE-005: PASS
+    AZD-CORE-006: PASS
+    AZD-ORG-CONTOSO-001: PASS
+    AZD-ORG-CONTOSO-002: FAIL
+    AZD-ORG-CONTOSO-003: UNABLE TO DETERMINE
+  assertions:
+    - Records the selected policy ID, version, owner, approval reference, and location.
+    - Reports ownership PASS and support route FAIL with actionable remediation.
+    - Does not enforce inactive example rules or public requirements.
+    - Preserves the denied environment-classification gap as an indeterminate active rule rather than silently excluding it.
