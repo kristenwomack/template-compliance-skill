@@ -4,10 +4,12 @@
   "private": true,
   "description": "Vally evaluation suite for the template-compliance skill.",
   "scripts": {
-    "test": "node --test \"evals/graders/tests/*.test.js\" \"skills/template-compliance/scripts/*.test.mjs\"",
+    "test": "node --test \"evals/graders/tests/*.test.js\"",
+    "catalog:generate": "node tools/generate-catalog.mjs",
+    "catalog:check": "node tools/generate-catalog.mjs --check",
     "parity": "node evals/parity/check-legacy-parity.js",
     "lint": "vally lint skills --eval-spec evals/eval.yaml --strict --grader-plugin ./graders/template-compliance-report.js",
-    "check": "npm run test && npm run parity && npm run lint",
+    "check": "npm run catalog:check && npm run test && npm run parity && npm run lint",
     "eval:ci": "vally eval --suite ci-gate --require-pass --junit --grader-plugin ./evals/graders/template-compliance-report.js",
     "eval:full": "vally eval --suite full --require-pass --junit --grader-plugin ./evals/graders/template-compliance-report.js"
   },

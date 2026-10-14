@@ -2,14 +2,9 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-export const REQUIRED_HEADINGS = [
-  "Important Security Notice", "Features", "Getting Started", "Guidance", "Resources",
-];
-export const GOVERNANCE_FILES = [
-  "LICENSE.md", "SECURITY.md", "CONTRIBUTING.md", ".github/CODE_OF_CONDUCT.md",
-];
-const CORE = Array.from({ length: 6 }, (_, i) => `AZD-CORE-00${i + 1}`);
-const PUBLIC = Array.from({ length: 8 }, (_, i) => `AZD-AWESOME-00${i + 1}`);
+const CATALOG = JSON.parse(await fs.readFile(new URL("../catalog.json", import.meta.url), "utf8"));
+export const REQUIRED_HEADINGS = CATALOG.required_headings;
+export const GOVERNANCE_FILES = CATALOG.governance_files;
 const PROFILES = ["core-only", "public-awesome-azd", "organization-catalog", "unresolved"];
 
 function contained(root, target) {
@@ -112,7 +107,18 @@ export function readH2(content) {
 function finding(id, layer, evidence, rationale) {
   const status = evidence.some((item) => item.state === "missing") ? "FAIL"
     : evidence.some((item) => item.state === "unknown") ? "UNABLE TO DETERMINE" : "PASS";
-  return { id, layer, status, evidence: evidence.map(({ content, entries, ...item }) => item), rationale };
+  const rule = CATALOG.rules.find((entry) => entry.id === id);
+  return {
+    id, layer, title: rule.title, status,
+    evidence: evidence.map(({ content, entries, ...item }) => item), rationale,
+    policy_basis: {
+      version: rule.version, requirement: rule.requirement, requirement_kind: rule.requirement_kind,
+      source_revision: rule.source_revision, references: rule.references,
+    },
+    ...(status === "FAIL" ? { remediation: rule.remediation } : {}),
+    ...(status === "UNABLE TO DETERMINE" || id === "AZD-AWESOME-007"
+      ? { reconciliation_criteria: { inspect: rule.inspect, pass: rule.pass, fail: rule.fail, unknown: rule.unknown } } : {}),
+  };
 }
 
 export async function checkTemplate({ root, repositoryRoot, profile, stage }) {
@@ -126,11 +132,14 @@ export async function checkTemplate({ root, repositoryRoot, profile, stage }) {
     if (!contained(repositoryRoot, root)) throw new Error("--root must be inside --repository-root.");
   }
   const publicStage = profile === "public-awesome-azd" ? stage ?? "preparation" : undefined;
-  const selected = [...CORE, ...(publicStage ? PUBLIC.filter((id) => publicStage === "submission" || id !== "AZD-AWESOME-006") : [])];
-  const findings = [
-    finding("AZD-CORE-001", "core", [await inspect(root, "azure.yaml")], "azure.yaml must be a readable file at the selected template root."),
-  ];
-  if (publicStage) {
+  const selected = CATALOG.rules.filter((rule) => rule.status === "active" && rule.policy_kind === "approved"
+    && (rule.layer === "core" || (publicStage && rule.stages.includes(publicStage))));
+  const selectedRule = (id) => selected.some((rule) => rule.id === id);
+  const findings = [];
+  if (selectedRule("AZD-CORE-001")) {
+    findings.push(finding("AZD-CORE-001", "core", [await inspect(root, "azure.yaml")], "azure.yaml must be a readable file at the selected template root."));
+  }
+  if (selectedRule("AZD-AWESOME-002")) {
     const governance = repositoryRoot
       ? await Promise.all(GOVERNANCE_FILES.map((name) => inspect(repositoryRoot, name)))
       : [{ path: null, state: "unknown", reason: "Repository root was not explicitly supplied." }];
@@ -148,6 +157,8 @@ export async function checkTemplate({ root, repositoryRoot, profile, stage }) {
       });
     }
     findings.push(finding("AZD-AWESOME-002", "destination", governance, "Repository-scoped governance files and at least one issue template must be present."));
+  }
+  if (selectedRule("AZD-AWESOME-007")) {
     const readme = await inspect(root, "README.md");
     const headings = readme.state === "present" ? readH2(readme.content) : [];
     const unsupportedHtml = readme.state === "present"
@@ -155,20 +166,25 @@ export async function checkTemplate({ root, repositoryRoot, profile, stage }) {
     const evidence = unsupportedHtml
       ? [{ path: readme.path, state: "unknown", reason: "Raw HTML may affect Markdown heading structure; inspect manually." }]
       : readme.state === "present" ? REQUIRED_HEADINGS.map((title) => {
-      const match = headings.find((heading) => heading.title === title);
-      return { path: readme.path, heading: title, state: match ? "present" : "missing", ...(match ? { line: match.line } : { reason: "Required literal H2 heading absent." }) };
-    }) : [readme];
+        const match = headings.find((heading) => heading.title === title);
+        return { path: readme.path, heading: title, state: match ? "present" : "missing", ...(match ? { line: match.line } : { reason: "Required literal H2 heading absent." }) };
+      }) : [readme];
     findings.push(finding("AZD-AWESOME-007", "destination", evidence, "Each required literal H2 heading must occur outside fenced code and HTML comments; raw HTML requires manual inspection."));
   }
   return {
-    format_version: 1,
-    catalog: "template-compliance@4",
+    format_version: 2,
+    catalog: CATALOG.identity,
+    policy_baseline: CATALOG.baseline,
     template_root: root,
     repository_root: repositoryRoot ?? null,
     destination_profile: profile,
     ...(publicStage ? { public_stage: publicStage } : {}),
     findings,
-    remaining_rule_ids: selected.filter((id) => !findings.some((item) => item.id === id)),
+    remaining_rules: selected.filter((rule) => !findings.some((item) => item.id === rule.id))
+      .map(({ id, title, layer, version, requirement, applies, inspect, pass, fail, unknown, remediation, requirement_kind, source_revision, references }) =>
+        ({ id, title, layer, version, requirement, applies, inspect, pass, fail, unknown, remediation, requirement_kind, source_revision, references })),
+    safeguards: [...CATALOG.safeguards.core, ...(publicStage ? CATALOG.safeguards.public : [])],
+    ...(publicStage ? { required_headings: REQUIRED_HEADINGS, required_repository_topics: CATALOG.required_repository_topics } : {}),
     organization_requirements: profile === "organization-catalog" ? "Assess only the user's explicitly selected existing documents." : "Not assessed.",
     limitations: [
       "Partial static checks only; not an overall compliance verdict.",

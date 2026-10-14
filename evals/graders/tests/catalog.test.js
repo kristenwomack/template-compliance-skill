@@ -25,6 +25,16 @@ function loadRules() {
 describe("catalog provenance", () => {
   const rules = loadRules();
 
+  it("generated views preserve the canonical rule objects exactly", () => {
+    const catalog = JSON.parse(fs.readFileSync(path.join(REFERENCES, "..", "catalog.json"), "utf8"));
+    assert.deepEqual(rules, catalog.rules);
+    assert.equal(new Set(catalog.rules.map((rule) => rule.id)).size, 14);
+    for (const rule of catalog.rules) {
+      assert.equal(rule.layer, rule.id.startsWith("AZD-CORE-") ? "core" : "destination");
+      assert.deepEqual(rule.stages, rule.id === "AZD-AWESOME-006" ? ["submission"] : ["preparation", "submission"]);
+    }
+  });
+
   it("preserves all fourteen rule IDs exactly once", () => {
     assert.deepEqual(rules.map((rule) => rule.id).sort(), [...ALL_RULES].sort());
   });
@@ -37,9 +47,38 @@ describe("catalog provenance", () => {
     const root = path.join(REPO_ROOT, "evals", "fixtures", "private-core-only", "project");
     for (const stage of ["preparation", "submission"]) {
       const result = await checkTemplate({ root, profile: "public-awesome-azd", stage });
-      const selected = [...result.findings.map((finding) => finding.id), ...result.remaining_rule_ids].sort();
+      const selected = [...result.findings.map((finding) => finding.id), ...result.remaining_rules.map((rule) => rule.id)].sort();
       const expected = rules.map((rule) => rule.id).filter((id) => stage === "submission" || id !== "AZD-AWESOME-006").sort();
       assert.deepEqual(selected, expected);
+      for (const rule of result.remaining_rules) {
+        const canonical = rules.find((entry) => entry.id === rule.id);
+        for (const [key, value] of Object.entries(rule)) assert.deepEqual(value, canonical[key], `${rule.id}.${key}`);
+      }
+    }
+  });
+
+  it("runtime payload is self-contained and smaller than the previous mandatory reference reads", async () => {
+    const root = path.join(REPO_ROOT, "evals", "fixtures", "private-core-only", "project");
+    for (const profile of ["core-only", "public-awesome-azd"]) {
+      const result = await checkTemplate({ root, profile });
+      assert.equal(result.format_version, 2);
+      assert.equal(result.policy_baseline, REVISION);
+      assert.ok(result.safeguards.some((text) => text.includes("uncommitted")));
+      assert.ok(result.safeguards.some((text) => text.includes("infra.path")));
+      for (const rule of result.remaining_rules) {
+        for (const key of ["id", "title", "layer", "requirement", "applies", "inspect", "pass", "fail", "unknown", "remediation", "requirement_kind", "source_revision", "references"]) {
+          assert.ok(rule[key], `${rule.id} missing ${key}`);
+        }
+      }
+      for (const finding of result.findings) {
+        assert.ok(finding.policy_basis.references.length);
+        assert.ok(finding.policy_basis.requirement);
+        if (finding.status === "FAIL") assert.ok(finding.remediation);
+        if (finding.status === "UNABLE TO DETERMINE" || finding.id === "AZD-AWESOME-007") assert.ok(finding.reconciliation_criteria);
+      }
+      const files = ["core-azd-rules.md", "policy-sources.md", ...(profile === "public-awesome-azd" ? ["awesome-azd-rules.md", ...MODULES.slice(1)] : [])];
+      const bytes = files.reduce((total, name) => total + fs.readFileSync(path.join(REFERENCES, name)).length, 0);
+      assert.ok(Buffer.byteLength(JSON.stringify(result, null, 2)) < bytes, `Payload for ${profile} did not reduce reference bytes`);
     }
   });
 

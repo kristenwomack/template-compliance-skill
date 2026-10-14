@@ -1,6 +1,14 @@
 # Compliance Rule Catalog
 
-This repository-owned index defines the bundled core and public checks. Enforce only bundled entries with `status: active` and `policy_kind: approved`. For internal catalogs, inspect existing requirements explicitly selected by the user; do not require organizations to adopt this catalog's schema.
+The canonical bundled policy is [catalog.json](../catalog.json). This index and
+the generated rule views support human review and manual fallback; the normal
+audit uses the checker's profile-filtered payload instead of loading all modules.
+Enforce only entries with `status: active` and `policy_kind: approved`. For internal
+catalogs, use user-selected existing documents, not this catalog's schema.
+
+Edit bundled rules and module introductions in `catalog.json`, then run
+`npm run catalog:generate` from the repository root. Generated YAML views are not
+independently editable policy. `npm run catalog:check` rejects stale views.
 
 Catalog identity: `template-compliance@4`. See [policy sources and interpretation](policy-sources.md) for the pinned upstream revision, source-to-rule mapping, local evidence safeguards, and conflict decisions. Upstream requirements inform this catalog; catalog approval is not official azd certification or collection acceptance.
 
@@ -55,14 +63,15 @@ Each bundled rule must define (this is a project-local catalog structure, not an
 
 Rules may add fields, but additions cannot weaken authority, evidence, uncertainty, or read-only constraints. Rule order does not imply priority.
 
-## Interpretation
+## Runtime ownership
 
-- Evaluate each rule-target pair independently.
-- Unknown applicability of an active approved rule is an UNABLE TO DETERMINE finding, not silent exclusion. Exclude a conditional rule only when readable evidence establishes non-applicability.
-- Scope bundled `AZD-CORE-*` to all profiles and bundled `AZD-AWESOME-*` only to public readiness. Organization requirements keep their existing source IDs or section headings and cannot override bundled rules. Resolve profile and public stage before selecting requirements.
-- Missing or ambiguous organization requirements are a destination-layer evidence gap, not a new finding. Do not declare organization readiness from core results alone.
-- A missing readable artifact may be a deterministic failure only when the rule says the artifact must exist.
-- Missing historical, execution, repository-setting, or external evidence is `UNABLE TO DETERMINE`, not `FAIL`, unless readable evidence directly contradicts the rule.
-- Scenario fit requires the documentation, configuration, resource declarations, and tracked-file state defined by the applicable rule. If any named evidence is absent or unreadable, return `UNABLE TO DETERMINE`.
-- External validation automation is evidence, not authority. A run establishes only the checks it records, and a failing run whose recorded checks map to no active rule does not establish a failure.
-- Rule modules use short keys (`applies`, `inspect`, `pass`, `fail`, `unknown`) with the same meaning as the corresponding schema fields above.
+Profile/stage selection is defined in [policy-profiles.md](policy-profiles.md);
+organization-source handling in [organization-policy.md](organization-policy.md);
+verdicts and counts in [report-format.md](report-format.md). The catalog supplies
+applicable evidence safeguards with the runtime payload. Source history and
+conflict explanations in [policy-sources.md](policy-sources.md) are on-demand
+documentation, not a required additional read for every audit.
+
+Rule views use short keys (`applies`, `inspect`, `pass`, `fail`, `unknown`) with
+the same meaning as the corresponding schema fields above. `layer` and `stages`
+select core versus public destination rules and preparation versus submission.

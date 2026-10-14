@@ -1,0 +1,466 @@
+{
+  "identity": "template-compliance@4",
+  "baseline": "22de60335bd77269a2e952cd0e3e8fab56ed4aa1",
+  "required_headings": [
+    "Important Security Notice",
+    "Features",
+    "Getting Started",
+    "Guidance",
+    "Resources"
+  ],
+  "governance_files": [
+    "LICENSE.md",
+    "SECURITY.md",
+    "CONTRIBUTING.md",
+    ".github/CODE_OF_CONDUCT.md"
+  ],
+  "required_repository_topics": ["azd-templates", "ai-azd-templates"],
+  "modules": [
+    {
+      "file": "core-azd-rules.md",
+      "introduction": "# Core `azd` Rules\n\nAuthority: this repository-owned rule module, as indexed by [compliance-rules.md](compliance-rules.md).\n\nAll rules below have `status: active`, `policy_kind: approved`, and `severity: required`.\nSource mappings and local interpretation are defined in [policy-sources.md](policy-sources.md).\n\n## Evaluation terms\n\n- **Template root:** the explicitly selected or documented azd working directory, otherwise the repository root. Paths in these rules are relative to that root. An unresolved or ambiguous root is an evidence gap, not proof of a missing file.\n- **Applicable azd schema:** the machine-readable schema linked by the [platform reference](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/azd-schema), `https://aka.ms/azure.yaml.json`. Record the schema URL (and resolved URL when available), retrieval time, and version or digest when supplied. The Learn page is documentation, not the schema. If the schema cannot be read and no readable validation record identifies it, schema conformance is `UNABLE TO DETERMINE`.\n- **Audited commit:** the target repository commit named in the report. As a local evidence safeguard, execution evidence is fresh only when it identifies that commit. Evidence for another commit or before relevant uncommitted changes does not establish the changed target's result.\n- **Scenario-fit evidence:** readable scenario documentation names the provisioned resource types, the infrastructure path is resolved from `azure.yaml` or its default `infra`, and tracked files under that path declare those resource types. An explicit `infra.path` is not required. Framework-specific equivalents are acceptable. Mapping named types to tracked declarations is a local evidence safeguard; it is not upstream wording. If required evidence cannot be read, infrastructure fit is `UNABLE TO DETERMINE`.\n- When fresh records disagree, a recorded failure takes precedence over a success. When a required file, external record, or authority cannot be read, use the rule's `unknown` outcome; do not infer its contents.",
+      "rule_ids": [
+        "AZD-CORE-001",
+        "AZD-CORE-002",
+        "AZD-CORE-003",
+        "AZD-CORE-004",
+        "AZD-CORE-005",
+        "AZD-CORE-006"
+      ]
+    },
+    {
+      "file": "awesome-azd-publication-rules.md",
+      "introduction": "# Awesome AZD Publication Rules\n\nAuthority: this repository-owned rule module, as indexed by [compliance-rules.md](compliance-rules.md).\n\nApply only to the explicitly selected `public-awesome-azd` profile, in preparation or submission. Interpret defined terms using [awesome-azd-rules.md](awesome-azd-rules.md).",
+      "rule_ids": [
+        "AZD-AWESOME-001",
+        "AZD-AWESOME-002",
+        "AZD-AWESOME-003",
+        "AZD-AWESOME-004"
+      ]
+    },
+    {
+      "file": "awesome-azd-submission-rules.md",
+      "introduction": "# Awesome AZD Submission Rules\n\nAuthority: this repository-owned rule module, as indexed by [compliance-rules.md](compliance-rules.md).\n\nApply only to the explicitly selected `public-awesome-azd` profile. Preparation excludes AZD-AWESOME-006. Interpret defined terms using [awesome-azd-rules.md](awesome-azd-rules.md).",
+      "rule_ids": [
+        "AZD-AWESOME-005",
+        "AZD-AWESOME-006",
+        "AZD-AWESOME-007",
+        "AZD-AWESOME-008"
+      ]
+    }
+  ],
+  "safeguards": {
+    "core": [
+      "Template root is the selected or documented working directory, not necessarily repository root. Unresolved roots are evidence gaps.",
+      "The applicable machine schema is https://aka.ms/azure.yaml.json, not the Learn page. Record resolved URL, retrieval time, and supplied version or digest; absence of readable validation tied to schema and target is uncertainty.",
+      "Tie execution and validation records to the audited commit. Relevant uncommitted changes invalidate historical success. A relevant fresh failure takes precedence over success; unrelated failed checks do not establish catalog failure.",
+      "Resolve omitted infra.path to infra relative to template root. Scenario-fit requires named provisioned types mapped to tracked declarations; framework-specific equivalents are acceptable. This mapping and documented component-path checks are local evidence safeguards, not verbatim upstream mandates.",
+      "Unknown applicability remains an UNABLE TO DETERMINE finding. Missing external evidence is uncertainty, not a failure. These safeguards cannot be represented as upstream rejection."
+    ],
+    "public": [
+      "Public README paths are template-root scoped; governance and GitHub metadata are repository scoped.",
+      "Apply the pinned LICENSE.md, .github/CODE_OF_CONDUCT.md, azd-templates and ai-azd-templates conventions, not alternative validator defaults. The AI topic does not require an AI application. Scenario-matched descriptions/topics are local evidence criteria.",
+      "All five required H2 headings must be checked, including Important Security Notice; a four-heading validator run is insufficient. Reconcile fresh records with readable README evidence; failures take precedence.",
+      "Security validation means the PSRule for Azure analysis. A record that did not run it establishes no security result.",
+      "Validation establishes only recorded checks. Dev containers, CI/CD workflows, screenshots and videos are optional unless an applicable rule explicitly requires an asset. A failing unrelated check cannot establish a catalog failure.",
+      "Submission authority recognizes a direct Awesome AZD PR or automated template-submission issue. Preparation requires materials, not an open submission.",
+      "PASS is local catalog satisfaction, not official certification or guaranteed collection acceptance. Keep source-backed SHOULD/MAY guidance separate from findings and counts."
+    ]
+  },
+  "rules": [
+    {
+      "id": "AZD-CORE-001",
+      "version": 2,
+      "status": "active",
+      "policy_kind": "approved",
+      "authority": "template-compliance repository-owned catalog",
+      "rationale": "Tests the cited core requirement using the catalog's explicit local evidence criteria.",
+      "severity": "required",
+      "source_revision": "22de60335bd77269a2e952cd0e3e8fab56ed4aa1",
+      "requirement_kind": "upstream-guidance",
+      "local_evidence_policy": "Use policy-sources.md safeguards; insufficient evidence is uncertainty, not an upstream defect.",
+      "references": [
+        "https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/development-guidelines/definition-of-done.md#core-azd-functionality",
+        "https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/publishing-guidelines.md#1-build-an-azd-compatible-repository"
+      ],
+      "title": "Root azure.yaml",
+      "requirement": "azure.yaml MUST exist at the resolved template root.",
+      "applies": "Any azd template repository.",
+      "inspect": "Explicit target selection or documented working directory and its root file listing.",
+      "pass": "A readable root azure.yaml exists.",
+      "fail": "A readable root listing proves azure.yaml is absent.",
+      "unknown": "The root listing is inaccessible or template root is unresolved.",
+      "remediation": "Add azure.yaml at the resolved template root, or clarify the documented working directory.",
+      "layer": "core",
+      "stages": [
+        "preparation",
+        "submission"
+      ]
+    },
+    {
+      "id": "AZD-CORE-002",
+      "version": 2,
+      "status": "active",
+      "policy_kind": "approved",
+      "authority": "template-compliance repository-owned catalog",
+      "rationale": "Tests the cited core requirement using the catalog's explicit local evidence criteria.",
+      "severity": "required",
+      "source_revision": "live-platform-reference; record inspected schema retrieval time and version or digest when supplied",
+      "requirement_kind": "platform-constraint",
+      "local_evidence_policy": "Use policy-sources.md safeguards; insufficient evidence is uncertainty, not an upstream defect.",
+      "references": [
+        "https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/azd-schema",
+        "https://aka.ms/azure.yaml.json"
+      ],
+      "title": "azd schema conformance",
+      "requirement": "azure.yaml MUST conform to the applicable azd schema defined above.",
+      "applies": "Any azd template repository.",
+      "inspect": "Template-root azure.yaml, the recorded machine-schema URL and retrieval time, and validator output for that schema.",
+      "pass": "Validator output identifies the applicable-schema URL and reports no schema errors for the inspected azure.yaml.",
+      "fail": "Validator output identifies the applicable-schema URL and reports one or more schema errors for the inspected azure.yaml.",
+      "unknown": "azure.yaml or the applicable schema is unreadable, or validator output tied to both is absent.",
+      "remediation": "Correct the reported errors against the applicable azd schema.",
+      "layer": "core",
+      "stages": [
+        "preparation",
+        "submission"
+      ]
+    },
+    {
+      "id": "AZD-CORE-003",
+      "version": 2,
+      "status": "active",
+      "policy_kind": "approved",
+      "authority": "template-compliance repository-owned catalog",
+      "rationale": "Tests the cited core requirement using the catalog's explicit local evidence criteria.",
+      "severity": "required",
+      "source_revision": "22de60335bd77269a2e952cd0e3e8fab56ed4aa1",
+      "requirement_kind": "upstream-guidance",
+      "local_evidence_policy": "Use policy-sources.md safeguards; insufficient evidence is uncertainty, not an upstream defect.",
+      "references": [
+        "https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/development-guidelines/definition-of-done.md#core-azd-functionality"
+      ],
+      "title": "Infrastructure assets",
+      "requirement": "Infrastructure assets appropriate to the template scenario MUST be committed.",
+      "applies": "Any azd template repository.",
+      "inspect": "Scenario docs, azure.yaml infra configuration, and tracked infrastructure assets.",
+      "pass": "Scenario documentation names the provisioned resource types, the configured or default infrastructure path is resolved, and tracked files under that path declare each named resource type.",
+      "fail": "Readable scenario documentation names a provisioned resource type that is absent from the readable tracked files under the resolved infrastructure path, or a required infrastructure file is untracked.",
+      "unknown": "Scenario documentation or azure.yaml is unreadable, provisioned resource types are not stated, the configured or default infrastructure path cannot be resolved, or tracked-file state cannot be read.",
+      "remediation": "Commit the infrastructure assets required by the documented scenario.",
+      "layer": "core",
+      "stages": [
+        "preparation",
+        "submission"
+      ]
+    },
+    {
+      "id": "AZD-CORE-004",
+      "version": 1,
+      "status": "active",
+      "policy_kind": "approved",
+      "authority": "template-compliance repository-owned catalog",
+      "rationale": "Tests the cited core requirement using the catalog's explicit local evidence criteria.",
+      "severity": "required",
+      "source_revision": "22de60335bd77269a2e952cd0e3e8fab56ed4aa1",
+      "requirement_kind": "upstream-guidance",
+      "local_evidence_policy": "Use policy-sources.md safeguards; insufficient evidence is uncertainty, not an upstream defect.",
+      "references": [
+        "https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/readme.md#core-azd-template-requirements"
+      ],
+      "title": "Documented azd up path contents",
+      "requirement": "The repository MUST include readable documentation for its azd up path and every code or configuration path that documentation identifies.",
+      "applies": "Any azd template repository.",
+      "inspect": "Documented azd up path and referenced code and configuration.",
+      "pass": "Readable tracked documentation states the azd up sequence and names its code and configuration paths, and every named path is present, tracked, and readable.",
+      "fail": "The documented path references a required component proven absent.",
+      "unknown": "The documented azd up path is unreadable or does not name its required code and configuration, or repository file state cannot be read.",
+      "remediation": "Add or correct the azd up documentation and each code or configuration path it identifies.",
+      "layer": "core",
+      "stages": [
+        "preparation",
+        "submission"
+      ]
+    },
+    {
+      "id": "AZD-CORE-005",
+      "version": 2,
+      "status": "active",
+      "policy_kind": "approved",
+      "authority": "template-compliance repository-owned catalog",
+      "rationale": "Tests the cited core requirement using the catalog's explicit local evidence criteria.",
+      "severity": "required",
+      "source_revision": "22de60335bd77269a2e952cd0e3e8fab56ed4aa1",
+      "requirement_kind": "upstream-guidance",
+      "local_evidence_policy": "Use policy-sources.md safeguards; insufficient evidence is uncertainty, not an upstream defect.",
+      "references": [
+        "https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/development-guidelines/definition-of-done.md#core-azd-functionality"
+      ],
+      "title": "Successful azd up verification",
+      "requirement": "The documented azd up happy path MUST have been executed successfully.",
+      "applies": "Any azd template repository.",
+      "inspect": "Supplied or readable workflow run, validation record, log, PR evidence, or manual verification record that identifies the audited commit and documented azd up path.",
+      "pass": "Evidence identifies the audited commit and documented azd up path and records a successful execution; no evidence for that commit records a failure.",
+      "fail": "Evidence identifying the audited commit and documented azd up path records a failed execution.",
+      "unknown": "No execution record identifies both the audited commit and documented azd up path, or a cited record is unreadable.",
+      "remediation": "Run the documented happy path outside this read-only audit and retain reviewable evidence.",
+      "layer": "core",
+      "stages": [
+        "preparation",
+        "submission"
+      ]
+    },
+    {
+      "id": "AZD-CORE-006",
+      "version": 2,
+      "status": "active",
+      "policy_kind": "approved",
+      "authority": "template-compliance repository-owned catalog",
+      "rationale": "Tests the cited core requirement using the catalog's explicit local evidence criteria.",
+      "severity": "required",
+      "source_revision": "22de60335bd77269a2e952cd0e3e8fab56ed4aa1",
+      "requirement_kind": "upstream-guidance",
+      "local_evidence_policy": "Use policy-sources.md safeguards; insufficient evidence is uncertainty, not an upstream defect.",
+      "references": [
+        "https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/development-guidelines/definition-of-done.md#core-azd-functionality"
+      ],
+      "title": "Verified teardown",
+      "requirement": "If the template provisions Azure resources, its documented teardown path MUST be verified using azd down or an explicitly documented equivalent.",
+      "applies": "Templates that provision Azure resources.",
+      "inspect": "Provisioning docs, teardown docs, and supplied or readable verification evidence.",
+      "pass": "Provisioning documentation states that Azure resources are created, names azd down or an explicit equivalent, and evidence identifying the audited commit records successful teardown with that path.",
+      "fail": "Evidence proves the documented teardown path fails or no teardown path is documented.",
+      "unknown": "Provisioning documentation is unreadable or does not state whether Azure resources are created, or no readable teardown record identifies the audited commit and documented path.",
+      "remediation": "Document and verify azd down or an explicit equivalent outside this read-only audit.",
+      "layer": "core",
+      "stages": [
+        "preparation",
+        "submission"
+      ]
+    },
+    {
+      "id": "AZD-AWESOME-001",
+      "version": 1,
+      "status": "active",
+      "policy_kind": "approved",
+      "authority": "template-compliance repository-owned catalog",
+      "rationale": "Tests the cited publication requirement using the catalog's explicit local evidence criteria.",
+      "severity": "collection-required",
+      "source_revision": "22de60335bd77269a2e952cd0e3e8fab56ed4aa1",
+      "requirement_kind": "upstream-guidance",
+      "local_evidence_policy": "Use policy-sources.md safeguards; validator defaults do not replace the pinned guidance.",
+      "references": [
+        "https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/development-guidelines/definition-of-done.md#awesome-azd-repository-baseline"
+      ],
+      "title": "Publication README",
+      "requirement": "README.md MUST explain the scenario, prerequisites, deployment steps, verification steps, and cleanup guidance.",
+      "applies": "Explicit Awesome AZD publication readiness.",
+      "inspect": "Root README.md.",
+      "pass": "README.md names the deployed scenario, states prerequisites or that there are none, gives deployment commands, gives a verification action and expected result, and gives a cleanup command or procedure.",
+      "fail": "A readable README is absent or one or more topics are absent.",
+      "unknown": "README.md is unreadable or its text does not distinguish one or more required topics.",
+      "remediation": "Add the missing publication-readiness topics to README.md.",
+      "layer": "destination",
+      "stages": [
+        "preparation",
+        "submission"
+      ]
+    },
+    {
+      "id": "AZD-AWESOME-002",
+      "version": 1,
+      "status": "active",
+      "policy_kind": "approved",
+      "authority": "template-compliance repository-owned catalog",
+      "rationale": "Tests the cited publication requirement using the catalog's explicit local evidence criteria.",
+      "severity": "collection-required",
+      "source_revision": "22de60335bd77269a2e952cd0e3e8fab56ed4aa1",
+      "requirement_kind": "upstream-guidance",
+      "local_evidence_policy": "Use policy-sources.md safeguards; validator defaults do not replace the pinned guidance.",
+      "references": [
+        "https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/development-guidelines/definition-of-done.md#awesome-azd-repository-baseline"
+      ],
+      "title": "OSS governance files",
+      "requirement": "LICENSE.md, SECURITY.md, CONTRIBUTING.md, .github/CODE_OF_CONDUCT.md, and an issue template MUST be present.",
+      "applies": "Explicit Awesome AZD publication readiness.",
+      "inspect": "Root and .github file listings.",
+      "pass": "Every named artifact and at least one issue template are present.",
+      "fail": "A readable listing proves any required artifact absent.",
+      "unknown": "Required listings are inaccessible.",
+      "remediation": "Add the missing baseline OSS or governance artifacts.",
+      "layer": "destination",
+      "stages": [
+        "preparation",
+        "submission"
+      ]
+    },
+    {
+      "id": "AZD-AWESOME-003",
+      "version": 2,
+      "status": "active",
+      "policy_kind": "approved",
+      "authority": "template-compliance repository-owned catalog",
+      "rationale": "Tests the cited publication requirement using the catalog's explicit local evidence criteria.",
+      "severity": "collection-required",
+      "source_revision": "22de60335bd77269a2e952cd0e3e8fab56ed4aa1",
+      "requirement_kind": "upstream-guidance",
+      "local_evidence_policy": "Use policy-sources.md safeguards; validator defaults do not replace the pinned guidance.",
+      "references": [
+        "https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/development-guidelines/definition-of-done.md#awesome-azd-repository-baseline"
+      ],
+      "title": "Repository discoverability",
+      "requirement": "The repository description MUST state the deployed scenario, and topics MUST include the required repository topics plus at least one language, model, or technology topic that describes the template.",
+      "applies": "Explicit Awesome AZD publication readiness.",
+      "inspect": "GitHub repository description and topics, plus README.md or azure.yaml for scenario, language, model, and technology terms.",
+      "pass": "The non-empty description states the deployed scenario, and the topics include azd-templates and ai-azd-templates plus at least one language, model, or technology term present in README.md or azure.yaml.",
+      "fail": "Readable metadata shows an empty description, no topics, topics that omit azd-templates or ai-azd-templates, or no language, model, or technology topic.",
+      "unknown": "Repository metadata, README.md, or azure.yaml is unreadable, or the description and topics cannot be compared with repository evidence.",
+      "remediation": "Set a repository description that states the scenario, and add the required repository topics plus the language, model, and technology topics the template uses.",
+      "layer": "destination",
+      "stages": [
+        "preparation",
+        "submission"
+      ]
+    },
+    {
+      "id": "AZD-AWESOME-004",
+      "version": 3,
+      "status": "active",
+      "policy_kind": "approved",
+      "authority": "template-compliance repository-owned catalog",
+      "rationale": "Tests the cited publication requirement using the catalog's explicit local evidence criteria.",
+      "severity": "collection-required",
+      "source_revision": "22de60335bd77269a2e952cd0e3e8fab56ed4aa1",
+      "requirement_kind": "upstream-guidance",
+      "local_evidence_policy": "Use policy-sources.md safeguards; validator defaults do not replace the pinned guidance.",
+      "references": [
+        "https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/development-guidelines/definition-of-done.md#review-and-publication-readiness"
+      ],
+      "title": "Reviewable validation evidence",
+      "requirement": "Reviewers MUST be able to access evidence of a successful validation, test, or manual verification that identifies the audited commit.",
+      "applies": "Explicit Awesome AZD publication readiness.",
+      "inspect": "Supplied or linked PRs, workflow runs, screenshots, or logs, including the checks each record states it performed.",
+      "pass": "A readable record identifies the audited commit and a successful validation, test, or manual verification; no record for that commit reports a failure of a check that maps to an active rule.",
+      "fail": "A readable record identifying the audited commit reports a failed check that maps to an active rule in this catalog.",
+      "unknown": "No supplied record identifies the audited commit, a cited record is unreadable, or the only failing record's checks map to no active rule.",
+      "remediation": "Produce and retain readable successful validation evidence for the audited commit outside this read-only audit.",
+      "layer": "destination",
+      "stages": [
+        "preparation",
+        "submission"
+      ]
+    },
+    {
+      "id": "AZD-AWESOME-005",
+      "version": 1,
+      "status": "active",
+      "policy_kind": "approved",
+      "authority": "template-compliance repository-owned catalog",
+      "rationale": "Tests the cited submission requirement using the catalog's explicit local evidence criteria.",
+      "severity": "collection-required",
+      "source_revision": "22de60335bd77269a2e952cd0e3e8fab56ed4aa1",
+      "requirement_kind": "upstream-guidance",
+      "local_evidence_policy": "Use policy-sources.md safeguards; only recorded checks establish validation coverage.",
+      "references": [
+        "https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/publishing-guidelines.md#4-submit-to-awesome-azd"
+      ],
+      "title": "Gallery metadata and asset",
+      "requirement": "Submission MUST prepare title, short description, source link, author, gallery image, technology/language/framework/Azure-service/IaC tags, and a unique template UUID.",
+      "applies": "Explicit Awesome AZD publication readiness.",
+      "inspect": "Prepared Awesome AZD submission metadata and referenced image.",
+      "pass": "Every listed metadata field is non-empty, the UUID parses as a UUID, and the image is a readable file or its URL returns a successful response.",
+      "fail": "Readable submission data shows an empty field, an unparsable UUID, an absent image, or an image URL with a non-success response.",
+      "unknown": "Submission data is unreadable, or image content or its URL response cannot be read.",
+      "remediation": "Prepare the missing gallery metadata or image required by this catalog rule.",
+      "layer": "destination",
+      "stages": [
+        "preparation",
+        "submission"
+      ]
+    },
+    {
+      "id": "AZD-AWESOME-006",
+      "version": 2,
+      "status": "active",
+      "policy_kind": "approved",
+      "authority": "template-compliance repository-owned catalog",
+      "rationale": "Tests the cited submission requirement using the catalog's explicit local evidence criteria.",
+      "severity": "collection-required",
+      "source_revision": "22de60335bd77269a2e952cd0e3e8fab56ed4aa1",
+      "requirement_kind": "upstream-guidance",
+      "local_evidence_policy": "Use policy-sources.md safeguards; only recorded checks establish validation coverage.",
+      "references": [
+        "https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/publishing-guidelines.md#4-submit-to-awesome-azd"
+      ],
+      "title": "Submission process",
+      "requirement": "Awesome AZD submissions MUST use one of the submission-authority paths.",
+      "applies": "public-awesome-azd profile at the explicitly selected submission stage; never preparation.",
+      "inspect": "Submission pull request or automated template-submission issue.",
+      "pass": "Readable submission evidence is a direct Awesome AZD pull request or automated template-submission issue.",
+      "fail": "Readable submission evidence uses neither submission-authority path.",
+      "unknown": "Submission evidence is absent or unreadable.",
+      "remediation": "Use a direct Awesome AZD pull request or the automated template-submission issue.",
+      "layer": "destination",
+      "stages": [
+        "submission"
+      ]
+    },
+    {
+      "id": "AZD-AWESOME-007",
+      "version": 3,
+      "status": "active",
+      "policy_kind": "approved",
+      "authority": "template-compliance repository-owned catalog",
+      "rationale": "Tests the cited submission requirement using the catalog's explicit local evidence criteria.",
+      "severity": "collection-required",
+      "source_revision": "22de60335bd77269a2e952cd0e3e8fab56ed4aa1",
+      "requirement_kind": "upstream-guidance",
+      "local_evidence_policy": "Use policy-sources.md safeguards; only recorded checks establish validation coverage.",
+      "references": [
+        "https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/development-guidelines/definition-of-done.md#awesome-azd-repository-baseline",
+        "https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/development-guidelines/definition-of-done.md#should"
+      ],
+      "title": "Required README headings",
+      "requirement": "README.md MUST contain each required README heading as an H2 heading.",
+      "applies": "Explicit Awesome AZD publication readiness.",
+      "inspect": "Template-root README.md heading structure, or a validation record identifying the audited revision and each H2 heading it checked.",
+      "pass": "Readable README.md contains every required README heading as an H2 heading, or a fresh validation record explicitly confirms every required H2 heading for that README; no fresh readable evidence contradicts that result.",
+      "fail": "A readable listing proves README.md is absent, readable README.md omits a required README heading or carries one only at another heading level, or a fresh record explicitly proves a required H2 heading is absent.",
+      "unknown": "README.md is unreadable and no fresh validation record establishes the complete required heading set, including Important Security Notice.",
+      "remediation": "Add the missing H2 headings to README.md and move existing content under the matching heading.",
+      "layer": "destination",
+      "stages": [
+        "preparation",
+        "submission"
+      ]
+    },
+    {
+      "id": "AZD-AWESOME-008",
+      "version": 2,
+      "status": "active",
+      "policy_kind": "approved",
+      "authority": "template-compliance repository-owned catalog",
+      "rationale": "Tests the cited submission requirement using the catalog's explicit local evidence criteria.",
+      "severity": "collection-required",
+      "source_revision": "22de60335bd77269a2e952cd0e3e8fab56ed4aa1",
+      "requirement_kind": "upstream-guidance",
+      "local_evidence_policy": "Use policy-sources.md safeguards; only recorded checks establish validation coverage.",
+      "references": [
+        "https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/development-guidelines/definition-of-done.md#review-and-publication-readiness"
+      ],
+      "title": "Security validation result",
+      "requirement": "The security validation MUST pass without warnings.",
+      "applies": "Explicit Awesome AZD publication readiness.",
+      "inspect": "Supplied or readable security validation output that identifies the audited commit.",
+      "pass": "A readable security validation record identifies the audited commit and reports the analysis completing with no warnings and no errors.",
+      "fail": "A readable security validation record identifies the audited commit and reports one or more warnings or errors.",
+      "unknown": "No security validation record identifies the audited commit, a cited record is unreadable, or the cited run did not perform the security analysis.",
+      "remediation": "Resolve the reported security findings, such as using Microsoft Entra ID or a managed identity where supported and removing exposed secrets, then re-run the validation outside this read-only audit.",
+      "layer": "destination",
+      "stages": [
+        "preparation",
+        "submission"
+      ]
+    }
+  ]
+}

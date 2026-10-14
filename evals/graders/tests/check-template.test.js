@@ -5,9 +5,9 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 import { test } from "node:test";
-import { checkTemplate, readH2, REQUIRED_HEADINGS, GOVERNANCE_FILES } from "./check-template.mjs";
+import { checkTemplate, readH2, REQUIRED_HEADINGS, GOVERNANCE_FILES } from "../../../skills/template-compliance/scripts/check-template.mjs";
 
-const script = fileURLToPath(new URL("./check-template.mjs", import.meta.url));
+const script = fileURLToPath(new URL("../../../skills/template-compliance/scripts/check-template.mjs", import.meta.url));
 
 async function fixture(t) {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "template-compliance-"));
@@ -32,8 +32,10 @@ test("core/private/organization/unresolved profiles never inspect public artifac
     const result = await checkTemplate({ root, profile });
     assert.deepEqual(result.findings.map((finding) => finding.id), ["AZD-CORE-001"]);
     assert.equal(status(result, "AZD-CORE-001"), "PASS");
-    assert.equal(result.remaining_rule_ids.length, 5);
-    assert.ok(result.remaining_rule_ids.every((id) => id.startsWith("AZD-CORE-")));
+    assert.equal(result.remaining_rules.length, 5);
+    assert.ok(result.remaining_rules.every((rule) => rule.id.startsWith("AZD-CORE-")));
+    assert.ok(!JSON.stringify(result).includes("AZD-AWESOME-"));
+    assert.ok(!JSON.stringify(result).includes("Important Security Notice"));
     assert.equal(result.overall_result, undefined);
   }
 });
@@ -56,12 +58,12 @@ test("public checks use the template root for README and repository root for gov
   const result = await checkTemplate({ root, repositoryRoot, profile: "public-awesome-azd" });
   assert.ok(result.findings.every((finding) => finding.status === "PASS"));
   assert.equal(result.public_stage, "preparation");
-  assert.ok(!result.remaining_rule_ids.includes("AZD-AWESOME-006"));
-  assert.equal(result.remaining_rule_ids.length, 10);
+  assert.ok(!result.remaining_rules.some((rule) => rule.id === "AZD-AWESOME-006"));
+  assert.equal(result.remaining_rules.length, 10);
   assert.ok(result.findings[2].evidence.every((item) => Number.isInteger(item.line)));
   assert.ok(!JSON.stringify(result).includes("name: Bug"));
   const submission = await checkTemplate({ root, repositoryRoot, profile: "public-awesome-azd", stage: "submission" });
-  assert.ok(submission.remaining_rule_ids.includes("AZD-AWESOME-006"));
+  assert.ok(submission.remaining_rules.some((rule) => rule.id === "AZD-AWESOME-006"));
 });
 
 test("issue config alone is not an issue template; legacy templates are accepted", async (t) => {

@@ -56,7 +56,8 @@ The bundled, repository-owned catalog defines core and public checks. Organizati
 
 The skill runs a bundled, dependency-free Node.js script for root `azure.yaml`
 presence, public governance files, and required public README H2 headings.
-The script returns evidence-backed JSON findings and the remaining rule IDs;
+The script returns evidence-backed JSON findings, remaining rule criteria,
+applicable safeguards, and source citations;
 the agent handles semantic checks, external records, selected organization
 requirements, and the final report. A partial static pass is never overall
 compliance. The script does not execute target code, deploy resources, access the
@@ -68,6 +69,17 @@ local files are unavailable, the agent reports that limitation and uses the
 catalog's evidence criteria directly. See
 [static checks](skills/template-compliance/references/static-checks.md)
 for invocation, scope, output, and manual-completion boundaries.
+
+`catalog.json` is the single bundled policy source. The checker filters it by
+profile and stage, so routine audits do not load full rule modules or policy
+history. Generated Markdown/YAML rule views remain available for human review
+and manual fallback; detailed provenance is loaded only when relevant.
+Organization documents are still selected and interpreted directly, never
+converted into this JSON format.
+
+To change bundled policy, edit `skills/template-compliance/catalog.json`, run
+`npm run catalog:generate`, and commit the updated views. `npm run catalog:check`
+rejects stale generated views and is included in `npm run check`.
 
 ## 🛠️ Customize policy
 
@@ -133,9 +145,11 @@ npm ci          # reproducible install from package-lock.json (what CI runs)
 | Command | What it does | Needs a token? |
 | --- | --- | --- |
 | `npm test` | Unit tests for the static checker, custom grader, and Markdown report parser (Node's built-in test runner). | No |
+| `npm run catalog:generate` | Regenerates human-readable rule views from the canonical catalog. | No |
+| `npm run catalog:check` | Rejects generated rule views that have drifted from the catalog. | No |
 | `npm run parity` | Compares the legacy `evals/tasks/*.yaml` fixtures against the Vally suite. | No |
 | `npm run lint` | Strict Vally lint of the skill and `evals/eval.yaml`, with the local grader plugin loaded. | No |
-| `npm run check` | All three of the above, in order. Run this before you open a pull request. | No |
+| `npm run check` | Catalog drift check, tests, parity, and lint. Run this before you open a pull request. | No |
 | `npm run eval:ci` | Behavioral `ci-gate` suite — the p0 and p1 stimuli. Fails the process on any regression. | **Yes** |
 | `npm run eval:full` | Behavioral `full` suite — every stimulus. | **Yes** |
 
@@ -235,9 +249,9 @@ template-compliance-skill/
 ├── skills/
 │   └── template-compliance/
 │       ├── SKILL.md                     # Routing, constraints, and analysis workflow
+│       ├── catalog.json                 # Canonical bundled rules and runtime safeguards
 │       ├── scripts/
 │       │   ├── check-template.mjs       # Dependency-free read-only static checks
-│       │   └── check-template.test.mjs  # Scope, filesystem, headings, and CLI tests
 │       └── references/
 │           ├── static-checks.md         # Script invocation and completion boundaries
 │           ├── compliance-rules.md      # Authoritative rule schema and catalog
@@ -255,7 +269,7 @@ template-compliance-skill/
 │   ├── graders/
 │   │   ├── template-compliance-report.js  # Custom Vally grader plugin
 │   │   ├── report-parser.js               # Deterministic Markdown report parser
-│   │   └── tests/                         # node --test suites for both
+│   │   └── tests/                         # Checker, catalog, grader, and parser tests
 │   ├── parity/
 │   │   ├── legacy-parity.js             # Legacy-vs-Vally comparison
 │   │   └── check-legacy-parity.js       # `npm run parity` entry point
@@ -264,6 +278,7 @@ template-compliance-skill/
 │   ├── static-checks.yml                # Tests, parity, and lint on every push/PR
 │   └── vally-eval.yml                   # Manual-only behavioral suite
 ├── .vally.yaml                          # Vally project configuration and suites
+├── tools/generate-catalog.mjs            # Generates/checks catalog reference views
 └── package.json                         # Pinned Vally CLI and scripts
 ```
 

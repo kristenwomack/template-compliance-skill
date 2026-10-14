@@ -32,15 +32,21 @@ a directory where a file is required yields FAIL.
 ## Output and completion
 
 Standard output is JSON with `format_version`, `catalog`, selected roots,
-profile/stage, `findings`, `remaining_rule_ids`, and `limitations`. Each finding
+profile/stage, `findings`, `remaining_rules`, `safeguards`, and `limitations`.
+Payload format version 2 replaces the version 1 ID-only list. Each remaining rule
+includes requirement, applicability, evidence criteria, pass/fail/unknown outcomes,
+remediation, and source citations. Criteria come from the installed `catalog.json`,
+not target files. Only active, approved rules for the selected profile/stage appear.
+Each finding
 contains an ID, layer, status, evidence paths (and heading lines when available),
-and rationale. Target file contents are not echoed. Invalid arguments or an
+and rationale, policy basis, and remediation or reconciliation criteria when needed.
+Target file contents are not echoed. Invalid arguments or an
 internal failure produce a diagnostic on standard error and exit code 1.
 Completed inspection exits 0 even when findings fail or are indeterminate:
 exit code is not a compliance verdict.
 
 The script never emits an overall verdict. Complete every remaining applicable
-rule with its catalog evidence criteria, including schema conformance, semantic
+rule with its included evidence criteria, including schema conformance, semantic
 README content, infrastructure fit, commit/tracked-file state, execution records,
 metadata, submission data, and security validation. Organization requirements
 always need inspection of the explicitly selected document. Do not infer a
@@ -51,6 +57,6 @@ records according to each rule (especially fresh heading validation records).
 Include remediation for failures, evidence needed for indeterminate findings,
 policy basis, and revision/working-tree state. Never duplicate script findings
 as new manual findings. If the script cannot run, or the input consists only of
-synthetic evidence summaries, use the catalog criteria directly and state the
+synthetic evidence summaries, use the selected generated catalog views directly and state the
 script limitation. Do not run the checker against denied paths to bypass access
 restrictions.

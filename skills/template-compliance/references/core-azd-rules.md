@@ -13,22 +13,23 @@ Source mappings and local interpretation are defined in [policy-sources.md](poli
 - **Scenario-fit evidence:** readable scenario documentation names the provisioned resource types, the infrastructure path is resolved from `azure.yaml` or its default `infra`, and tracked files under that path declare those resource types. An explicit `infra.path` is not required. Framework-specific equivalents are acceptable. Mapping named types to tracked declarations is a local evidence safeguard; it is not upstream wording. If required evidence cannot be read, infrastructure fit is `UNABLE TO DETERMINE`.
 - When fresh records disagree, a recorded failure takes precedence over a success. When a required file, external record, or authority cannot be read, use the rule's `unknown` outcome; do not infer its contents.
 
+<!-- Generated from catalog.json; run npm run catalog:generate. Do not edit. -->
+
 ```yaml
-defaults: &defaults
-  version: 1
-  status: active
-  policy_kind: approved
-  authority: "template-compliance repository-owned catalog"
-  rationale: Tests the cited core requirement using the catalog's explicit local evidence criteria.
-  severity: required
-  source_revision: "22de60335bd77269a2e952cd0e3e8fab56ed4aa1"
-  requirement_kind: upstream-guidance
-  local_evidence_policy: "Use policy-sources.md safeguards; insufficient evidence is uncertainty, not an upstream defect."
 rules:
   - id: AZD-CORE-001
-    <<: *defaults
     version: 2
-    references: ["https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/development-guidelines/definition-of-done.md#core-azd-functionality", "https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/publishing-guidelines.md#1-build-an-azd-compatible-repository"]
+    status: active
+    policy_kind: approved
+    authority: template-compliance repository-owned catalog
+    rationale: Tests the cited core requirement using the catalog's explicit local evidence criteria.
+    severity: required
+    source_revision: 22de60335bd77269a2e952cd0e3e8fab56ed4aa1
+    requirement_kind: upstream-guidance
+    local_evidence_policy: Use policy-sources.md safeguards; insufficient evidence is uncertainty, not an upstream defect.
+    references:
+      - https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/development-guidelines/definition-of-done.md#core-azd-functionality
+      - https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/publishing-guidelines.md#1-build-an-azd-compatible-repository
     title: Root azure.yaml
     requirement: azure.yaml MUST exist at the resolved template root.
     applies: Any azd template repository.
@@ -37,12 +38,23 @@ rules:
     fail: A readable root listing proves azure.yaml is absent.
     unknown: The root listing is inaccessible or template root is unresolved.
     remediation: Add azure.yaml at the resolved template root, or clarify the documented working directory.
+    layer: core
+    stages:
+      - preparation
+      - submission
   - id: AZD-CORE-002
-    <<: *defaults
     version: 2
-    references: ["https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/azd-schema", "https://aka.ms/azure.yaml.json"]
-    source_revision: "live-platform-reference; record inspected schema retrieval time and version or digest when supplied"
+    status: active
+    policy_kind: approved
+    authority: template-compliance repository-owned catalog
+    rationale: Tests the cited core requirement using the catalog's explicit local evidence criteria.
+    severity: required
+    source_revision: live-platform-reference; record inspected schema retrieval time and version or digest when supplied
     requirement_kind: platform-constraint
+    local_evidence_policy: Use policy-sources.md safeguards; insufficient evidence is uncertainty, not an upstream defect.
+    references:
+      - https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/azd-schema
+      - https://aka.ms/azure.yaml.json
     title: azd schema conformance
     requirement: azure.yaml MUST conform to the applicable azd schema defined above.
     applies: Any azd template repository.
@@ -51,10 +63,22 @@ rules:
     fail: Validator output identifies the applicable-schema URL and reports one or more schema errors for the inspected azure.yaml.
     unknown: azure.yaml or the applicable schema is unreadable, or validator output tied to both is absent.
     remediation: Correct the reported errors against the applicable azd schema.
+    layer: core
+    stages:
+      - preparation
+      - submission
   - id: AZD-CORE-003
-    <<: *defaults
     version: 2
-    references: ["https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/development-guidelines/definition-of-done.md#core-azd-functionality"]
+    status: active
+    policy_kind: approved
+    authority: template-compliance repository-owned catalog
+    rationale: Tests the cited core requirement using the catalog's explicit local evidence criteria.
+    severity: required
+    source_revision: 22de60335bd77269a2e952cd0e3e8fab56ed4aa1
+    requirement_kind: upstream-guidance
+    local_evidence_policy: Use policy-sources.md safeguards; insufficient evidence is uncertainty, not an upstream defect.
+    references:
+      - https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/development-guidelines/definition-of-done.md#core-azd-functionality
     title: Infrastructure assets
     requirement: Infrastructure assets appropriate to the template scenario MUST be committed.
     applies: Any azd template repository.
@@ -63,9 +87,22 @@ rules:
     fail: Readable scenario documentation names a provisioned resource type that is absent from the readable tracked files under the resolved infrastructure path, or a required infrastructure file is untracked.
     unknown: Scenario documentation or azure.yaml is unreadable, provisioned resource types are not stated, the configured or default infrastructure path cannot be resolved, or tracked-file state cannot be read.
     remediation: Commit the infrastructure assets required by the documented scenario.
+    layer: core
+    stages:
+      - preparation
+      - submission
   - id: AZD-CORE-004
-    <<: *defaults
-    references: ["https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/readme.md#core-azd-template-requirements"]
+    version: 1
+    status: active
+    policy_kind: approved
+    authority: template-compliance repository-owned catalog
+    rationale: Tests the cited core requirement using the catalog's explicit local evidence criteria.
+    severity: required
+    source_revision: 22de60335bd77269a2e952cd0e3e8fab56ed4aa1
+    requirement_kind: upstream-guidance
+    local_evidence_policy: Use policy-sources.md safeguards; insufficient evidence is uncertainty, not an upstream defect.
+    references:
+      - https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/readme.md#core-azd-template-requirements
     title: Documented azd up path contents
     requirement: The repository MUST include readable documentation for its azd up path and every code or configuration path that documentation identifies.
     applies: Any azd template repository.
@@ -74,10 +111,22 @@ rules:
     fail: The documented path references a required component proven absent.
     unknown: The documented azd up path is unreadable or does not name its required code and configuration, or repository file state cannot be read.
     remediation: Add or correct the azd up documentation and each code or configuration path it identifies.
+    layer: core
+    stages:
+      - preparation
+      - submission
   - id: AZD-CORE-005
-    <<: *defaults
     version: 2
-    references: ["https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/development-guidelines/definition-of-done.md#core-azd-functionality"]
+    status: active
+    policy_kind: approved
+    authority: template-compliance repository-owned catalog
+    rationale: Tests the cited core requirement using the catalog's explicit local evidence criteria.
+    severity: required
+    source_revision: 22de60335bd77269a2e952cd0e3e8fab56ed4aa1
+    requirement_kind: upstream-guidance
+    local_evidence_policy: Use policy-sources.md safeguards; insufficient evidence is uncertainty, not an upstream defect.
+    references:
+      - https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/development-guidelines/definition-of-done.md#core-azd-functionality
     title: Successful azd up verification
     requirement: The documented azd up happy path MUST have been executed successfully.
     applies: Any azd template repository.
@@ -86,10 +135,22 @@ rules:
     fail: Evidence identifying the audited commit and documented azd up path records a failed execution.
     unknown: No execution record identifies both the audited commit and documented azd up path, or a cited record is unreadable.
     remediation: Run the documented happy path outside this read-only audit and retain reviewable evidence.
+    layer: core
+    stages:
+      - preparation
+      - submission
   - id: AZD-CORE-006
-    <<: *defaults
     version: 2
-    references: ["https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/development-guidelines/definition-of-done.md#core-azd-functionality"]
+    status: active
+    policy_kind: approved
+    authority: template-compliance repository-owned catalog
+    rationale: Tests the cited core requirement using the catalog's explicit local evidence criteria.
+    severity: required
+    source_revision: 22de60335bd77269a2e952cd0e3e8fab56ed4aa1
+    requirement_kind: upstream-guidance
+    local_evidence_policy: Use policy-sources.md safeguards; insufficient evidence is uncertainty, not an upstream defect.
+    references:
+      - https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/development-guidelines/definition-of-done.md#core-azd-functionality
     title: Verified teardown
     requirement: If the template provisions Azure resources, its documented teardown path MUST be verified using azd down or an explicitly documented equivalent.
     applies: Templates that provision Azure resources.
@@ -98,4 +159,8 @@ rules:
     fail: Evidence proves the documented teardown path fails or no teardown path is documented.
     unknown: Provisioning documentation is unreadable or does not state whether Azure resources are created, or no readable teardown record identifies the audited commit and documented path.
     remediation: Document and verify azd down or an explicit equivalent outside this read-only audit.
+    layer: core
+    stages:
+      - preparation
+      - submission
 ```
