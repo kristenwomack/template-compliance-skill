@@ -52,6 +52,23 @@ Policy-resolution gaps are limitations, not fabricated rule findings.
 
 The bundled, repository-owned catalog defines core and public checks. Organization checks use existing requirements explicitly selected by the user; descriptive guidance and optional enhancements are not compliance failures. Assets such as dev containers or CI/CD pipeline definitions are required only if a selected requirement explicitly requires them. External validation automation is evidence, not authority: a run establishes only the checks it records. Review and version catalog changes in this repository so the policy stays clear and intentional.
 
+### Deterministic checks, orchestrated by the agent
+
+The skill runs a bundled, dependency-free Node.js script for root `azure.yaml`
+presence, public governance files, and required public README H2 headings.
+The script returns evidence-backed JSON findings and the remaining rule IDs;
+the agent handles semantic checks, external records, selected organization
+requirements, and the final report. A partial static pass is never overall
+compliance. The script does not execute target code, deploy resources, access the
+network, or modify files.
+
+Copy the complete skill directory, including `scripts/`, when installing.
+Auditing needs Node.js 22.12 or newer but no npm dependencies. When the runtime or
+local files are unavailable, the agent reports that limitation and uses the
+catalog's evidence criteria directly. See
+[static checks](skills/template-compliance/references/static-checks.md)
+for invocation, scope, output, and manual-completion boundaries.
+
 ## 🛠️ Customize policy
 
 For an internal catalog, point the skill at your team's existing requirements:
@@ -115,7 +132,7 @@ npm ci          # reproducible install from package-lock.json (what CI runs)
 
 | Command | What it does | Needs a token? |
 | --- | --- | --- |
-| `npm test` | Unit tests for the custom grader and its Markdown report parser (Node's built-in test runner). | No |
+| `npm test` | Unit tests for the static checker, custom grader, and Markdown report parser (Node's built-in test runner). | No |
 | `npm run parity` | Compares the legacy `evals/tasks/*.yaml` fixtures against the Vally suite. | No |
 | `npm run lint` | Strict Vally lint of the skill and `evals/eval.yaml`, with the local grader plugin loaded. | No |
 | `npm run check` | All three of the above, in order. Run this before you open a pull request. | No |
@@ -218,7 +235,11 @@ template-compliance-skill/
 ├── skills/
 │   └── template-compliance/
 │       ├── SKILL.md                     # Routing, constraints, and analysis workflow
+│       ├── scripts/
+│       │   ├── check-template.mjs       # Dependency-free read-only static checks
+│       │   └── check-template.test.mjs  # Scope, filesystem, headings, and CLI tests
 │       └── references/
+│           ├── static-checks.md         # Script invocation and completion boundaries
 │           ├── compliance-rules.md      # Authoritative rule schema and catalog
 │           ├── policy-sources.md        # Pinned sources, interpretations, and guidance
 │           ├── policy-profiles.md       # Core, public stages, and organization selection

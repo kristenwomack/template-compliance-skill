@@ -4,7 +4,7 @@
   "private": true,
   "description": "Vally evaluation suite for the template-compliance skill.",
   "scripts": {
-    "test": "node --test \"evals/graders/tests/*.test.js\"",
+    "test": "node --test \"evals/graders/tests/*.test.js\" \"skills/template-compliance/scripts/*.test.mjs\"",
     "parity": "node evals/parity/check-legacy-parity.js",
     "lint": "vally lint skills --eval-spec evals/eval.yaml --strict --grader-plugin ./graders/template-compliance-report.js",
     "check": "npm run test && npm run parity && npm run lint",

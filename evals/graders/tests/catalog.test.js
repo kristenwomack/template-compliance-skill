@@ -7,6 +7,7 @@ import YAML from "yaml";
 
 import { REPO_ROOT } from "../../parity/legacy-parity.js";
 import { ALL_RULES } from "./report-fixtures.js";
+import { checkTemplate, REQUIRED_HEADINGS, GOVERNANCE_FILES } from "../../../skills/template-compliance/scripts/check-template.mjs";
 
 const REFERENCES = path.join(REPO_ROOT, "skills", "template-compliance", "references");
 const REVISION = "22de60335bd77269a2e952cd0e3e8fab56ed4aa1";
@@ -26,6 +27,20 @@ describe("catalog provenance", () => {
 
   it("preserves all fourteen rule IDs exactly once", () => {
     assert.deepEqual(rules.map((rule) => rule.id).sort(), [...ALL_RULES].sort());
+  });
+
+  it("keeps deterministic checks synchronized with catalog requirements", async () => {
+    const terms = fs.readFileSync(path.join(REFERENCES, "awesome-azd-rules.md"), "utf8");
+    const governance = rules.find((rule) => rule.id === "AZD-AWESOME-002");
+    assert.deepEqual([...terms.matchAll(/`## ([^`]+)`/g)].map((match) => match[1]), REQUIRED_HEADINGS);
+    assert.deepEqual(governance.requirement.match(/(?:\.github\/)?[A-Z_]+\.md/g), GOVERNANCE_FILES);
+    const root = path.join(REPO_ROOT, "evals", "fixtures", "private-core-only", "project");
+    for (const stage of ["preparation", "submission"]) {
+      const result = await checkTemplate({ root, profile: "public-awesome-azd", stage });
+      const selected = [...result.findings.map((finding) => finding.id), ...result.remaining_rule_ids].sort();
+      const expected = rules.map((rule) => rule.id).filter((id) => stage === "submission" || id !== "AZD-AWESOME-006").sort();
+      assert.deepEqual(selected, expected);
+    }
   });
 
   describe("profile policy fixtures", () => {
