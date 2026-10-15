@@ -1,17 +1,17 @@
-// Static parity test: the nine legacy `evals/tasks/*.yaml` fixtures must still
+// Static parity test: the `evals/tasks/*.yaml` fixtures must still
 // describe exactly what the Vally suite asserts.
 
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { checkParity, loadLegacyTasks, loadStimuli } from "../../parity/legacy-parity.js";
-import { TemplateComplianceReportGrader, resolveConfig } from "../template-compliance-report.js";
+import { PublicationReportGrader, resolveConfig } from "../publication-report.js";
 import { ALL_RULES, CORE_RULES, report } from "./report-fixtures.js";
 
 describe("legacy fixture parity", () => {
-  it("keeps all nine legacy task fixtures", () => {
+  it("keeps the legacy tasks and policy/profile regressions", () => {
     const tasks = loadLegacyTasks();
-    assert.equal(tasks.length, 9, "legacy evals/tasks fixtures must be preserved until live parity is observed");
+    assert.equal(tasks.length, 25, "publication and project journeys must retain suite parity");
     assert.deepEqual(
       tasks.map((t) => t.id).sort(),
       [
@@ -21,9 +21,25 @@ describe("legacy fixture parity", () => {
         "ambiguous-evidence",
         "ambiguous-publication-scope",
         "compliant-template",
+        "copilot-init",
+        "existing-code",
+        "existing-configuration",
+        "generated-submission",
+        "minimal-init",
         "optional-assets-and-validator-limits",
+        "organization-policy-empty",
+        "organization-policy-inaccessible",
+        "organization-policy-missing",
+        "organization-policy-selected",
+        "partial-setup",
+        "policy-interpretation",
+        "private-core-only",
+        "public-preparation",
         "remediation-needed",
         "should-not-trigger",
+        "template-derived",
+        "template-init",
+        "troubleshoot",
       ],
     );
   });
@@ -44,14 +60,14 @@ describe("legacy fixture parity", () => {
       0,
       violations.map((v) => `[${v.code}] ${v.subject}: ${v.message}`).join("\n"),
     );
-    assert.equal(checked, 9);
+    assert.equal(checked, 25);
   });
 
-  it("gives every stimulus a deterministic template-compliance-report grader", () => {
+  it("gives every stimulus a deterministic publication-report grader", () => {
     const { stimuli } = loadStimuli();
     for (const stimulus of stimuli) {
-      const grader = (stimulus.graders ?? []).find((g) => g.type === "template-compliance-report");
-      assert.ok(grader, `${stimulus.name} has no template-compliance-report grader`);
+      const grader = (stimulus.graders ?? []).find((g) => g.type === "publication-report");
+      assert.ok(grader, `${stimulus.name} has no publication-report grader`);
     }
   });
 
@@ -62,14 +78,14 @@ describe("legacy fixture parity", () => {
     assert.ok(Math.abs(total - 1) < 0.01, `weights sum to ${total}`);
     assert.equal(spec.scoring?.threshold, 1);
     assert.ok(
-      weights["template-compliance-report"] > weights.prompt,
+      weights["publication-report"] > weights.prompt,
       "the deterministic grader must outweigh the prompt judge",
     );
   });
 });
 
 describe("eval.yaml grader configs are satisfiable", () => {
-  const grader = new TemplateComplianceReportGrader();
+  const grader = new PublicationReportGrader();
   const { stimuli } = loadStimuli();
 
   /** Derive the overall verdict the contract requires for a status set. */
@@ -82,7 +98,7 @@ describe("eval.yaml grader configs are satisfiable", () => {
   }
 
   for (const stimulus of stimuli) {
-    const config = (stimulus.graders ?? []).find((g) => g.type === "template-compliance-report")?.config;
+    const config = (stimulus.graders ?? []).find((g) => g.type === "publication-report")?.config;
 
     it(`${stimulus.name}: an ideal report satisfies every declared assertion`, async () => {
       const resolved = resolveConfig(config);
@@ -104,20 +120,48 @@ describe("eval.yaml grader configs are satisfiable", () => {
         for (const rule of CORE_RULES) {
           if (!forbidden.has(rule)) statuses[rule] = "UNABLE TO DETERMINE";
         }
+        // Profile-aware partial expectations still require all shared core rules.
+        if (resolved.destinationProfile !== undefined) {
+          for (const rule of CORE_RULES) {
+            if (!(rule in statuses) && !forbidden.has(rule)) {
+              statuses[rule] = resolved.readiness?.core === "PASS" ? "PASS" : "UNABLE TO DETERMINE";
+            }
+          }
+        }
       }
       // A non-exhaustive expectation must tolerate rules it does not pin.
       if (!resolved.exhaustive) {
         const extra = ALL_RULES.find((rule) => !(rule in statuses) && !forbidden.has(rule));
-        if (extra) statuses[extra] = "PASS";
+        if (extra) statuses[extra] = resolved.destinationProfile === "unresolved" ? "UNABLE TO DETERMINE" : "PASS";
       }
 
+      assert.ok(resolved.destinationProfile, `${stimulus.name}: declare the report profile explicitly`);
+      if (resolved.destinationProfile === "public-awesome-azd" && !resolved.exhaustive) {
+        for (const rule of ALL_RULES) {
+          if (!(rule in statuses) && !forbidden.has(rule) &&
+              !(rule === "AZD-AWESOME-006" && resolved.publicStage === "preparation")) {
+            statuses[rule] = "UNABLE TO DETERMINE";
+          }
+        }
+      }
+      const readiness = resolved.readiness ?? {
+        core: deriveOverall(Object.fromEntries(Object.entries(statuses).filter(([id]) => id.startsWith("AZD-CORE-")))),
+        destination: deriveOverall(Object.fromEntries(Object.entries(statuses).filter(([id]) => !id.startsWith("AZD-CORE-")))),
+      };
       const overall = resolved.overallResult ?? deriveOverall(statuses);
       assert.ok(
         !resolved.forbiddenOverall.includes(overall),
         `${stimulus.name}: the ideal report's overall verdict ${overall} is itself forbidden`,
       );
 
-      const result = await grader.grade({ trajectory: { output: report({ overall, statuses }) }, config });
+      const result = await grader.grade({
+        trajectory: { output: report({
+          overall, statuses,
+          profile: resolved.destinationProfile,
+          stage: resolved.publicStage,
+          readiness,
+        }) }, config,
+      });
       assert.equal(result.passed, true, `${stimulus.name}: ${result.evidence}`);
     });
   }

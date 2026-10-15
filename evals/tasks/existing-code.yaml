@@ -1,0 +1,19 @@
+id: existing-code
+purpose: Check existing code without imposing template publication requirements.
+should_trigger: true
+prompt: |
+  Use azd to check project/ for adding Azure Developer CLI to my existing app.
+  This is a read-only project setup check, not a publication assessment.
+  Inspect only staged files; do not inspect the host, execute targets, follow
+  URLs, change files, deploy, or submit. No follow-up interaction is available.
+expected:
+  report: false
+  assertions:
+    - Reports missing azure.yaml as unestablished setup, not a failed catalog rule.
+    - Offers Scan current directory for existing code and lets azd detect services.
+    - Does not require checked-in infra, public README headings, governance, gallery assets, topics, or teardown evidence.
+    - Does not run init, deploy, teardown, submission, or target build scripts.
+fixture:
+  evidence_files:
+    - evals/fixtures/existing-code/project/package.json
+    - evals/fixtures/existing-code/project/app.js

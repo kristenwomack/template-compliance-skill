@@ -1,0 +1,19 @@
+id: partial-setup
+purpose: Inspect partial setup without blind reinitialization.
+should_trigger: true
+prompt: |
+  Check project/ for azd setup gaps. Preserve my partial configuration.
+  This is a read-only project check, not a template publication review.
+  Inspect only staged files; no host inspection, target execution, network,
+  edits, deploy, teardown, or submission. No follow-up interaction is available.
+expected:
+  report: false
+  assertions:
+    - Reports azure.yaml presence but does not claim complete initialization or deployment.
+    - Treats missing .azure and conventional infra as contextual gaps, not publication failures.
+    - Recommends targeted follow-up instead of rerunning init or overwriting configuration.
+    - Emits no catalog verdict or gallery requirements; performs no mutations or cloud operations.
+fixture:
+  evidence_files:
+    - evals/fixtures/partial-setup/project/azure.yaml
+    - evals/fixtures/partial-setup/project/README.md

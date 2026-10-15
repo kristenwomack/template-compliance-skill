@@ -91,7 +91,7 @@ repository:
       - appservice
       - bicep
 schema_validation:
-  schema_url: https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/azd-schema
+  schema_url: https://aka.ms/azure.yaml.json
   retrieved_at: 2026-08-30T12:00:00Z
   target_commit: a17b39f452a6d7c18d2a0f5e901b4667d24de811
   result: pass
@@ -136,14 +136,13 @@ evidence:
     errors: 0
     log_excerpt: "PSRule for Azure: 0 errors, 0 warnings."
   gallery:
+    path: direct-pr
     title: Python App Service Starter
     short_description: Deploy a Python web app to Azure App Service with Bicep and azd.
     source: https://github.com/example/python-appservice-template
     author: Example Templates Team
-    image:
-      url: https://raw.githubusercontent.com/example/python-appservice-template/a17b39f/assets/gallery.png
-      http_status: 200
-      content_type: image/png
+    authorUrl: https://github.com/example
+    uuid_uniqueness: No other gallery entry uses this UUID in the supplied complete entry listing.
     tags:
       technology: web
       language: python

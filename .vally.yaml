@@ -10,5 +10,5 @@ suites:
     filter:
       priority: [p0, p1]
   full:
-    description: Complete template-compliance behavioral evaluation.
+    description: Complete azd behavioral evaluation.
     evals: evals/eval.yaml

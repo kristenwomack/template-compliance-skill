@@ -1,0 +1,5 @@
+{
+  "name": "existing-app",
+  "private": true,
+  "scripts": { "build": "node app.js" }
+}

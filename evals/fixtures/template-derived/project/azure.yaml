@@ -1,0 +1,4 @@
+name: template-app
+metadata:
+  template: example-selected-template
+services: {}

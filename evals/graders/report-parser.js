@@ -1,7 +1,7 @@
-// Deterministic parser for template-compliance Markdown reports.
+// Deterministic parser for template publication Markdown reports.
 //
 // The report contract lives in
-// `skills/template-compliance/references/report-format.md`. This module turns a
+// `skills/azd/references/report-format.md`. This module turns a
 // report into structured data without any model in the loop, so an eval can
 // assert the exact overall result and the exact {rule ID: status} map instead of
 // asking a judge to eyeball it.
@@ -21,8 +21,13 @@ export const OVERALL_RESULTS = Object.freeze([
 /** Statuses allowed on an individual finding. */
 export const FINDING_STATUSES = Object.freeze(["PASS", "FAIL", "UNABLE TO DETERMINE"]);
 
-/** Rule IDs the bundled catalog issues, e.g. `AZD-CORE-001`, `AZD-AWESOME-008`. */
+/** Bundled IDs; fixture-specific document headings use rule_id_pattern. */
 export const DEFAULT_RULE_ID_PATTERN = "AZD-[A-Z]+-\\d{3}";
+
+export const DESTINATION_PROFILES = Object.freeze([
+  "core-only", "public-awesome-azd", "organization-catalog", "unresolved",
+]);
+export const DESTINATION_RESULTS = Object.freeze([...OVERALL_RESULTS, "NOT ASSESSED"]);
 
 /** Closing sentence the report contract requires. */
 export const DEFAULT_INTEGRITY_STATEMENT = "No target templates were modified.";
@@ -162,7 +167,12 @@ function compileRuleIdMatcher(pattern) {
     const found = [];
     let m;
     while ((m = re.exec(text)) !== null) {
-      found.push(m[1]);
+      // Bundled IDs can carry a descriptive title. A selected document heading
+      // is instead the whole rule identity, not a prefix of another heading.
+      if (/^AZD-[A-Z]+-\d{3}$/.test(m[1]) ||
+          normalizeLabel(text.replace(/\s+#+\s*$/, "")) === normalizeLabel(m[1])) {
+        found.push(m[1]);
+      }
       if (m.index === re.lastIndex) re.lastIndex++;
     }
     return found;
@@ -170,7 +180,7 @@ function compileRuleIdMatcher(pattern) {
 }
 
 /**
- * Parse a template-compliance report.
+ * Parse a template publication report.
  *
  * @param {string} text Raw agent output.
  * @param {{ruleIdPattern?: string, integrityStatement?: string}} [options]
@@ -401,6 +411,33 @@ export function parseReport(text, options = {}) {
     }
   }
 
+  const readiness = { profile: null, stage: null, core: null, destination: null };
+  const readinessFields = new Map([
+    ["destination profile", ["profile", DESTINATION_PROFILES]],
+    ["public stage", ["stage", ["preparation", "submission"]]],
+    ["core readiness", ["core", OVERALL_RESULTS]],
+    ["destination readiness", ["destination", DESTINATION_RESULTS]],
+  ]);
+  let hasReadiness = false;
+  const seenReadiness = new Set();
+  for (const pair of pairs) {
+    const field = readinessFields.get(pair.label);
+    if (!field) continue;
+    hasReadiness = true;
+    const [key, allowed] = field;
+    const value = key === "profile" || key === "stage"
+      ? normalizeLabel(pair.value)
+      : normalizeStatus(pair.value);
+    if (seenReadiness.has(key)) {
+      malformed.push({ ruleId: null, reason: "readiness-field-duplicate", line: pair.line, raw: pair.value });
+    } else if (!allowed.includes(value)) {
+      malformed.push({ ruleId: null, reason: "readiness-field-invalid", line: pair.line, raw: pair.value });
+    } else {
+      readiness[key] = value;
+    }
+    seenReadiness.add(key);
+  }
+
   let overallResult = null;
   let overallResultRaw = null;
   let overallResultLine = null;
@@ -457,6 +494,15 @@ export function parseReport(text, options = {}) {
   }
 
   const integrityStatementFound = flatten(source).includes(flatten(integrityStatement));
+  // An overall status can summarize ordinary diagnostics. Require evidence
+  // specific to publication assessment, even when that report is malformed.
+  const publicationHeading = lines.some((line) => {
+    const heading = HEADING_RE.exec(line);
+    return heading && /\b(?:compliance|publication(?: readiness)?) report\b/.test(normalizeLabel(heading[2]));
+  });
+  const hasReportSignals = records.length > 0 || hasReadiness || publicationHeading ||
+    malformed.some((entry) => entry.reason !== "overall-result-invalid") ||
+    pairs.some((pair) => pair.label === "overall compliance");
 
   return {
     overallResult,
@@ -467,9 +513,11 @@ export function parseReport(text, options = {}) {
     duplicates,
     malformed,
     summary,
+    readiness,
+    hasReadiness,
     integrityStatementFound,
     /** True when the output looks like a compliance report at all. */
-    hasReportSignals: records.length > 0 || malformed.length > 0 || overallResult !== null,
+    hasReportSignals,
   };
 }
 
