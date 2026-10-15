@@ -25,7 +25,7 @@ and command help before choosing options; preview capabilities may vary.
 | --- | --- | --- |
 | “Help me add azd to this existing app.” | Build/adapt | Only requested local changes. |
 | “Initialize from this template” or “Start minimal.” | Build/adapt | Inspect code before execution; preserve existing files. |
-| “Help me use Copilot-assisted init.” | Build/adapt | Preview handoff to a separate terminal agent session requires explicit approval. |
+| “Help me use Copilot-assisted init.” | Build/adapt | A separate Copilot agent-session handoff under `azd init` requires explicit approval; no recursive handoff from a running agent. |
 | “Diagnose this azd deploy error.” | Operate/troubleshoot | Read-only diagnosis first; cloud changes require authorization. |
 | “Check this project's azd setup.” | Project check | Read-only facts and gaps, not template publication rules. |
 | “Review this template for Awesome AZD preparation.” | Publication review | Read-only core plus selected destination policy; no implicit submission. |
@@ -52,6 +52,14 @@ Existing-code initialization can generate `azure.yaml`, `.azure`, and
 `.gitignore` without checked-in infrastructure. Partial and existing
 configurations need targeted inspection, not an automatic reset.
 See the [documented init workflows](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/azd-init-workflow).
+
+Copilot-assisted init creates a separate Copilot agent session through the running
+`azd init` command; it need not open a separate visible terminal. That session may
+inspect and modify project files using approved tools. Explain this capability
+and obtain explicit approval before handoff. An already-running agent must not
+invoke it recursively; offer scan, template, or minimal alternatives instead.
+See [verified session implementation](skills/azd/references/init-sources.md#copilot-agent-session-handoff);
+availability still depends on installed version/help.
 
 **Initialized**, **deployed**, **publication-ready**, and **accepted** are
 different states. Files alone prove neither a successful deployment nor

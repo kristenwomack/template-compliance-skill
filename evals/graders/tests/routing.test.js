@@ -27,8 +27,22 @@ describe("azd router and workflow boundaries", () => {
       assert.ok(text.includes(phrase), `missing ${phrase}`);
     }
     const build = read("references/build.md");
-    for (const phrase of ["Scan current directory", "--template", "--minimal", "separate terminal agent session", "explicit approval", "without checked-in infrastructure"]) {
+    for (const phrase of ["Scan current directory", "--template", "--minimal", "separate Copilot agent session", "explicit approval", "without checked-in infrastructure"]) {
       assert.ok(build.includes(phrase), `missing ${phrase}`);
+    }
+  });
+
+  it("describes the Copilot session without requiring another terminal or recursive handoff", () => {
+    const build = read("references/build.md");
+    const readme = fs.readFileSync(new URL("../../../README.md", import.meta.url), "utf8");
+    for (const text of [build, readme].map((value) => value.replace(/\s+/g, " "))) {
+      assert.match(text, /running.*(?:command|azd init)/);
+      assert.match(text, /(?:not necessarily|need not open).*separate visible terminal/);
+      assert.match(text, /(?:inspect\/modify|inspect and modify).*files/);
+      assert.match(text, /approved tools/);
+      assert.match(text, /already-running agent must not/);
+      assert.match(text, /explicit approval/);
+      assert.doesNotMatch(text, /separate terminal agent session/);
     }
   });
 

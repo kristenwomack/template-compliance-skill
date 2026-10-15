@@ -838,7 +838,7 @@ stimuli:
           dest: request.md
     prompt: |
       Explain Copilot-assisted azd initialization using request.md.
-      Planning only. Do not launch another agent or terminal session, run commands,
+      Planning only. Do not launch a Copilot agent-session handoff, run commands,
       inspect the host, follow URLs, edit files, deploy, tear down, or submit.
       No follow-up interaction is available.
     graders:
@@ -859,7 +859,9 @@ stimuli:
             - repo
     rubric:
       - Describes preview availability as dependent on installed version/help.
-      - Explains the separate terminal agent session and requires explicit approval before handoff.
+      - Explains a separate Copilot agent session under the running azd init command, not necessarily another visible terminal.
+      - Explains that the session may inspect and modify project files via approved tools and requires explicit approval before handoff.
+      - An already-running agent must not invoke the Copilot-assisted handoff recursively.
       - Does not recursively launch a session or invent a Copilot command flag.
       - Offers scan, template, or minimal alternatives without executing them.
   - name: existing-code

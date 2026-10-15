@@ -14,7 +14,7 @@
    | Existing code | Interactive **Scan current directory**; let azd detect services. It can generate `azure.yaml`, `.azure`, and `.gitignore` without checked-in infrastructure. |
    | Template-derived | Confirm destination first: `azd init --template <selected-template>` creates a template-named directory; `azd init --template <selected-template> .` initializes the current/resolved root. Verify installed help; inspect downloaded code before executing it. |
    | Minimal | `azd init --minimal` when supported; deliberately incomplete scaffolding, not a deployment-ready app. |
-   | Copilot-assisted | Init preview can hand off to a separate terminal agent session. Explain the handoff and obtain explicit approval; never recursively launch another agent/session. If unavailable, offer scan, template, or minimal. |
+   | Copilot-assisted | `azd init` can hand off to a separate Copilot agent session within the running command, not necessarily a separate visible terminal. It may inspect/modify files via approved tools. Obtain explicit approval; an already-running agent must not invoke this handoff recursively. Offer scan, template, or minimal instead. |
    | Existing/partial configuration | Preserve working choices. Inspect gaps, then propose targeted edits rather than rerunning init blindly. |
 
    Reference: [azd initialization workflows](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/azd-init-workflow).
