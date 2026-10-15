@@ -117,6 +117,19 @@ test("raw HTML is indeterminate rather than a false heading pass", async (t) => 
   assert.equal(status(await checkPublication({ root, profile: "public-awesome-azd" }), "AZD-AWESOME-007"), "UNABLE TO DETERMINE");
 });
 
+test("CommonMark URL and email autolinks do not make valid headings unknown", async (t) => {
+  const root = await fixture(t);
+  const headings = REQUIRED_HEADINGS.map((heading) => `## ${heading}`).join("\n");
+  for (const link of ["<https://example.com>", "<mailto:help@example.com>", "<help+azd@example.com>", "<custom+scheme:resource>"]) {
+    await write(root, "README.md", `${link}\n${headings}`);
+    assert.equal(status(await checkPublication({ root, profile: "public-awesome-azd" }), "AZD-AWESOME-007"), "PASS", link);
+  }
+  for (const html of ["<div>", "<pre>", "<https://example.com> <div>", "<user@example.com invalid>", "<a href='https://example.com'>"]) {
+    await write(root, "README.md", `${html}\n${headings}`);
+    assert.equal(status(await checkPublication({ root, profile: "public-awesome-azd" }), "AZD-AWESOME-007"), "UNABLE TO DETERMINE", html);
+  }
+});
+
 test("invalid scope and CLI flags are rejected rather than silently defaulted", async (t) => {
   const root = await fixture(t);
   for (const options of [

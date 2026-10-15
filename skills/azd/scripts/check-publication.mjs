@@ -7,6 +7,9 @@ const CATALOG = JSON.parse(await fs.readFile(new URL("../policy/publication-cata
 export const REQUIRED_HEADINGS = CATALOG.required_headings;
 export const GOVERNANCE_FILES = CATALOG.governance_files;
 const PROFILES = ["core-only", "public-awesome-azd", "organization-catalog", "unresolved"];
+// CommonMark URI and email autolinks are not raw HTML. Schemes contain
+// 2–32 characters; email domains use DNS-shaped labels.
+const AUTOLINK = /<(?:[A-Za-z][A-Za-z0-9+.-]{1,31}:[^\x00-\x20<>]*|[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*)>/g;
 
 export function readH2(content) {
   const headings = [];
@@ -112,7 +115,7 @@ export async function checkPublication({ root, repositoryRoot, profile, stage })
     const readme = await inspectScoped(root, "README.md");
     const headings = readme.state === "present" ? readH2(readme.content) : [];
     const unsupportedHtml = readme.state === "present"
-      && /^ {0,3}<\/?[A-Za-z][^>]*>/m.test(readme.content.replace(/<!--[\s\S]*?-->/g, ""));
+      && /^ {0,3}<\/?[A-Za-z][^>]*>/m.test(readme.content.replace(/<!--[\s\S]*?-->/g, "").replace(AUTOLINK, ""));
     const evidence = unsupportedHtml
       ? [{ path: readme.path, state: "unknown", reason: "Raw HTML may affect Markdown heading structure; inspect manually." }]
       : readme.state === "present" ? REQUIRED_HEADINGS.map((title) => {
