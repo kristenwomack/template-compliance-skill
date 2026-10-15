@@ -11,6 +11,7 @@ import { checkPublication, REQUIRED_HEADINGS, GOVERNANCE_FILES } from "../../../
 
 const REFERENCES = path.join(REPO_ROOT, "skills", "azd", "references");
 const REVISION = "22de60335bd77269a2e952cd0e3e8fab56ed4aa1";
+const SUBMISSION_REVISION = "c463284b7c756047e8732832f0ca65b85e37f24e";
 const MODULES = ["core-azd-rules.md", "awesome-azd-publication-rules.md", "awesome-azd-submission-rules.md"];
 
 function loadRules() {
@@ -136,6 +137,12 @@ describe("catalog provenance", () => {
       assert.ok(rule.references?.length > 0, `${rule.id} has no source`);
       assert.ok(Number.isInteger(rule.version) && rule.version >= 1, rule.id);
       if (rule.requirement_kind === "upstream-guidance") {
+        if (rule.id === "AZD-AWESOME-005") {
+          assert.equal(rule.source_revision, SUBMISSION_REVISION);
+          assert.equal(rule.version, 2);
+          assert.ok(rule.references.every((url) => url.startsWith(`https://github.com/Azure/awesome-azd/blob/${SUBMISSION_REVISION}/`)));
+          continue;
+        }
         assert.equal(rule.source_revision, REVISION, rule.id);
         assert.ok(
           rule.references.every((url) => url.startsWith(`https://github.com/Azure-Samples/azd-template-artifacts/blob/${REVISION}/`) && url.includes("#")),
@@ -146,6 +153,29 @@ describe("catalog provenance", () => {
         assert.ok(rule.references.includes("https://aka.ms/azure.yaml.json"));
         assert.ok(rule.source_revision.startsWith("live-platform-reference"));
       }
+    }
+  });
+
+  it("versions path/stage-specific submission policy and exercises optional metadata", () => {
+    const catalog = JSON.parse(fs.readFileSync(path.join(REFERENCES, "..", "policy", "publication-catalog.json"), "utf8"));
+    assert.equal(catalog.identity, "azd-publication@5");
+    const rule = rules.find((entry) => entry.id === "AZD-AWESOME-005");
+    for (const phrase of ["Automated issue preparation", "automated generated PR", "Direct PR", "Recommended"]) {
+      assert.ok(rule.requirement.includes(phrase), phrase);
+    }
+    assert.match(rule.unknown, /applicability/);
+    const prep = YAML.parse(fs.readFileSync(path.join(REPO_ROOT, "evals/fixtures/public-preparation/public-evidence.yaml"), "utf8"));
+    assert.deepEqual(Object.keys(prep.evidence.gallery).sort(), ["path", "source"]);
+    const generated = YAML.parse(fs.readFileSync(path.join(REPO_ROOT, "evals/fixtures/generated-submission/metadata.yaml"), "utf8"));
+    assert.equal(generated.evidence.gallery.path, "automated-generated-pr");
+    assert.equal(generated.evidence.gallery.final_entry.preview, undefined);
+    assert.equal(generated.evidence.gallery.final_entry.frameworks, undefined);
+    assert.ok(generated.evidence.gallery.final_entry.id);
+    for (const name of ["all-rules-pass", "all-rules-fail"]) {
+      const fixture = YAML.parse(fs.readFileSync(path.join(REPO_ROOT, `evals/fixtures/${name}/evidence.yaml`), "utf8"));
+      const task = YAML.parse(fs.readFileSync(path.join(REPO_ROOT, `evals/tasks/${name}.yaml`), "utf8"));
+      assert.equal(fixture.evidence.gallery.path, "direct-pr");
+      assert.deepEqual(fixture.evidence.gallery, task.fixture.evidence.gallery);
     }
   });
 

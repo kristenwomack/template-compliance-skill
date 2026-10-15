@@ -10,7 +10,7 @@ Edit bundled rules and module introductions in `policy/publication-catalog.json`
 `npm run catalog:generate` from the repository root. Generated YAML views are not
 independently editable policy. `npm run catalog:check` rejects stale views.
 
-Catalog identity: `azd-publication@4`. See [policy sources and interpretation](policy-sources.md) for the pinned upstream revision, source-to-rule mapping, local evidence safeguards, and conflict decisions. Upstream requirements inform this catalog; catalog approval is not official azd certification or collection acceptance.
+Catalog identity: `azd-publication@5`. See [policy sources and interpretation](policy-sources.md) for the pinned upstream revisions, source-to-rule mapping, local evidence safeguards, and conflict decisions. Upstream requirements inform this catalog; catalog approval is not official azd certification or collection acceptance.
 
 ## Active modules
 

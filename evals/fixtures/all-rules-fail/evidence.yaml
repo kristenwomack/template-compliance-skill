@@ -51,7 +51,9 @@ evidence:
     warnings: 3
     errors: 1
     log_excerpt: "PSRule for Azure: 1 error, 3 warnings; storage account allows shared key access."
-  gallery: {}
+  gallery:
+    path: direct-pr
+    final_entry: {}
   submission:
     kind: email-to-maintainer
     result: unsupported-path

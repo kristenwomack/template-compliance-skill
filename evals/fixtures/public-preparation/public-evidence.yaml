@@ -136,18 +136,5 @@ evidence:
     errors: 0
     log_excerpt: "PSRule for Azure: 0 errors, 0 warnings."
   gallery:
-    title: Python App Service Starter
-    short_description: Deploy a Python web app to Azure App Service with Bicep and azd.
+    path: automated-issue
     source: https://github.com/example/python-appservice-template
-    author: Example Templates Team
-    image:
-      url: https://raw.githubusercontent.com/example/python-appservice-template/a17b39f/assets/gallery.png
-      http_status: 200
-      content_type: image/png
-    tags:
-      technology: web
-      language: python
-      framework: flask
-      azure_service: app-service
-      iac: bicep
-    uuid: 123e4567-e89b-12d3-a456-426614174000

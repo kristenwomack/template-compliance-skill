@@ -1,0 +1,25 @@
+evidence_scope: Synthetic override for all-rules-pass/evidence.yaml. Replace only evidence.gallery and evidence.submission with the records below; retain all other base evidence. No live verification is claimed.
+evidence:
+  gallery:
+    path: automated-generated-pr
+    entry_path: website/static/templates.json
+    applicable_categories: [languages, azureServices, IaC]
+    framework_applicability: No application framework is used; this scenario uses Python standard-library HTTP serving.
+    uuid_uniqueness: No other entry in the supplied complete gallery listing uses this id.
+    final_entry:
+      title: Python App Service Starter
+      description: Deploy a Python web app to Azure App Service with Bicep and azd.
+      author: Example Templates Team
+      authorUrl: https://github.com/example
+      source: https://github.com/example/python-appservice-template
+      tags: [community, new]
+      languages: [python]
+      azureServices: [appservice]
+      IaC: [bicep]
+      id: 123e4567-e89b-12d3-a456-426614174000
+    tag_taxonomy_evidence: All supplied tags are recognized by the selected gallery taxonomy.
+  submission:
+    kind: automated-template-submission-issue
+    url: https://github.com/Azure/awesome-azd/issues/9998
+    generated_pr: https://github.com/Azure/awesome-azd/pull/9999
+    generated_entry_access: readable

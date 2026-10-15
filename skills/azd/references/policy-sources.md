@@ -1,6 +1,6 @@
 # Policy sources and interpretation
 
-Catalog identity: `azd-publication@4`.
+Catalog identity: `azd-publication@5`.
 
 ## Versioned guidance baseline
 
@@ -33,7 +33,36 @@ accepted, or endorsed the target.
 | AZD-CORE-004 | [Core requirements](https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/readme.md#core-azd-template-requirements) | Code, configuration, and documentation supporting the happy path. |
 | AZD-AWESOME-001, AZD-AWESOME-002, AZD-AWESOME-003, AZD-AWESOME-007 | [Repository baseline](https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/development-guidelines/definition-of-done.md#awesome-azd-repository-baseline) | Applies only to explicit public collection readiness, not private or standalone projects. |
 | AZD-AWESOME-004, AZD-AWESOME-008 | [Review and publication readiness](https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/docs/development-guidelines/definition-of-done.md#review-and-publication-readiness) | Reviewable evidence and PSRule validation without warnings. |
-| AZD-AWESOME-005, AZD-AWESOME-006 | [Submission guidance](https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/publishing-guidelines.md#4-submit-to-awesome-azd) | Prepared gallery materials and the two recognized submission paths. |
+| AZD-AWESOME-005 v2 | [Verified submission flow](#verified-submission-flow) | Path/stage-specific inputs and final gallery metadata; preview is Recommended. |
+| AZD-AWESOME-006 | [Submission guidance](https://github.com/Azure-Samples/azd-template-artifacts/blob/22de60335bd77269a2e952cd0e3e8fab56ed4aa1/publishing-guidelines.md#4-submit-to-awesome-azd) | The two recognized submission paths. |
+
+## Verified submission flow
+
+Read-only GitHub API verification on 2026-10-15 pinned `Azure/awesome-azd` HEAD
+[`c463284b7c756047e8732832f0ca65b85e37f24e`](https://github.com/Azure/awesome-azd/tree/c463284b7c756047e8732832f0ca65b85e37f24e).
+This newer flow supersedes the older blanket metadata interpretation for rule 005
+only; other rules retain their listed baseline.
+
+- [Issue form](https://github.com/Azure/awesome-azd/blob/c463284b7c756047e8732832f0ca65b85e37f24e/.github/ISSUE_TEMPLATE/template-submission.yml):
+  only Source Repository is required. All other fields are optional overrides.
+- [Workflow](https://github.com/Azure/awesome-azd/blob/c463284b7c756047e8732832f0ca65b85e37f24e/.github/workflows/template-submission.yml)
+  extracts metadata and creates a PR. Inspect that generated entry once available;
+  do not fail issue preparation for fields the workflow will generate.
+- [Entry writer](https://github.com/Azure/awesome-azd/blob/c463284b7c756047e8732832f0ca65b85e37f24e/website/scripts/update-templates-json.js)
+  generates a UUID, requires an author URL, allows empty preview and IaC, and
+  adds language/framework/service arrays only when non-empty.
+- [Contributor guide](https://github.com/Azure/awesome-azd/blob/c463284b7c756047e8732832f0ca65b85e37f24e/website/docs/contribute.md#submit-a-pr)
+  lists direct-entry title, description, attribution name/link, source, tags and
+  unique UUID. Check the prepared/final entry, not an issue-input checklist.
+- [Schema reference](https://github.com/Azure/awesome-azd/blob/c463284b7c756047e8732832f0ca65b85e37f24e/docs/templates-schema.md)
+  requires non-empty title, description, author, GitHub source and recognized tags;
+  preview and category arrays are optional. It treats authorUrl as optional,
+  unlike the writer and contributor guide. The guide also lists an image.
+  **Catalog interpretation:** retain attribution link and UUID for PR entries,
+  require only categories known to apply, and label preview **Recommended** for
+  both paths. Do not claim every upstream document agrees or that PASS guarantees
+  acceptance. Unknown applicability/entry access remains uncertainty; preview
+  absence or access never changes a finding.
 
 ## Explicit local evidence safeguards
 
@@ -84,4 +113,5 @@ include testing the end-user setup path, covering changed logic, explaining
 authentication and secrets handling, and preferring Entra ID or managed identities
 where supported. Do not claim those practices were verified by this compliance
 audit. Dev containers, CI/CD, screenshots, and demo videos remain optional unless
-a specific applicable rule requires a particular submission asset.
+a specific applicable rule requires a particular submission asset. Gallery preview
+images are **Recommended**, not required by AZD-AWESOME-005.

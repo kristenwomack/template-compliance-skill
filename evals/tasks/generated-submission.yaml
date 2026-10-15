@@ -1,0 +1,37 @@
+id: generated-submission
+purpose: Inspect generated PR metadata rather than requiring optional issue overrides or irrelevant categories.
+should_trigger: true
+prompt: |
+  Assess public Awesome AZD submission readiness read-only.
+  evidence.yaml is the complete synthetic base evidence. metadata.yaml explicitly
+  replaces only evidence.gallery and evidence.submission. Use its generated PR
+  entry, not the base direct-PR entry. No framework applies to this scenario.
+  Do not inspect the host, run targets, or follow URLs.
+fixture:
+  evidence_files:
+    - evals/fixtures/all-rules-pass/evidence.yaml
+    - evals/fixtures/generated-submission/metadata.yaml
+expected:
+  destination_profile: public-awesome-azd
+  public_stage: submission
+  readiness: {core: PASS, destination: PASS}
+  overall_result: PASS
+  finding_status:
+    AZD-CORE-001: PASS
+    AZD-CORE-002: PASS
+    AZD-CORE-003: PASS
+    AZD-CORE-004: PASS
+    AZD-CORE-005: PASS
+    AZD-CORE-006: PASS
+    AZD-AWESOME-001: PASS
+    AZD-AWESOME-002: PASS
+    AZD-AWESOME-003: PASS
+    AZD-AWESOME-004: PASS
+    AZD-AWESOME-005: PASS
+    AZD-AWESOME-006: PASS
+    AZD-AWESOME-007: PASS
+    AZD-AWESOME-008: PASS
+  assertions:
+    - Inspects the supplied generated PR entry for AZD-AWESOME-005, including generated id and attribution link.
+    - Missing preview and inapplicable frameworks do not fail or add findings; preview is Recommended separately.
+    - Does not demand optional issue overrides or a user-generated UUID after automation has generated the entry.

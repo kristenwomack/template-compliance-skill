@@ -34,6 +34,7 @@ expected:
     AZD-AWESOME-007: PASS
     AZD-AWESOME-008: PASS
   assertions:
+    - Automated issue preparation passes AZD-AWESOME-005 with only the source URL; overrides, preview and a caller-provided UUID are not required.
     - Does not require an open PR or submission issue and emits no AZD-AWESOME-006 finding.
     - Assesses seven public preparation rules plus six core rules with visible catalog and source versions.
     - Does not claim a submission is underway or gallery acceptance is guaranteed.

@@ -209,6 +209,7 @@ stimuli:
           scoring: binary
           evidence: [trajectory, diff, repo]
     rubric:
+      - Direct PR metadata passes without a preview image; recommend one separately without changing counts.
       - Every PASS cites supplied file, metadata, commit, URL, or recorded-result evidence.
       - The report separately evaluates schema validation, infrastructure fit, documented azd up paths, execution, teardown, README content and headings, topics, security validation, gallery metadata, and submission authority.
       - The agent does not modify the fixture or follow the example URLs.
@@ -259,6 +260,7 @@ stimuli:
           scoring: binary
           evidence: [trajectory, diff, repo]
     rubric:
+      - AZD-AWESOME-005 fails for the empty direct PR entry, not for an absent preview or optional issue overrides.
       - The report cites failing validation checks only when they map to active catalog rules.
       - AZD-AWESOME-008 fails from the supplied security warnings and errors rather than merely from absent files.
       - The report gives rule-specific remediation, makes no changes, and does not misclassify proven missing required files as uncertainty.
@@ -767,9 +769,61 @@ stimuli:
           scoring: binary
           evidence: [trajectory, diff, repo]
     rubric:
+      - Automated issue preparation passes AZD-AWESOME-005 with only the source URL; overrides, preview and a caller-provided UUID are not required.
       - Does not require an open PR or submission issue and emits no AZD-AWESOME-006 finding.
       - Assesses seven public preparation rules plus six core rules with visible catalog and source versions.
       - Does not claim a submission is underway or gallery acceptance is guaranteed.
+
+  - name: generated-submission
+    tags:
+      priority: p1
+      coverage: [submission-paths, generated-metadata, optional-preview]
+    agent_environment:
+      files:
+        - src: fixtures/all-rules-pass/evidence.yaml
+          dest: evidence.yaml
+        - src: fixtures/generated-submission/metadata.yaml
+          dest: metadata.yaml
+    prompt: |
+      Assess public Awesome AZD submission readiness read-only.
+      evidence.yaml is the complete synthetic base evidence. metadata.yaml explicitly
+      replaces only evidence.gallery and evidence.submission. Use its generated PR
+      entry, not the base direct-PR entry. No framework applies to this scenario.
+      Do not inspect the host, run targets, or follow URLs.
+    graders:
+      - type: skill-invocation
+        config:
+          required: [azd]
+      - type: diff-empty
+      - type: publication-report
+        config:
+          destination_profile: public-awesome-azd
+          public_stage: submission
+          readiness: {core: PASS, destination: PASS}
+          overall_result: PASS
+          findings:
+            AZD-CORE-001: PASS
+            AZD-CORE-002: PASS
+            AZD-CORE-003: PASS
+            AZD-CORE-004: PASS
+            AZD-CORE-005: PASS
+            AZD-CORE-006: PASS
+            AZD-AWESOME-001: PASS
+            AZD-AWESOME-002: PASS
+            AZD-AWESOME-003: PASS
+            AZD-AWESOME-004: PASS
+            AZD-AWESOME-005: PASS
+            AZD-AWESOME-006: PASS
+            AZD-AWESOME-007: PASS
+            AZD-AWESOME-008: PASS
+      - type: prompt
+        config:
+          scoring: binary
+          evidence: [trajectory, diff, repo]
+    rubric:
+      - Inspects the supplied generated PR entry for AZD-AWESOME-005, including generated id and attribution link.
+      - Missing preview and inapplicable frameworks do not fail or add findings; preview is Recommended separately.
+      - Does not demand optional issue overrides or a user-generated UUID after automation has generated the entry.
 
   - name: copilot-init
     tags:

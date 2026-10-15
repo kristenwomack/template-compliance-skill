@@ -51,7 +51,9 @@ fixture:
       warnings: 3
       errors: 1
       log_excerpt: "PSRule for Azure: 1 error, 3 warnings; storage account allows shared key access."
-    gallery: {}
+    gallery:
+      path: direct-pr
+      final_entry: {}
     submission:
       kind: email-to-maintainer
       result: unsupported-path
@@ -77,6 +79,7 @@ expected:
     AZD-AWESOME-007: FAIL
     AZD-AWESOME-008: FAIL
   assertions:
+    - AZD-AWESOME-005 fails for the empty direct PR entry, not for an absent preview or optional issue overrides.
     - Reports twelve FAIL findings and two UNABLE TO DETERMINE findings; absent azure.yaml prevents schema and infrastructure-path conclusions.
     - Cites the failing validation checks that map to active catalog rules.
     - Reports AZD-AWESOME-008 as FAIL from the recorded security warnings and errors, not from the absent repository files.

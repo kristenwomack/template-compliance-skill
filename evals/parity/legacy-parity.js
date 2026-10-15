@@ -145,7 +145,8 @@ export function checkParity() {
         continue;
       }
       const expectedPrefix = `fixtures/${id}/`;
-      if (!src.startsWith(expectedPrefix)) {
+      const explicitlyShared = task.fixture?.evidence_files?.includes(`evals/${src}`);
+      if (!src.startsWith(expectedPrefix) && !explicitlyShared) {
         add(
           "fixture-path-mismatch",
           id,
@@ -158,6 +159,13 @@ export function checkParity() {
       }
       if (typeof entry.dest !== "string" || entry.dest.length === 0) {
         add("fixture-missing", id, `Staged source ${src} has no \`dest\`.`);
+      }
+    }
+    if (task.fixture?.evidence_files) {
+      const declared = [...task.fixture.evidence_files].sort();
+      const staged = files.map((entry) => `evals/${entry.src}`).sort();
+      if (JSON.stringify(declared) !== JSON.stringify(staged)) {
+        add("fixture-path-mismatch", id, "Staged sources differ from the explicit task evidence_files manifest.");
       }
     }
 
