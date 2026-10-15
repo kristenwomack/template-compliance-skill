@@ -379,6 +379,26 @@ describe("summary counts", () => {
 describe("non-trigger stimulus", () => {
   const config = { expect_report: false };
 
+  it("allows generic overall diagnostic statuses, including invalid status words", async () => {
+    for (const status of ["FAIL", "PASS", "UNABLE TO DETERMINE", "BLOCKED"]) {
+      const result = await grade(`# Project diagnostics\nOverall status: ${status}\nService web: build failed.`, config);
+      assert.equal(result.passed, true, result.evidence);
+    }
+  });
+
+  it("still rejects malformed actual publication reports", async () => {
+    for (const output of [
+      "# Publication report\nOverall status: BLOCKED",
+      "# Compliance Report\nOverall status: FAIL",
+      "Destination profile: invalid",
+      "### AZD-CORE-001\nStatus: BROKEN",
+      "Overall compliance: MOSTLY",
+    ]) {
+      const result = await grade(output, config);
+      assert.equal(result.passed, false, output);
+    }
+  });
+
   it("passes when the agent simply edits the template", async () => {
     const result = await grade(
       "I added an `owner` field to `templates/deployment.yaml` and reformatted each section.",

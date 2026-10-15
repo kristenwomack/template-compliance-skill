@@ -489,6 +489,15 @@ export function parseReport(text, options = {}) {
   }
 
   const integrityStatementFound = flatten(source).includes(flatten(integrityStatement));
+  // An overall status can summarize ordinary diagnostics. Require evidence
+  // specific to publication assessment, even when that report is malformed.
+  const publicationHeading = lines.some((line) => {
+    const heading = HEADING_RE.exec(line);
+    return heading && /\b(?:compliance|publication(?: readiness)?) report\b/.test(normalizeLabel(heading[2]));
+  });
+  const hasReportSignals = records.length > 0 || hasReadiness || publicationHeading ||
+    malformed.some((entry) => entry.reason !== "overall-result-invalid") ||
+    pairs.some((pair) => pair.label === "overall compliance");
 
   return {
     overallResult,
@@ -503,7 +512,7 @@ export function parseReport(text, options = {}) {
     hasReadiness,
     integrityStatementFound,
     /** True when the output looks like a compliance report at all. */
-    hasReportSignals: records.length > 0 || malformed.length > 0 || overallResult !== null || hasReadiness,
+    hasReportSignals,
   };
 }
 
