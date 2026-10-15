@@ -4,7 +4,7 @@ Authority: this repository-owned rule module, as indexed by [compliance-rules.md
 
 Apply only to the explicitly selected `public-awesome-azd` profile. Preparation excludes AZD-AWESOME-006. Interpret defined terms using [awesome-azd-rules.md](awesome-azd-rules.md).
 
-<!-- Generated from catalog.json; run npm run catalog:generate. Do not edit. -->
+<!-- Generated from policy/publication-catalog.json; run npm run catalog:generate. Do not edit. -->
 
 ```yaml
 rules:
@@ -12,7 +12,7 @@ rules:
     version: 1
     status: active
     policy_kind: approved
-    authority: template-compliance repository-owned catalog
+    authority: azd repository-owned catalog
     rationale: Tests the cited submission requirement using the catalog's explicit local evidence criteria.
     severity: collection-required
     source_revision: 22de60335bd77269a2e952cd0e3e8fab56ed4aa1
@@ -36,7 +36,7 @@ rules:
     version: 2
     status: active
     policy_kind: approved
-    authority: template-compliance repository-owned catalog
+    authority: azd repository-owned catalog
     rationale: Tests the cited submission requirement using the catalog's explicit local evidence criteria.
     severity: collection-required
     source_revision: 22de60335bd77269a2e952cd0e3e8fab56ed4aa1
@@ -59,7 +59,7 @@ rules:
     version: 3
     status: active
     policy_kind: approved
-    authority: template-compliance repository-owned catalog
+    authority: azd repository-owned catalog
     rationale: Tests the cited submission requirement using the catalog's explicit local evidence criteria.
     severity: collection-required
     source_revision: 22de60335bd77269a2e952cd0e3e8fab56ed4aa1
@@ -84,7 +84,7 @@ rules:
     version: 2
     status: active
     policy_kind: approved
-    authority: template-compliance repository-owned catalog
+    authority: azd repository-owned catalog
     rationale: Tests the cited submission requirement using the catalog's explicit local evidence criteria.
     severity: collection-required
     source_revision: 22de60335bd77269a2e952cd0e3e8fab56ed4aa1

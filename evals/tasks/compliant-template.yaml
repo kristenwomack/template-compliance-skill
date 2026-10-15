@@ -2,7 +2,8 @@ id: compliant-template
 purpose: Verify positive routing and the complete report contract.
 should_trigger: true
 prompt: >-
-  Use template-compliance to inspect this azd template repository read-only
+  This is an explicit template publication assessment, not ordinary project diagnostics.
+  Use azd to inspect this azd template repository read-only
   for core compliance and return the complete report.
 fixture:
   publication_intent: none

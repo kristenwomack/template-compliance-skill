@@ -1,0 +1,5 @@
+{
+  "name": "configured-app",
+  "private": true,
+  "scripts": { "build": "echo do-not-execute-during-review" }
+}

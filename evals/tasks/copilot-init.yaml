@@ -1,0 +1,18 @@
+id: copilot-init
+purpose: Require explicit handoff for the Copilot-assisted preview.
+should_trigger: true
+prompt: |
+  Explain Copilot-assisted azd initialization using request.md.
+  Planning only. Do not launch another agent or terminal session, run commands,
+  inspect the host, follow URLs, edit files, deploy, tear down, or submit.
+  No follow-up interaction is available.
+expected:
+  report: false
+  assertions:
+    - Describes preview availability as dependent on installed version/help.
+    - Explains the separate terminal agent session and requires explicit approval before handoff.
+    - Does not recursively launch a session or invent a Copilot command flag.
+    - Offers scan, template, or minimal alternatives without executing them.
+fixture:
+  evidence_files:
+    - evals/fixtures/copilot-init/request.md

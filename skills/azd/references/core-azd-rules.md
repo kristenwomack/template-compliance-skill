@@ -13,7 +13,7 @@ Source mappings and local interpretation are defined in [policy-sources.md](poli
 - **Scenario-fit evidence:** readable scenario documentation names the provisioned resource types, the infrastructure path is resolved from `azure.yaml` or its default `infra`, and tracked files under that path declare those resource types. An explicit `infra.path` is not required. Framework-specific equivalents are acceptable. Mapping named types to tracked declarations is a local evidence safeguard; it is not upstream wording. If required evidence cannot be read, infrastructure fit is `UNABLE TO DETERMINE`.
 - When fresh records disagree, a recorded failure takes precedence over a success. When a required file, external record, or authority cannot be read, use the rule's `unknown` outcome; do not infer its contents.
 
-<!-- Generated from catalog.json; run npm run catalog:generate. Do not edit. -->
+<!-- Generated from policy/publication-catalog.json; run npm run catalog:generate. Do not edit. -->
 
 ```yaml
 rules:
@@ -21,7 +21,7 @@ rules:
     version: 2
     status: active
     policy_kind: approved
-    authority: template-compliance repository-owned catalog
+    authority: azd repository-owned catalog
     rationale: Tests the cited core requirement using the catalog's explicit local evidence criteria.
     severity: required
     source_revision: 22de60335bd77269a2e952cd0e3e8fab56ed4aa1
@@ -46,7 +46,7 @@ rules:
     version: 2
     status: active
     policy_kind: approved
-    authority: template-compliance repository-owned catalog
+    authority: azd repository-owned catalog
     rationale: Tests the cited core requirement using the catalog's explicit local evidence criteria.
     severity: required
     source_revision: live-platform-reference; record inspected schema retrieval time and version or digest when supplied
@@ -71,7 +71,7 @@ rules:
     version: 2
     status: active
     policy_kind: approved
-    authority: template-compliance repository-owned catalog
+    authority: azd repository-owned catalog
     rationale: Tests the cited core requirement using the catalog's explicit local evidence criteria.
     severity: required
     source_revision: 22de60335bd77269a2e952cd0e3e8fab56ed4aa1
@@ -95,7 +95,7 @@ rules:
     version: 1
     status: active
     policy_kind: approved
-    authority: template-compliance repository-owned catalog
+    authority: azd repository-owned catalog
     rationale: Tests the cited core requirement using the catalog's explicit local evidence criteria.
     severity: required
     source_revision: 22de60335bd77269a2e952cd0e3e8fab56ed4aa1
@@ -119,7 +119,7 @@ rules:
     version: 2
     status: active
     policy_kind: approved
-    authority: template-compliance repository-owned catalog
+    authority: azd repository-owned catalog
     rationale: Tests the cited core requirement using the catalog's explicit local evidence criteria.
     severity: required
     source_revision: 22de60335bd77269a2e952cd0e3e8fab56ed4aa1
@@ -143,7 +143,7 @@ rules:
     version: 2
     status: active
     policy_kind: approved
-    authority: template-compliance repository-owned catalog
+    authority: azd repository-owned catalog
     rationale: Tests the cited core requirement using the catalog's explicit local evidence criteria.
     severity: required
     source_revision: 22de60335bd77269a2e952cd0e3e8fab56ed4aa1

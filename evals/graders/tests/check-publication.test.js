@@ -5,12 +5,12 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 import { test } from "node:test";
-import { checkTemplate, readH2, REQUIRED_HEADINGS, GOVERNANCE_FILES } from "../../../skills/template-compliance/scripts/check-template.mjs";
+import { checkPublication, readH2, REQUIRED_HEADINGS, GOVERNANCE_FILES } from "../../../skills/azd/scripts/check-publication.mjs";
 
-const script = fileURLToPath(new URL("../../../skills/template-compliance/scripts/check-template.mjs", import.meta.url));
+const script = fileURLToPath(new URL("../../../skills/azd/scripts/check-publication.mjs", import.meta.url));
 
 async function fixture(t) {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "template-compliance-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "azd-"));
   t.after(() => fs.rm(root, { recursive: true, force: true }));
   return root;
 }
@@ -29,7 +29,7 @@ test("core/private/organization/unresolved profiles never inspect public artifac
   const root = await fixture(t);
   await write(root, "azure.yaml", "name: example");
   for (const profile of ["core-only", "organization-catalog", "unresolved"]) {
-    const result = await checkTemplate({ root, profile });
+    const result = await checkPublication({ root, profile });
     assert.deepEqual(result.findings.map((finding) => finding.id), ["AZD-CORE-001"]);
     assert.equal(status(result, "AZD-CORE-001"), "PASS");
     assert.equal(result.remaining_rules.length, 5);
@@ -42,10 +42,10 @@ test("core/private/organization/unresolved profiles never inspect public artifac
 
 test("missing files fail, unreadable roots remain unknown, and directories are not files", async (t) => {
   const root = await fixture(t);
-  assert.equal(status(await checkTemplate({ root, profile: "core-only" }), "AZD-CORE-001"), "FAIL");
-  assert.equal(status(await checkTemplate({ root: path.join(root, "absent"), profile: "core-only" }), "AZD-CORE-001"), "UNABLE TO DETERMINE");
+  assert.equal(status(await checkPublication({ root, profile: "core-only" }), "AZD-CORE-001"), "FAIL");
+  assert.equal(status(await checkPublication({ root: path.join(root, "absent"), profile: "core-only" }), "AZD-CORE-001"), "UNABLE TO DETERMINE");
   await fs.mkdir(path.join(root, "azure.yaml"));
-  assert.equal(status(await checkTemplate({ root, profile: "core-only" }), "AZD-CORE-001"), "FAIL");
+  assert.equal(status(await checkPublication({ root, profile: "core-only" }), "AZD-CORE-001"), "FAIL");
 });
 
 test("public checks use the template root for README and repository root for governance", async (t) => {
@@ -55,14 +55,14 @@ test("public checks use the template root for README and repository root for gov
   await write(root, "README.md", REQUIRED_HEADINGS.map((heading) => `## ${heading}`).join("\n"));
   for (const name of GOVERNANCE_FILES) await write(repositoryRoot, name);
   await write(repositoryRoot, ".github/ISSUE_TEMPLATE/bug.yaml", "name: Bug");
-  const result = await checkTemplate({ root, repositoryRoot, profile: "public-awesome-azd" });
+  const result = await checkPublication({ root, repositoryRoot, profile: "public-awesome-azd" });
   assert.ok(result.findings.every((finding) => finding.status === "PASS"));
   assert.equal(result.public_stage, "preparation");
   assert.ok(!result.remaining_rules.some((rule) => rule.id === "AZD-AWESOME-006"));
   assert.equal(result.remaining_rules.length, 10);
   assert.ok(result.findings[2].evidence.every((item) => Number.isInteger(item.line)));
   assert.ok(!JSON.stringify(result).includes("name: Bug"));
-  const submission = await checkTemplate({ root, repositoryRoot, profile: "public-awesome-azd", stage: "submission" });
+  const submission = await checkPublication({ root, repositoryRoot, profile: "public-awesome-azd", stage: "submission" });
   assert.ok(submission.remaining_rules.some((rule) => rule.id === "AZD-AWESOME-006"));
 });
 
@@ -70,16 +70,16 @@ test("issue config alone is not an issue template; legacy templates are accepted
   const root = await fixture(t);
   for (const name of GOVERNANCE_FILES) await write(root, name);
   await write(root, ".github/ISSUE_TEMPLATE/config.yml", "blank_issues_enabled: true");
-  assert.equal(status(await checkTemplate({ root, repositoryRoot: root, profile: "public-awesome-azd" }), "AZD-AWESOME-002"), "FAIL");
+  assert.equal(status(await checkPublication({ root, repositoryRoot: root, profile: "public-awesome-azd" }), "AZD-AWESOME-002"), "FAIL");
   await write(root, ".github/ISSUE_TEMPLATE.md", "Describe the problem");
-  assert.equal(status(await checkTemplate({ root, repositoryRoot: root, profile: "public-awesome-azd" }), "AZD-AWESOME-002"), "PASS");
+  assert.equal(status(await checkPublication({ root, repositoryRoot: root, profile: "public-awesome-azd" }), "AZD-AWESOME-002"), "PASS");
 });
 
 test("missing nested governance is failure but an unspecified repository root is unknown", async (t) => {
   const root = await fixture(t);
   const options = { root, profile: "public-awesome-azd" };
-  assert.equal(status(await checkTemplate(options), "AZD-AWESOME-002"), "UNABLE TO DETERMINE");
-  assert.equal(status(await checkTemplate({ ...options, repositoryRoot: root }), "AZD-AWESOME-002"), "FAIL");
+  assert.equal(status(await checkPublication(options), "AZD-AWESOME-002"), "UNABLE TO DETERMINE");
+  assert.equal(status(await checkPublication({ ...options, repositoryRoot: root }), "AZD-AWESOME-002"), "FAIL");
 });
 
 test("heading parser excludes code fences, comments, indented code, and other heading levels", () => {
@@ -97,7 +97,7 @@ test("heading parser excludes code fences, comments, indented code, and other he
 test("headings only at H3 or inside code fail", async (t) => {
   const root = await fixture(t);
   await write(root, "README.md", "```\n" + REQUIRED_HEADINGS.map((heading) => `## ${heading}`).join("\n") + "\n```");
-  const result = await checkTemplate({ root, profile: "public-awesome-azd" });
+  const result = await checkPublication({ root, profile: "public-awesome-azd" });
   assert.equal(status(result, "AZD-AWESOME-007"), "FAIL");
 });
 
@@ -114,7 +114,7 @@ test("BOM and invalid backtick fences do not hide real headings", () => {
 test("raw HTML is indeterminate rather than a false heading pass", async (t) => {
   const root = await fixture(t);
   await write(root, "README.md", "<pre>\n" + REQUIRED_HEADINGS.map((heading) => `## ${heading}`).join("\n") + "\n</pre>");
-  assert.equal(status(await checkTemplate({ root, profile: "public-awesome-azd" }), "AZD-AWESOME-007"), "UNABLE TO DETERMINE");
+  assert.equal(status(await checkPublication({ root, profile: "public-awesome-azd" }), "AZD-AWESOME-007"), "UNABLE TO DETERMINE");
 });
 
 test("invalid scope and CLI flags are rejected rather than silently defaulted", async (t) => {
@@ -123,7 +123,7 @@ test("invalid scope and CLI flags are rejected rather than silently defaulted", 
     { root }, { root, profile: "private" }, { root, profile: "core-only", stage: "submission" },
     { root, profile: "public-awesome-azd", stage: "draft" },
     { root, repositoryRoot: path.join(root, "elsewhere"), profile: "core-only" },
-  ]) await assert.rejects(checkTemplate(options));
+  ]) await assert.rejects(checkPublication(options));
   for (const args of [[], ["--root"], ["--wat", root], ["--root", root, "--root", root]]) {
     const result = spawnSync(process.execPath, [script, ...args], { encoding: "utf8" });
     assert.equal(result.status, 1);
@@ -148,7 +148,7 @@ test("external directory links cannot prove governance present or absent", async
   const outside = await fixture(t);
   for (const name of GOVERNANCE_FILES.filter((name) => !name.startsWith(".github/"))) await write(root, name);
   await fs.symlink(outside, path.join(root, ".github"), process.platform === "win32" ? "junction" : "dir");
-  assert.equal(status(await checkTemplate({ root, repositoryRoot: root, profile: "public-awesome-azd" }), "AZD-AWESOME-002"), "UNABLE TO DETERMINE");
+  assert.equal(status(await checkPublication({ root, repositoryRoot: root, profile: "public-awesome-azd" }), "AZD-AWESOME-002"), "UNABLE TO DETERMINE");
 });
 
 test("symlinks outside the selected root and dangling links are evidence gaps", async (t) => {
@@ -161,8 +161,8 @@ test("symlinks outside the selected root and dangling links are evidence gaps", 
     if (error.code === "EPERM") { t.skip("Creating file symlinks requires OS privileges."); return; }
     throw error;
   }
-  assert.equal(status(await checkTemplate({ root, profile: "core-only" }), "AZD-CORE-001"), "UNABLE TO DETERMINE");
+  assert.equal(status(await checkPublication({ root, profile: "core-only" }), "AZD-CORE-001"), "UNABLE TO DETERMINE");
   await fs.unlink(path.join(root, "azure.yaml"));
   await fs.symlink(path.join(outside, "missing"), path.join(root, "azure.yaml"));
-  assert.equal(status(await checkTemplate({ root, profile: "core-only" }), "AZD-CORE-001"), "UNABLE TO DETERMINE");
+  assert.equal(status(await checkPublication({ root, profile: "core-only" }), "AZD-CORE-001"), "UNABLE TO DETERMINE");
 });

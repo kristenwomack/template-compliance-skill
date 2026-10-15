@@ -1,0 +1,10 @@
+name: configured-app
+services:
+  api:
+    project: .
+    host: containerapp
+    language: js
+hooks:
+  predeploy:
+    shell: sh
+    run: echo "Do not run hooks during review"

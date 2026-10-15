@@ -7,9 +7,9 @@ import YAML from "yaml";
 
 import { REPO_ROOT } from "../../parity/legacy-parity.js";
 import { ALL_RULES } from "./report-fixtures.js";
-import { checkTemplate, REQUIRED_HEADINGS, GOVERNANCE_FILES } from "../../../skills/template-compliance/scripts/check-template.mjs";
+import { checkPublication, REQUIRED_HEADINGS, GOVERNANCE_FILES } from "../../../skills/azd/scripts/check-publication.mjs";
 
-const REFERENCES = path.join(REPO_ROOT, "skills", "template-compliance", "references");
+const REFERENCES = path.join(REPO_ROOT, "skills", "azd", "references");
 const REVISION = "22de60335bd77269a2e952cd0e3e8fab56ed4aa1";
 const MODULES = ["core-azd-rules.md", "awesome-azd-publication-rules.md", "awesome-azd-submission-rules.md"];
 
@@ -26,7 +26,7 @@ describe("catalog provenance", () => {
   const rules = loadRules();
 
   it("generated views preserve the canonical rule objects exactly", () => {
-    const catalog = JSON.parse(fs.readFileSync(path.join(REFERENCES, "..", "catalog.json"), "utf8"));
+    const catalog = JSON.parse(fs.readFileSync(path.join(REFERENCES, "..", "policy", "publication-catalog.json"), "utf8"));
     assert.deepEqual(rules, catalog.rules);
     assert.equal(new Set(catalog.rules.map((rule) => rule.id)).size, 14);
     for (const rule of catalog.rules) {
@@ -46,7 +46,7 @@ describe("catalog provenance", () => {
     assert.deepEqual(governance.requirement.match(/(?:\.github\/)?[A-Z_]+\.md/g), GOVERNANCE_FILES);
     const root = path.join(REPO_ROOT, "evals", "fixtures", "private-core-only", "project");
     for (const stage of ["preparation", "submission"]) {
-      const result = await checkTemplate({ root, profile: "public-awesome-azd", stage });
+      const result = await checkPublication({ root, profile: "public-awesome-azd", stage });
       const selected = [...result.findings.map((finding) => finding.id), ...result.remaining_rules.map((rule) => rule.id)].sort();
       const expected = rules.map((rule) => rule.id).filter((id) => stage === "submission" || id !== "AZD-AWESOME-006").sort();
       assert.deepEqual(selected, expected);
@@ -60,7 +60,7 @@ describe("catalog provenance", () => {
   it("runtime payload is self-contained and smaller than the previous mandatory reference reads", async () => {
     const root = path.join(REPO_ROOT, "evals", "fixtures", "private-core-only", "project");
     for (const profile of ["core-only", "public-awesome-azd"]) {
-      const result = await checkTemplate({ root, profile });
+      const result = await checkPublication({ root, profile });
       assert.equal(result.format_version, 2);
       assert.equal(result.policy_baseline, REVISION);
       assert.ok(result.safeguards.some((text) => text.includes("uncommitted")));

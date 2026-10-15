@@ -2,7 +2,8 @@ id: remediation-needed
 purpose: Verify failure evidence and proposed remediation without edits.
 should_trigger: true
 prompt: >-
-  Audit this azd template repository with template-compliance. Explain failures
+  This is an explicit template publication assessment, not ordinary project diagnostics.
+  Audit this azd template repository with azd. Explain failures
   and recommend remediation, but do not edit anything.
 fixture:
   publication_intent: none

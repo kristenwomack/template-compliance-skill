@@ -1,4 +1,4 @@
-// Vally grader plugin: `template-compliance-report`.
+// Vally grader plugin: `publication-report`.
 //
 // Registered through the documented plugin contract — a module that exports
 // `registerGraders(registry)` and is loaded with
@@ -22,7 +22,7 @@ import {
 
 const OVERALL_SET = new Set(OVERALL_RESULTS);
 const FINDING_SET = new Set(FINDING_STATUSES);
-const GRADER_NAME = "template-compliance-report";
+const GRADER_NAME = "publication-report";
 
 function fail(message) {
   throw new Error(`${GRADER_NAME}: ${message}`);
@@ -492,11 +492,11 @@ export function evaluateReport(parsed, resolved) {
   return details;
 }
 
-export class TemplateComplianceReportGrader {
+export class PublicationReportGrader {
   metadata = {
     name: GRADER_NAME,
     description:
-      "Parses a template-compliance Markdown report and asserts the exact overall result, the exact " +
+      "Parses a azd Markdown report and asserts the exact overall result, the exact " +
       "{rule ID: status} map, selected profile and readiness layers, and report hygiene (no missing, unexpected, duplicate, or malformed " +
       "findings; summary counts consistent with the findings; integrity statement present).",
     behavior: {},
@@ -566,7 +566,7 @@ export class TemplateComplianceReportGrader {
 
 /** Vally plugin entry point. */
 export function registerGraders(registry) {
-  registry.register(new TemplateComplianceReportGrader());
+  registry.register(new PublicationReportGrader());
 }
 
 export default { registerGraders };

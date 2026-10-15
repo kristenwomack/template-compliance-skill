@@ -2,6 +2,7 @@ id: organization-policy-inaccessible
 purpose: Inspect ordinary project files with user-selected scope and existing requirements.
 should_trigger: true
 prompt: |
+  This is an explicit template publication assessment, not ordinary project diagnostics.
   Check project/ for our internal catalog using the selected internal-handbook.md. Access to that document is denied; do not attempt to read it or bypass the restriction.
 
   Inspect only the staged project and explicitly selected requirements, read-only.

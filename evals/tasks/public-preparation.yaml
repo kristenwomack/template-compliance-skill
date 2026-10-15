@@ -2,6 +2,7 @@ id: public-preparation
 purpose: Separate public preparation from submission using supplied synthetic evidence.
 should_trigger: true
 prompt: |
+  This is an explicit template publication assessment, not ordinary project diagnostics.
   Check whether this template is ready to submit to public Awesome AZD.
   We are preparing materials, not submitting yet. Inspect read-only.
   public-evidence.yaml is supplied synthetic evidence for this evaluation only,

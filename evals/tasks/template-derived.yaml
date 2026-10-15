@@ -1,0 +1,18 @@
+id: template-derived
+purpose: Keep template origin separate from publication intent.
+should_trigger: true
+prompt: |
+  Check the azd setup of my template-derived application in project/.
+  I am not publishing a template. Inspect only staged files read-only.
+  Do not inspect the host, execute targets, follow URLs, change files, deploy,
+  tear down, or submit. No follow-up interaction is available.
+expected:
+  report: false
+  assertions:
+    - Uses project diagnostics even though the app came from a template.
+    - Does not infer successful deployment, publication readiness, or acceptance from metadata.
+    - Applies no catalog or gallery requirements and makes no changes or cloud calls.
+fixture:
+  evidence_files:
+    - evals/fixtures/template-derived/project/azure.yaml
+    - evals/fixtures/template-derived/project/README.md

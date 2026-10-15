@@ -1,16 +1,16 @@
 # Compliance Rule Catalog
 
-The canonical bundled policy is [catalog.json](../catalog.json). This index and
+The canonical bundled policy is [publication-catalog.json](../policy/publication-catalog.json). This index and
 the generated rule views support human review and manual fallback; the normal
 audit uses the checker's profile-filtered payload instead of loading all modules.
 Enforce only entries with `status: active` and `policy_kind: approved`. For internal
 catalogs, use user-selected existing documents, not this catalog's schema.
 
-Edit bundled rules and module introductions in `catalog.json`, then run
+Edit bundled rules and module introductions in `policy/publication-catalog.json`, then run
 `npm run catalog:generate` from the repository root. Generated YAML views are not
 independently editable policy. `npm run catalog:check` rejects stale views.
 
-Catalog identity: `template-compliance@4`. See [policy sources and interpretation](policy-sources.md) for the pinned upstream revision, source-to-rule mapping, local evidence safeguards, and conflict decisions. Upstream requirements inform this catalog; catalog approval is not official azd certification or collection acceptance.
+Catalog identity: `azd-publication@4`. See [policy sources and interpretation](policy-sources.md) for the pinned upstream revision, source-to-rule mapping, local evidence safeguards, and conflict decisions. Upstream requirements inform this catalog; catalog approval is not official azd certification or collection acceptance.
 
 ## Active modules
 

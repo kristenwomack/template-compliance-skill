@@ -1,4 +1,7 @@
-# Deterministic static checks
+# Deterministic publication checks
+
+For explicit template assessments only. Ordinary project diagnostics use
+`inspect-project.mjs` and [check.md](check.md), without publication rules.
 
 Run the script from the installed skill directory, not from the inspected target.
 It uses only Node.js built-ins (Node.js 22.12 or newer), so copying the complete
@@ -7,8 +10,8 @@ Use an absolute script path and explicitly selected roots. Quote paths containin
 spaces. For example, from the installed skill directory:
 
 ```text
-node scripts/check-template.mjs --root "<template-root>" --profile core-only
-node scripts/check-template.mjs --root "<template-root>" --repository-root "<repository-root>" --profile public-awesome-azd --stage preparation
+node scripts/check-publication.mjs --root "<template-root>" --profile core-only
+node scripts/check-publication.mjs --root "<template-root>" --repository-root "<repository-root>" --profile public-awesome-azd --stage preparation
 ```
 
 Use the host's path separators. The supported profiles are `core-only`,
@@ -35,7 +38,7 @@ Standard output is JSON with `format_version`, `catalog`, selected roots,
 profile/stage, `findings`, `remaining_rules`, `safeguards`, and `limitations`.
 Payload format version 2 replaces the version 1 ID-only list. Each remaining rule
 includes requirement, applicability, evidence criteria, pass/fail/unknown outcomes,
-remediation, and source citations. Criteria come from the installed `catalog.json`,
+remediation, and source citations. Criteria come from the installed `policy/publication-catalog.json`,
 not target files. Only active, approved rules for the selected profile/stage appear.
 Each finding
 contains an ID, layer, status, evidence paths (and heading lines when available),

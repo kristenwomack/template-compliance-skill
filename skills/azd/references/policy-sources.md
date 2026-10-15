@@ -1,6 +1,6 @@
 # Policy sources and interpretation
 
-Catalog identity: `template-compliance@4`.
+Catalog identity: `azd-publication@4`.
 
 ## Versioned guidance baseline
 

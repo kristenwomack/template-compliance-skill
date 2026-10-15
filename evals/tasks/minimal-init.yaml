@@ -1,0 +1,17 @@
+id: minimal-init
+purpose: Explain minimal initialization without invented options or execution.
+should_trigger: true
+prompt: |
+  Use azd to explain how I could initialize a minimal project.
+  Planning only: read request.md, do not inspect the host, run commands,
+  follow URLs, edit files, provision, deploy, tear down, or submit.
+  No follow-up interaction is available.
+expected:
+  report: false
+  assertions:
+    - Explains minimal init with --minimal conditional on installed version/help support.
+    - Distinguishes minimal scaffolding from a complete or deployed project.
+    - Does not invent flags, apply gallery requirements, execute commands, or change files.
+fixture:
+  evidence_files:
+    - evals/fixtures/minimal-init/request.md

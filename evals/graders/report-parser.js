@@ -1,7 +1,7 @@
-// Deterministic parser for template-compliance Markdown reports.
+// Deterministic parser for template publication Markdown reports.
 //
 // The report contract lives in
-// `skills/template-compliance/references/report-format.md`. This module turns a
+// `skills/azd/references/report-format.md`. This module turns a
 // report into structured data without any model in the loop, so an eval can
 // assert the exact overall result and the exact {rule ID: status} map instead of
 // asking a judge to eyeball it.
@@ -175,7 +175,7 @@ function compileRuleIdMatcher(pattern) {
 }
 
 /**
- * Parse a template-compliance report.
+ * Parse a template publication report.
  *
  * @param {string} text Raw agent output.
  * @param {{ruleIdPattern?: string, integrityStatement?: string}} [options]

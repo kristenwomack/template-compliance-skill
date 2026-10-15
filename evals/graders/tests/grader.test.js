@@ -1,4 +1,4 @@
-// Behavioural tests for the `template-compliance-report` Vally grader.
+// Behavioural tests for the `publication-report` Vally grader.
 //
 // These drive the grader through its real `grade()` entry point with a minimal
 // trajectory, and register it through Vally's real plugin loader so the plugin
@@ -12,17 +12,17 @@ import { describe, it } from "node:test";
 import { createGraderRegistry, loadGraderPlugin } from "@microsoft/vally";
 
 import {
-  TemplateComplianceReportGrader,
+  PublicationReportGrader,
   registerGraders,
   resolveConfig,
-} from "../template-compliance-report.js";
+} from "../publication-report.js";
 
 import { ALL_RULES, CORE_RULES, report, uniform } from "./report-fixtures.js";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const PLUGIN = path.resolve(HERE, "..", "template-compliance-report.js");
+const PLUGIN = path.resolve(HERE, "..", "publication-report.js");
 
-const grader = new TemplateComplianceReportGrader();
+const grader = new PublicationReportGrader();
 
 async function grade(output, config) {
   return grader.grade({ trajectory: { output }, config });
@@ -37,7 +37,7 @@ describe("plugin contract", () => {
   it("registers through Vally's grader plugin loader", async () => {
     const registry = createGraderRegistry();
     await loadGraderPlugin(PLUGIN, registry, { cwd: HERE });
-    const registered = registry.get("template-compliance-report");
+    const registered = registry.get("publication-report");
     assert.ok(registered, "grader was not registered");
     assert.equal(registered.metadata.determinism, "static");
     assert.equal(registered.metadata.costProfile, "free");
@@ -49,15 +49,15 @@ describe("plugin contract", () => {
     const registered = [];
     registerGraders({ register: (g) => registered.push(g) });
     assert.equal(registered.length, 1);
-    assert.equal(registered[0].metadata.name, "template-compliance-report");
+    assert.equal(registered[0].metadata.name, "publication-report");
   });
 
   it("derives a pure, config-specific default name", () => {
     assert.equal(
       grader.defaultName({ overall_result: "PASS", findings: uniform(CORE_RULES, "PASS") }),
-      "template-compliance-report PASS / 6 rules",
+      "publication-report PASS / 6 rules",
     );
-    assert.equal(grader.defaultName({ expect_report: false }), "template-compliance-report absent");
+    assert.equal(grader.defaultName({ expect_report: false }), "publication-report absent");
     assert.equal(grader.assertsAbsence({ expect_report: false }), true);
     assert.equal(grader.assertsAbsence({ overall_result: "PASS" }), false);
   });
@@ -97,7 +97,7 @@ describe("PASS stimulus", () => {
     const result = await grade(report({ overall: "PASS", statuses: uniform(CORE_RULES, "PASS") }), config);
     assert.equal(result.passed, true, result.evidence);
     assert.equal(result.score, 1);
-    assert.equal(result.graderType, "template-compliance-report");
+    assert.equal(result.graderType, "publication-report");
     assert.equal(failedChecks(result).length, 0);
   });
 

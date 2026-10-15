@@ -1,7 +1,7 @@
 // Shared report builders for the grader tests.
 //
 // These produce contract-shaped Markdown reports (see
-// `skills/template-compliance/references/report-format.md`) so the tests
+// `skills/azd/references/report-format.md`) so the tests
 // exercise the parser against realistic output rather than hand-tuned strings.
 
 import { DEFAULT_INTEGRITY_STATEMENT } from "../report-parser.js";
@@ -73,7 +73,7 @@ export function report({
     "# Compliance Report",
     "",
     "- **Scope:** evidence.yaml",
-    "- **Catalog:** bundled template-compliance catalog",
+    "- **Catalog:** bundled azd catalog",
     "- **Inspection mode:** read-only",
   ];
   if (overall !== undefined) lines.push(`- **Overall result:** \`${overall}\``);

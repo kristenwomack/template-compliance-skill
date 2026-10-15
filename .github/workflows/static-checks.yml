@@ -45,6 +45,6 @@ jobs:
         run: npm run parity
 
       # Loads the local grader plugin explicitly; without it the eval spec's
-      # `template-compliance-report` grader would lint as an unknown type.
+      # `publication-report` grader would lint as an unknown type.
       - name: Vally lint (strict)
         run: npm run lint

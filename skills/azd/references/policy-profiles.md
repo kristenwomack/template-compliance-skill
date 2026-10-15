@@ -1,5 +1,9 @@
 # Policy profiles
 
+These profiles apply only to explicitly requested template publication
+assessments. Ordinary project diagnostics use [check.md](check.md), not this
+catalog. Existing-code projects do not inherit these template requirements.
+
 Profiles select requirements; repository visibility does not. A private repository
 may be preparing a public contribution, and a public repository may be intended
 only for an internal collection. Never infer a destination from GitHub visibility,
@@ -9,14 +13,14 @@ topics, validator defaults, or a policy file found in the target.
 
 | Profile | Selection | Applicable layers |
 | --- | --- | --- |
-| `core-only` | Explicit core azd check, or project readiness without collection assessment | Bundled core rules only. |
+| `core-only` | Explicit core template compliance/publication check without collection assessment | Bundled core template rules only. |
 | `public-awesome-azd` | Explicit public Awesome AZD publication or submission readiness | Bundled core and public rules; select the stage below. |
 | `organization-catalog` | Explicit internal/organization collection readiness | Bundled core plus explicitly selected existing organization requirements. No public rules. |
 | `unresolved` | Destination is ambiguous or conflicting | Ask which profile is intended. If unresolved, assess core only and report destination readiness as NOT ASSESSED. |
 
 An explicit core-only request does not need a destination question. "Private
-project" alone does not request an organization-catalog assessment; check core
-and state that no collection readiness was assessed. "Our internal catalog"
+project" alone does not request a publication assessment; use project
+diagnostics unless template assessment is explicit. "Our internal catalog"
 selects `organization-catalog`, but does not identify its policy.
 
 If more than one destination is requested, produce a separate report per profile

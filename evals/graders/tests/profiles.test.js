@@ -2,10 +2,10 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { parseReport } from "../report-parser.js";
-import { resolveConfig, TemplateComplianceReportGrader } from "../template-compliance-report.js";
+import { resolveConfig, PublicationReportGrader } from "../publication-report.js";
 import { AWESOME_RULES, CORE_RULES, report, uniform } from "./report-fixtures.js";
 
-const grader = new TemplateComplianceReportGrader();
+const grader = new PublicationReportGrader();
 const core = uniform(CORE_RULES, "PASS");
 // Test-local headings from an ordinary document, not an organization ID standard.
 const policyPattern = "AZD-[A-Z]+-\\d{3}|Ownership|Support|Production review";
