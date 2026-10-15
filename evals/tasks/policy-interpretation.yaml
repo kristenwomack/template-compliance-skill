@@ -7,6 +7,8 @@ prompt: >-
 fixture:
   evidence_file: evals/fixtures/policy-interpretation/evidence.yaml
 expected:
+  destination_profile: public-awesome-azd
+  public_stage: submission
   finding_status:
     AZD-CORE-001: PASS
     AZD-CORE-002: UNABLE TO DETERMINE

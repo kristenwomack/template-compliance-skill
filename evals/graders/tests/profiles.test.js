@@ -60,6 +60,21 @@ describe("profile config validation", () => {
 });
 
 describe("readiness layer checks", () => {
+  it("rejects legacy-shaped reports universally, including optional reports without config labels", async () => {
+    for (const config of [{}, { expect_report: "optional" }, { findings: core }]) {
+      const result = await grade({ overall: "PASS", statuses: core }, config);
+      assert.equal(result.passed, false);
+      assert.ok(result.details.some((detail) => detail.name === "readiness-layers" && !detail.passed));
+    }
+    for (const omit of ["profile", "readiness"]) {
+      const options = {
+        overall: "PASS", statuses: core, profile: "core-only",
+        readiness: { core: "PASS", destination: "NOT ASSESSED" },
+      };
+      delete options[omit];
+      assert.equal((await grade(options)).passed, false);
+    }
+  });
   it("allows passing core with unresolved organization policy, but blocks overall PASS", async () => {
     const options = {
       overall: "UNABLE TO DETERMINE", statuses: core, profile: "organization-catalog",

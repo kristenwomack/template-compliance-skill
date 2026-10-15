@@ -133,6 +133,19 @@ describe("eval.yaml grader configs are satisfiable", () => {
         if (extra) statuses[extra] = resolved.destinationProfile === "unresolved" ? "UNABLE TO DETERMINE" : "PASS";
       }
 
+      assert.ok(resolved.destinationProfile, `${stimulus.name}: declare the report profile explicitly`);
+      if (resolved.destinationProfile === "public-awesome-azd" && !resolved.exhaustive) {
+        for (const rule of ALL_RULES) {
+          if (!(rule in statuses) && !forbidden.has(rule) &&
+              !(rule === "AZD-AWESOME-006" && resolved.publicStage === "preparation")) {
+            statuses[rule] = "UNABLE TO DETERMINE";
+          }
+        }
+      }
+      const readiness = resolved.readiness ?? {
+        core: deriveOverall(Object.fromEntries(Object.entries(statuses).filter(([id]) => id.startsWith("AZD-CORE-")))),
+        destination: deriveOverall(Object.fromEntries(Object.entries(statuses).filter(([id]) => !id.startsWith("AZD-CORE-")))),
+      };
       const overall = resolved.overallResult ?? deriveOverall(statuses);
       assert.ok(
         !resolved.forbiddenOverall.includes(overall),
@@ -144,7 +157,7 @@ describe("eval.yaml grader configs are satisfiable", () => {
           overall, statuses,
           profile: resolved.destinationProfile,
           stage: resolved.publicStage,
-          readiness: resolved.readiness,
+          readiness,
         }) }, config,
       });
       assert.equal(result.passed, true, `${stimulus.name}: ${result.evidence}`);

@@ -13,6 +13,8 @@ fixture:
       source: git-ls-files
       paths: []
 expected:
+  destination_profile: core-only
+  readiness: {core: FAIL, destination: NOT ASSESSED}
   overall_result: FAIL
   finding_status:
     AZD-CORE-001: FAIL

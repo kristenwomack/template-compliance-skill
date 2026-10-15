@@ -41,9 +41,37 @@ function tally(statuses) {
     else if (status === "FAIL") counts.fail += 1;
     else counts.unknown += 1;
   }
+
   return counts;
 }
 
+function verdict(statuses) {
+  const values = Object.values(statuses);
+  return values.includes("FAIL") ? "FAIL" : values.includes("UNABLE TO DETERMINE")
+    ? "UNABLE TO DETERMINE" : values.length ? "PASS" : "NO ACTIVE APPLICABLE RULES";
+}
+
+// Explicit builders for tests that exercise the complete current contract.
+// The low-level report() deliberately leaves omitted labels omitted.
+export function coreReport(options = {}) {
+  return report({
+    profile: "core-only",
+    readiness: { core: verdict(options.statuses ?? {}), destination: "NOT ASSESSED" },
+    ...options,
+  });
+}
+
+export function publicSubmissionReport(options = {}) {
+  const entries = Object.entries(options.statuses ?? {});
+  return report({
+    profile: "public-awesome-azd", stage: "submission",
+    readiness: {
+      core: verdict(Object.fromEntries(entries.filter(([id]) => id.startsWith("AZD-CORE-")))),
+      destination: verdict(Object.fromEntries(entries.filter(([id]) => !id.startsWith("AZD-CORE-")))),
+    },
+    ...options,
+  });
+}
 /**
  * Render a compliance report.
  *

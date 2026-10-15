@@ -39,6 +39,8 @@ stimuli:
       - type: publication-report
         config:
           overall_result: PASS
+          destination_profile: core-only
+          readiness: {core: PASS, destination: NOT ASSESSED}
           findings:
             AZD-CORE-001: PASS
             AZD-CORE-002: PASS
@@ -78,6 +80,8 @@ stimuli:
       - type: publication-report
         config:
           overall_result: FAIL
+          destination_profile: core-only
+          readiness: {core: FAIL, destination: NOT ASSESSED}
           findings:
             AZD-CORE-001: FAIL
             AZD-CORE-002: UNABLE TO DETERMINE
@@ -116,6 +120,8 @@ stimuli:
       - type: publication-report
         config:
           overall_result: UNABLE TO DETERMINE
+          destination_profile: core-only
+          readiness: {core: UNABLE TO DETERMINE, destination: NOT ASSESSED}
           findings:
             AZD-CORE-001: UNABLE TO DETERMINE
             AZD-CORE-002: UNABLE TO DETERMINE
@@ -376,6 +382,8 @@ stimuli:
         config:
           # The fixture constrains only these four rules; the rest follow their
           # own evidence, so the expectation is deliberately not exhaustive.
+          destination_profile: public-awesome-azd
+          public_stage: submission
           findings:
             AZD-AWESOME-002: PASS
             AZD-AWESOME-004: UNABLE TO DETERMINE
@@ -417,6 +425,8 @@ stimuli:
       - type: diff-empty
       - type: publication-report
         config:
+          destination_profile: public-awesome-azd
+          public_stage: submission
           findings:
             AZD-CORE-001: PASS
             AZD-CORE-002: UNABLE TO DETERMINE

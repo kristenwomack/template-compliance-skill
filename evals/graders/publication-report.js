@@ -338,10 +338,8 @@ export function evaluateReport(parsed, resolved) {
   }
 
   if (parsed.hasReportSignals) {
-    if (parsed.hasReadiness || resolved.destinationProfile !== undefined || resolved.readiness !== undefined || resolved.publicStage !== undefined) {
-      details.push(checkReadiness(parsed, resolved));
-    }
-    const expectedOverall = parsed.hasReadiness ? deriveLayeredOverall(parsed) : deriveOverallResult(parsed.findings);
+    details.push(checkReadiness(parsed, resolved));
+    const expectedOverall = deriveLayeredOverall(parsed);
     const passed = parsed.overallResult === expectedOverall;
     details.push(
       check(
