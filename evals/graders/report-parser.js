@@ -167,7 +167,12 @@ function compileRuleIdMatcher(pattern) {
     const found = [];
     let m;
     while ((m = re.exec(text)) !== null) {
-      found.push(m[1]);
+      // Bundled IDs can carry a descriptive title. A selected document heading
+      // is instead the whole rule identity, not a prefix of another heading.
+      if (/^AZD-[A-Z]+-\d{3}$/.test(m[1]) ||
+          normalizeLabel(text.replace(/\s+#+\s*$/, "")) === normalizeLabel(m[1])) {
+        found.push(m[1]);
+      }
       if (m.index === re.lastIndex) re.lastIndex++;
     }
     return found;

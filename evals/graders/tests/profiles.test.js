@@ -15,6 +15,18 @@ async function grade(options, config = {}) {
 }
 
 describe("profile report parsing", () => {
+  it("matches complete normalized organization headings, not prefixes", () => {
+    for (const heading of ["Support", "**Support**", "`Support`", "Support ###"]) {
+      const parsed = parseReport(`### ${heading}\nStatus: PASS`, { ruleIdPattern: policyPattern });
+      assert.deepEqual(parsed.findings, { Support: "PASS" }, heading);
+    }
+    for (const heading of ["Supportability notes", "Support notes", "Production review checklist"]) {
+      const parsed = parseReport(`### ${heading}\nStatus: PASS`, { ruleIdPattern: policyPattern });
+      assert.deepEqual(parsed.findings, {}, heading);
+    }
+    const bundled = parseReport("### AZD-CORE-001 — azure.yaml at root\nStatus: PASS", { ruleIdPattern: policyPattern });
+    assert.deepEqual(bundled.findings, { "AZD-CORE-001": "PASS" });
+  });
   it("parses existing document headings and readiness without counting layer labels", () => {
     const parsed = parseReport(report({
       overall: "FAIL",

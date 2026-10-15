@@ -145,7 +145,7 @@ export function report({
     } else {
       for (const [rule, status] of entries) {
         lines.push(
-          `### ${rule} \u2014 catalog requirement`,
+          /^AZD-[A-Z]+-\d{3}$/.test(rule) ? `### ${rule} \u2014 catalog requirement` : `### ${rule}`,
           "",
           `- **Target:** evidence.yaml`,
           `- **Status:** ${status}`,
