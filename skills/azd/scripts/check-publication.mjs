@@ -64,28 +64,41 @@ export async function checkPublication({ root, repositoryRoot, profile, stage })
     throw new Error("--stage is preparation or submission and is valid only for public-awesome-azd.");
   }
   root = path.resolve(root);
+  let containmentUnknown = false;
   if (repositoryRoot) {
     repositoryRoot = path.resolve(repositoryRoot);
-    if (!contained(repositoryRoot, root)) throw new Error("--root must be inside --repository-root.");
+    try {
+      const [realRepository, realRoot] = await Promise.all([fs.realpath(repositoryRoot), fs.realpath(root)]);
+      if (!contained(realRepository, realRoot)) throw new Error("--root resolves outside --repository-root.");
+      repositoryRoot = realRepository;
+      root = realRoot;
+    } catch (error) {
+      if (!error.code) throw error;
+      if (!contained(repositoryRoot, root)) throw new Error("--root must be inside --repository-root.");
+      containmentUnknown = true;
+    }
   }
+  const inspectScoped = (scope, relative, directory = false) => containmentUnknown
+    ? { path: path.resolve(scope, relative), state: "unknown", reason: "Root containment could not be resolved." }
+    : inspect(scope, relative, directory);
   const publicStage = profile === "public-awesome-azd" ? stage ?? "preparation" : undefined;
   const selected = CATALOG.rules.filter((rule) => rule.status === "active" && rule.policy_kind === "approved"
     && (rule.layer === "core" || (publicStage && rule.stages.includes(publicStage))));
   const selectedRule = (id) => selected.some((rule) => rule.id === id);
   const findings = [];
   if (selectedRule("AZD-CORE-001")) {
-    findings.push(finding("AZD-CORE-001", "core", [await inspect(root, "azure.yaml")], "azure.yaml must be a readable file at the selected template root."));
+    findings.push(finding("AZD-CORE-001", "core", [await inspectScoped(root, "azure.yaml")], "azure.yaml must be a readable file at the selected template root."));
   }
   if (selectedRule("AZD-AWESOME-002")) {
     const governance = repositoryRoot
-      ? await Promise.all(GOVERNANCE_FILES.map((name) => inspect(repositoryRoot, name)))
+      ? await Promise.all(GOVERNANCE_FILES.map((name) => inspectScoped(repositoryRoot, name)))
       : [{ path: null, state: "unknown", reason: "Repository root was not explicitly supplied." }];
     if (repositoryRoot) {
-      const legacy = await inspect(repositoryRoot, ".github/ISSUE_TEMPLATE.md");
-      const directory = await inspect(repositoryRoot, ".github/ISSUE_TEMPLATE", true);
+      const legacy = await inspectScoped(repositoryRoot, ".github/ISSUE_TEMPLATE.md");
+      const directory = await inspectScoped(repositoryRoot, ".github/ISSUE_TEMPLATE", true);
       const templates = directory.state === "present"
         ? await Promise.all(directory.entries.filter((name) => /\.(md|ya?ml)$/i.test(name) && !/^config\.ya?ml$/i.test(name))
-          .map((name) => inspect(repositoryRoot, `.github/ISSUE_TEMPLATE/${name}`)))
+          .map((name) => inspectScoped(repositoryRoot, `.github/ISSUE_TEMPLATE/${name}`)))
         : [];
       const present = [legacy, ...templates].find((item) => item.state === "present");
       const unknown = [legacy, directory, ...templates].find((item) => item.state === "unknown");
@@ -96,7 +109,7 @@ export async function checkPublication({ root, repositoryRoot, profile, stage })
     findings.push(finding("AZD-AWESOME-002", "destination", governance, "Repository-scoped governance files and at least one issue template must be present."));
   }
   if (selectedRule("AZD-AWESOME-007")) {
-    const readme = await inspect(root, "README.md");
+    const readme = await inspectScoped(root, "README.md");
     const headings = readme.state === "present" ? readH2(readme.content) : [];
     const unsupportedHtml = readme.state === "present"
       && /^ {0,3}<\/?[A-Za-z][^>]*>/m.test(readme.content.replace(/<!--[\s\S]*?-->/g, ""));

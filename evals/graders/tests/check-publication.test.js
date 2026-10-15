@@ -151,6 +151,35 @@ test("external directory links cannot prove governance present or absent", async
   assert.equal(status(await checkPublication({ root, repositoryRoot: root, profile: "public-awesome-azd" }), "AZD-AWESOME-002"), "UNABLE TO DETERMINE");
 });
 
+test("root junctions cannot import external template evidence", async (t) => {
+  const repositoryRoot = await fixture(t);
+  const outside = await fixture(t);
+  await write(outside, "azure.yaml");
+  const root = path.join(repositoryRoot, "template");
+  await fs.symlink(outside, root, process.platform === "win32" ? "junction" : "dir");
+  await assert.rejects(checkPublication({ root, repositoryRoot, profile: "core-only" }), /resolves outside/);
+  const unavailable = await checkPublication({
+    root: path.join(repositoryRoot, "missing"), repositoryRoot, profile: "core-only",
+  });
+  assert.equal(status(unavailable, "AZD-CORE-001"), "UNABLE TO DETERMINE");
+});
+
+test("repository junctions and contained template roots use canonical paths", async (t) => {
+  const parent = await fixture(t);
+  const repository = await fixture(t);
+  await write(repository, "template/azure.yaml");
+  const repositoryRoot = path.join(parent, "repository");
+  await fs.symlink(repository, repositoryRoot, process.platform === "win32" ? "junction" : "dir");
+  const result = await checkPublication({ root: path.join(repositoryRoot, "template"), repositoryRoot, profile: "core-only" });
+  assert.equal(result.repository_root, await fs.realpath(repository));
+  assert.equal(result.template_root, await fs.realpath(path.join(repository, "template")));
+  assert.equal(status(result, "AZD-CORE-001"), "PASS");
+  const canonicalSelection = await checkPublication({
+    root: path.join(repository, "template"), repositoryRoot, profile: "core-only",
+  });
+  assert.equal(status(canonicalSelection, "AZD-CORE-001"), "PASS");
+});
+
 test("symlinks outside the selected root and dangling links are evidence gaps", async (t) => {
   const root = await fixture(t);
   const outside = await fixture(t);
