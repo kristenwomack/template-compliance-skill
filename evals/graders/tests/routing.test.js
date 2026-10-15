@@ -43,7 +43,7 @@ describe("azd router and workflow boundaries", () => {
   it("keeps new journey prompts, staged files, assertions and no-report expectations synchronized", () => {
     const { stimuli } = loadStimuli();
     const journeys = loadLegacyTasks().filter((task) => task.expected?.report === false);
-    assert.equal(journeys.length, 7);
+    assert.equal(journeys.length, 8);
     for (const task of journeys) {
       const stimulus = stimuli.find((entry) => entry.name === task.id);
       assert.equal(stimulus.prompt, task.prompt);
@@ -52,5 +52,16 @@ describe("azd router and workflow boundaries", () => {
       assert.ok(stimulus.graders.some((grader) => grader.type === "diff-empty"));
       assert.deepEqual(stimulus.agent_environment.files.map((entry) => `evals/${entry.src}`).sort(), [...task.fixture.evidence_files].sort());
     }
+  });
+
+  it("requires explicit template destination and version/help confirmation", () => {
+    const build = read("references/build.md");
+    assert.ok(build.includes("azd init --template <selected-template> ."));
+    for (const phrase of ["template-named directory", "absolute destination", "command working", "azd init --help", "--cwd"]) {
+      assert.ok(build.includes(phrase), phrase);
+    }
+    const readme = fs.readFileSync(new URL("../../../README.md", import.meta.url), "utf8");
+    assert.ok(readme.includes("azd init --template <selected-template> ."));
+    assert.match(read("references/init-sources.md"), /c681d5a9e52961914e12e98255680363c52e2a7f/);
   });
 });

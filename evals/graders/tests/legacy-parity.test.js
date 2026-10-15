@@ -11,7 +11,7 @@ import { ALL_RULES, CORE_RULES, report } from "./report-fixtures.js";
 describe("legacy fixture parity", () => {
   it("keeps the legacy tasks and policy/profile regressions", () => {
     const tasks = loadLegacyTasks();
-    assert.equal(tasks.length, 24, "publication and project journeys must retain suite parity");
+    assert.equal(tasks.length, 25, "publication and project journeys must retain suite parity");
     assert.deepEqual(
       tasks.map((t) => t.id).sort(),
       [
@@ -38,6 +38,7 @@ describe("legacy fixture parity", () => {
         "remediation-needed",
         "should-not-trigger",
         "template-derived",
+        "template-init",
         "troubleshoot",
       ],
     );
@@ -59,7 +60,7 @@ describe("legacy fixture parity", () => {
       0,
       violations.map((v) => `[${v.code}] ${v.subject}: ${v.message}`).join("\n"),
     );
-    assert.equal(checked, 24);
+    assert.equal(checked, 25);
   });
 
   it("gives every stimulus a deterministic publication-report grader", () => {

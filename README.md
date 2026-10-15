@@ -41,6 +41,13 @@ template-derived initialization (`--template`), minimal initialization
 (`--minimal`), and the Copilot-assisted preview. Installed help determines
 available options; interactive choices are not invented flags.
 
+Confirm the absolute destination and command working directory before template
+acquisition. Current azd uses `azd init --template <selected-template>` to create
+a template-named directory; `azd init --template <selected-template> .` targets
+the current directory, so run it from the resolved project root (or use supported
+`--cwd`). Check installed `azd version` and `azd init --help` first because versions
+may differ. See [pinned init verification](skills/azd/references/init-sources.md).
+
 Existing-code initialization can generate `azure.yaml`, `.azure`, and
 `.gitignore` without checked-in infrastructure. Partial and existing
 configurations need targeted inspection, not an automatic reset.

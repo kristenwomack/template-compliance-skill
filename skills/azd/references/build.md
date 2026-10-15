@@ -12,13 +12,19 @@
    | Starting point | Init approach |
    | --- | --- |
    | Existing code | Interactive **Scan current directory**; let azd detect services. It can generate `azure.yaml`, `.azure`, and `.gitignore` without checked-in infrastructure. |
-   | Template-derived | `azd init --template <selected-template>` when supported by installed help; inspect downloaded code before executing it. |
+   | Template-derived | Confirm destination first: `azd init --template <selected-template>` creates a template-named directory; `azd init --template <selected-template> .` initializes the current/resolved root. Verify installed help; inspect downloaded code before executing it. |
    | Minimal | `azd init --minimal` when supported; deliberately incomplete scaffolding, not a deployment-ready app. |
    | Copilot-assisted | Init preview can hand off to a separate terminal agent session. Explain the handoff and obtain explicit approval; never recursively launch another agent/session. If unavailable, offer scan, template, or minimal. |
    | Existing/partial configuration | Preserve working choices. Inspect gaps, then propose targeted edits rather than rerunning init blindly. |
 
    Reference: [azd initialization workflows](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/azd-init-workflow).
    Installed help controls available flags; interactive choices are not flags.
+   For template init, confirm the absolute destination and command working
+   directory with the user before acquisition. Run the `.` form from the resolved
+   project root (or use supported `--cwd`); do not assume the shell is already
+   there. Explain both forms and avoid unexpected nested/sibling directories.
+   Version-specific behavior and read-only verification:
+   [init sources](init-sources.md). Do not run init merely to discover its behavior.
 3. Explain the intended file changes and any overwrite risks. Apply only
    requested local edits, after resolving design choices (service boundaries,
    hosting, infrastructure ownership). Do not add gallery requirements to an

@@ -1016,6 +1016,34 @@ stimuli:
       - Treats missing .azure and conventional infra as contextual gaps, not publication failures.
       - Recommends targeted follow-up instead of rerunning init or overwriting configuration.
       - Emits no catalog verdict or gallery requirements; performs no mutations or cloud operations.
+  - name: template-init
+    tags:
+      priority: p1
+      coverage: [project-workflows, template-destination, safety]
+    agent_environment:
+      files:
+        - src: fixtures/template-init/request.md
+          dest: request.md
+    prompt: |
+      Plan template initialization using request.md. Explain only; do not execute
+      commands, inspect the host, follow URLs, edit files, deploy, or submit.
+    graders:
+      - type: skill-invocation
+        config:
+          required: [azd]
+      - type: diff-empty
+      - type: publication-report
+        config:
+          expect_report: false
+      - type: prompt
+        config:
+          scoring: binary
+          evidence: [trajectory, diff, repo]
+    rubric:
+      - Explains that azd init --template without a positional directory creates a template-named directory.
+      - Uses azd init --template <selected-template> . for the resolved project root only after confirming the absolute destination and command working directory.
+      - Requires installed azd version and init help before choosing version-dependent behavior; does not download or initialize anything.
+
   - name: template-derived
     tags:
       priority: p1

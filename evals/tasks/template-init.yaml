@@ -1,0 +1,15 @@
+id: template-init
+purpose: Confirm template acquisition destination before initialization.
+should_trigger: true
+prompt: |
+  Plan template initialization using request.md. Explain only; do not execute
+  commands, inspect the host, follow URLs, edit files, deploy, or submit.
+expected:
+  report: false
+  assertions:
+    - Explains that azd init --template without a positional directory creates a template-named directory.
+    - Uses azd init --template <selected-template> . for the resolved project root only after confirming the absolute destination and command working directory.
+    - Requires installed azd version and init help before choosing version-dependent behavior; does not download or initialize anything.
+fixture:
+  evidence_files:
+    - evals/fixtures/template-init/request.md
