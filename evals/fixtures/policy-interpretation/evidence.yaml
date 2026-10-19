@@ -1,0 +1,60 @@
+evidence_scope: This document is the complete set of readable evidence. Do not inspect the host repository or follow URLs; do not infer unavailable evidence.
+publication_intent: explicit
+repository:
+  audited_commit: 7c92d640f1e845ea4f4f6ea4a68c37d834ffe201
+  working_tree: clean
+  root_files:
+    - README.md
+    - LICENSE.md
+    - SECURITY.md
+    - CONTRIBUTING.md
+    - .github/CODE_OF_CONDUCT.md
+    - .github/ISSUE_TEMPLATE/bug.yml
+    - examples/web/azure.yaml
+    - examples/web/README.md
+    - examples/web/infra/main.bicep
+  template_root: examples/web
+  working_directory_documentation: Run azd from examples/web.
+  template_root_files: [azure.yaml, README.md, infra/main.bicep]
+  tracked_files:
+    paths:
+      - examples/web/azure.yaml
+      - examples/web/README.md
+      - examples/web/infra/main.bicep
+  azure_yaml:
+    content: |
+      name: web-infrastructure
+  infrastructure:
+    path: examples/web/infra
+    file: examples/web/infra/main.bicep
+    content_excerpt: resource webApp 'Microsoft.Web/sites@2023-12-01'
+  readme:
+    path: examples/web/README.md
+    content: |
+      # Web infrastructure
+      ## Features
+      Provisions a Microsoft.Web/sites resource with infra/main.bicep.
+      ## Getting Started
+      Install azd and authenticate to an Azure subscription.
+      From examples/web, run azd up; it reads azure.yaml and infra/main.bicep.
+      Verify the web app appears in the Azure portal. Run azd down to clean up.
+      ## Guidance
+      This is an infrastructure-only, non-AI template.
+      ## Resources
+      Azure App Service documentation.
+  metadata:
+    description: Provision Azure App Service web infrastructure with azd.
+    topics: [azd-templates, ai-azd-templates, bicep]
+  absent_optional_assets: [.devcontainer, .github/workflows/azure-dev.yml]
+schema_validation:
+  schema_url: https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/azd-schema
+  retrieved_at: 2026-10-05T12:00:00Z
+  result: pass
+  output_excerpt: The documentation page was reviewed; no machine-readable schema was identified.
+evidence:
+  validation:
+    target_commit: 7c92d640f1e845ea4f4f6ea4a68c37d834ffe201
+    result: success
+    recorded_checks: [readme-h2-headings]
+    checked_headings: [Features, Getting Started, Guidance, Resources]
+    log_excerpt: All four configured headings passed; Important Security Notice was not checked.

@@ -1,7 +1,7 @@
 id: all-rules-fail
-purpose: Verify deterministic negative behavior for every active repository-owned catalog rule.
+purpose: Verify negative findings preserve configuration-dependent uncertainty when required configuration is absent.
 should_trigger: true
-prompt: Audit this failed Awesome AZD submission and provide remediation without edits.
+prompt: Audit this in-progress failed Awesome AZD submission and provide remediation without edits; use the public submission stage.
 fixture:
   publication_intent: explicit
   repository:
@@ -25,7 +25,7 @@ fixture:
       access: readable
       present: false
   schema_validation:
-    schema_url: https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/azd-schema
+    schema_url: https://aka.ms/azure.yaml.json
     retrieved_at: "2026-08-30T12:00:00Z"
     target_commit: b51a9b74c24cf470e57cc87b3b52d3b592f7850a
     result: fail
@@ -51,17 +51,22 @@ fixture:
       warnings: 3
       errors: 1
       log_excerpt: "PSRule for Azure: 1 error, 3 warnings; storage account allows shared key access."
-    gallery: {}
+    gallery:
+      path: direct-pr
+      final_entry: {}
     submission:
       kind: email-to-maintainer
       result: unsupported-path
       catalog_rule: AZD-AWESOME-006
 expected:
+  destination_profile: public-awesome-azd
+  public_stage: submission
+  readiness: {core: FAIL, destination: FAIL}
   overall_result: FAIL
   finding_status:
     AZD-CORE-001: FAIL
-    AZD-CORE-002: FAIL
-    AZD-CORE-003: FAIL
+    AZD-CORE-002: UNABLE TO DETERMINE
+    AZD-CORE-003: UNABLE TO DETERMINE
     AZD-CORE-004: FAIL
     AZD-CORE-005: FAIL
     AZD-CORE-006: FAIL
@@ -74,7 +79,8 @@ expected:
     AZD-AWESOME-007: FAIL
     AZD-AWESOME-008: FAIL
   assertions:
-    - Reports fourteen FAIL findings from direct negative evidence.
+    - AZD-AWESOME-005 fails for the empty direct PR entry, not for an absent preview or optional issue overrides.
+    - Reports twelve FAIL findings and two UNABLE TO DETERMINE findings; absent azure.yaml prevents schema and infrastructure-path conclusions.
     - Cites the failing validation checks that map to active catalog rules.
     - Reports AZD-AWESOME-008 as FAIL from the recorded security warnings and errors, not from the absent repository files.
     - Gives rule-specific remediation but applies no changes.

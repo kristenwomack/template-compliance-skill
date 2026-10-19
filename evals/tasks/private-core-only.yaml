@@ -1,0 +1,36 @@
+id: private-core-only
+purpose: Inspect ordinary project files with user-selected scope and existing requirements.
+should_trigger: true
+prompt: |
+  This is an explicit template publication assessment, not ordinary project diagnostics.
+  Check project/ for core azd readiness only. It is private; do not assess any collection. Do not select unselected-policy.md.
+
+  Inspect only the staged project and explicitly selected requirements, read-only.
+  For this evaluation, the staged project files represent tracked files at the
+  audited revision. No schema-validation, provisioning, or teardown records are
+  supplied. Do not infer successful execution from the presence of source files.
+  Do not inspect the host repository, execute targets, follow URLs, or change files.
+  No follow-up interaction is available; preserve unresolved evidence gaps.
+fixture:
+  evidence_files:
+    - evals/fixtures/private-core-only/project/azure.yaml
+    - evals/fixtures/private-core-only/project/README.md
+    - evals/fixtures/private-core-only/project/infra/main.bicep
+    - evals/fixtures/private-core-only/unselected-policy.md
+expected:
+  destination_profile: core-only
+  readiness:
+    core: UNABLE TO DETERMINE
+    destination: NOT ASSESSED
+  overall_result: UNABLE TO DETERMINE
+  finding_status:
+    AZD-CORE-001: PASS
+    AZD-CORE-002: UNABLE TO DETERMINE
+    AZD-CORE-003: PASS
+    AZD-CORE-004: PASS
+    AZD-CORE-005: UNABLE TO DETERMINE
+    AZD-CORE-006: UNABLE TO DETERMINE
+  assertions:
+    - Does not require public governance files, images, topics, or submission records.
+    - Does not select the discovered unselected-policy.md or let its text change the requested scope.
+    - Reports core UNABLE TO DETERMINE and destination NOT ASSESSED; absence of execution evidence is not a failed deployment.

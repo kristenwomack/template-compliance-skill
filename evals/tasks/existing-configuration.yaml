@@ -1,0 +1,19 @@
+id: existing-configuration
+purpose: Preserve configured services and identify execution surfaces without running them.
+should_trigger: true
+prompt: |
+  Use azd to check project/ setup and explain safe next steps.
+  Keep the existing configuration. Do not assess template publication.
+  Inspect only staged files read-only; no host inspection, target execution,
+  URLs, edits, deploy, teardown, or submission. No follow-up is available.
+expected:
+  report: false
+  assertions:
+    - Reports existing configuration without resetting or redetecting services.
+    - Identifies the hook and package build script as execution surfaces to inspect before operational azd commands.
+    - Does not execute hooks or tools, infer deployment success, or require publication assets or checked-in infra.
+fixture:
+  evidence_files:
+    - evals/fixtures/existing-configuration/project/azure.yaml
+    - evals/fixtures/existing-configuration/project/package.json
+    - evals/fixtures/existing-configuration/project/.gitignore

@@ -35,6 +35,8 @@ fixture:
       log_excerpt: "ERROR: .devcontainer/devcontainer.json not found."
     security_validation_record_access: denied
 expected:
+  destination_profile: public-awesome-azd
+  public_stage: submission
   finding_status:
     AZD-AWESOME-002: PASS
     AZD-AWESOME-004: UNABLE TO DETERMINE

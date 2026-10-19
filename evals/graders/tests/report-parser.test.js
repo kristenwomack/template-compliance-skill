@@ -1,4 +1,4 @@
-// Unit tests for the template-compliance report parser.
+// Unit tests for the azd report parser.
 //
 // Run with `npm test` (Node's built-in test runner — no extra dependency).
 

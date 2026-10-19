@@ -1,4 +1,4 @@
-// Static parity between the nine legacy `evals/tasks/*.yaml` fixtures and the
+// Static parity between the `evals/tasks/*.yaml` fixtures and the
 // Vally suite in `evals/eval.yaml`.
 //
 // The legacy YAML files predate the Vally migration and are still the
@@ -10,8 +10,8 @@
 //   * each stimulus stages the fixture directory that belongs to its task;
 //   * the deterministic grader's expected overall result and
 //     {rule ID: status} map are identical to the legacy `expected` block;
-//   * trigger/non-trigger intent matches the skill-invocation grader and the
-//     grader's `expect_report` setting; and
+//   * trigger/non-trigger intent matches the skill-invocation grader, with
+//     explicit project workflows allowed to omit publication reports; and
 //   * every legacy assertion list still has a qualitative rubric behind it.
 //
 // Nothing here runs an agent or needs credentials.
@@ -22,7 +22,7 @@ import { fileURLToPath } from "node:url";
 
 import YAML from "yaml";
 
-import { resolveConfig } from "../graders/template-compliance-report.js";
+import { resolveConfig } from "../graders/publication-report.js";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 
@@ -31,8 +31,8 @@ export const EVALS_DIR = path.join(REPO_ROOT, "evals");
 export const EVAL_SPEC = path.join(EVALS_DIR, "eval.yaml");
 export const TASKS_DIR = path.join(EVALS_DIR, "tasks");
 
-const GRADER_TYPE = "template-compliance-report";
-const SKILL_NAME = "template-compliance";
+const GRADER_TYPE = "publication-report";
+const SKILL_NAME = "azd";
 
 function readYaml(file) {
   return YAML.parse(fs.readFileSync(file, "utf8"));
@@ -145,7 +145,8 @@ export function checkParity() {
         continue;
       }
       const expectedPrefix = `fixtures/${id}/`;
-      if (!src.startsWith(expectedPrefix)) {
+      const explicitlyShared = task.fixture?.evidence_files?.includes(`evals/${src}`);
+      if (!src.startsWith(expectedPrefix) && !explicitlyShared) {
         add(
           "fixture-path-mismatch",
           id,
@@ -158,6 +159,13 @@ export function checkParity() {
       }
       if (typeof entry.dest !== "string" || entry.dest.length === 0) {
         add("fixture-missing", id, `Staged source ${src} has no \`dest\`.`);
+      }
+    }
+    if (task.fixture?.evidence_files) {
+      const declared = [...task.fixture.evidence_files].sort();
+      const staged = files.map((entry) => `evals/${entry.src}`).sort();
+      if (JSON.stringify(declared) !== JSON.stringify(staged)) {
+        add("fixture-path-mismatch", id, "Staged sources differ from the explicit task evidence_files manifest.");
       }
     }
 
@@ -189,7 +197,7 @@ export function checkParity() {
         add(
           "trigger-grader-mismatch",
           id,
-          `Legacy task expects template-compliance to trigger, but skill-invocation does not require it.`,
+          `Legacy task expects azd to trigger, but skill-invocation does not require it.`,
         );
       }
     } else {
@@ -198,7 +206,7 @@ export function checkParity() {
         add(
           "trigger-grader-mismatch",
           id,
-          `Legacy task expects template-compliance NOT to trigger, but skill-invocation does not disallow it.`,
+          `Legacy task expects azd NOT to trigger, but skill-invocation does not disallow it.`,
         );
       }
     }
@@ -226,15 +234,28 @@ export function checkParity() {
           "Legacy task is a non-trigger case, so the grader must set `expect_report: false`.",
         );
       }
-    } else if (resolved.expectReport === false) {
+    } else if (resolved.expectReport === false && task.expected?.report !== false) {
       add(
         "expect-report-mismatch",
         id,
         "Legacy task expects the skill to trigger, so the grader must not set `expect_report: false`.",
       );
     }
+    if (task.expected?.report === false && resolved.expectReport !== false) {
+      add("expect-report-mismatch", id, "Project workflow must not require a publication report.");
+    }
 
     const legacyOverall = task.expected?.overall_result;
+    for (const [key, resolvedKey] of [
+      ["destination_profile", "destinationProfile"], ["public_stage", "publicStage"],
+    ]) {
+      if (task.expected?.[key] !== resolved[resolvedKey]) {
+        add("profile-mismatch", id, `Legacy ${key} differs from the grader.`);
+      }
+    }
+    if (!sameMap(task.expected?.readiness, resolved.readiness)) {
+      add("readiness-mismatch", id, "Legacy readiness layers differ from the grader.");
+    }
     if (legacyOverall === undefined) {
       if (resolved.overallResult !== undefined) {
         add(

@@ -1,4 +1,4 @@
-// Behavioural tests for the `template-compliance-report` Vally grader.
+// Behavioural tests for the `publication-report` Vally grader.
 //
 // These drive the grader through its real `grade()` entry point with a minimal
 // trajectory, and register it through Vally's real plugin loader so the plugin
@@ -12,17 +12,17 @@ import { describe, it } from "node:test";
 import { createGraderRegistry, loadGraderPlugin } from "@microsoft/vally";
 
 import {
-  TemplateComplianceReportGrader,
+  PublicationReportGrader,
   registerGraders,
   resolveConfig,
-} from "../template-compliance-report.js";
+} from "../publication-report.js";
 
-import { ALL_RULES, CORE_RULES, report, uniform } from "./report-fixtures.js";
+import { ALL_RULES, CORE_RULES, coreReport, publicSubmissionReport, uniform } from "./report-fixtures.js";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const PLUGIN = path.resolve(HERE, "..", "template-compliance-report.js");
+const PLUGIN = path.resolve(HERE, "..", "publication-report.js");
 
-const grader = new TemplateComplianceReportGrader();
+const grader = new PublicationReportGrader();
 
 async function grade(output, config) {
   return grader.grade({ trajectory: { output }, config });
@@ -37,7 +37,7 @@ describe("plugin contract", () => {
   it("registers through Vally's grader plugin loader", async () => {
     const registry = createGraderRegistry();
     await loadGraderPlugin(PLUGIN, registry, { cwd: HERE });
-    const registered = registry.get("template-compliance-report");
+    const registered = registry.get("publication-report");
     assert.ok(registered, "grader was not registered");
     assert.equal(registered.metadata.determinism, "static");
     assert.equal(registered.metadata.costProfile, "free");
@@ -49,15 +49,15 @@ describe("plugin contract", () => {
     const registered = [];
     registerGraders({ register: (g) => registered.push(g) });
     assert.equal(registered.length, 1);
-    assert.equal(registered[0].metadata.name, "template-compliance-report");
+    assert.equal(registered[0].metadata.name, "publication-report");
   });
 
   it("derives a pure, config-specific default name", () => {
     assert.equal(
       grader.defaultName({ overall_result: "PASS", findings: uniform(CORE_RULES, "PASS") }),
-      "template-compliance-report PASS / 6 rules",
+      "publication-report PASS / 6 rules",
     );
-    assert.equal(grader.defaultName({ expect_report: false }), "template-compliance-report absent");
+    assert.equal(grader.defaultName({ expect_report: false }), "publication-report absent");
     assert.equal(grader.assertsAbsence({ expect_report: false }), true);
     assert.equal(grader.assertsAbsence({ overall_result: "PASS" }), false);
   });
@@ -94,23 +94,23 @@ describe("PASS stimulus", () => {
   const config = { overall_result: "PASS", findings: uniform(CORE_RULES, "PASS") };
 
   it("passes on a contract-shaped PASS report", async () => {
-    const result = await grade(report({ overall: "PASS", statuses: uniform(CORE_RULES, "PASS") }), config);
+    const result = await grade(coreReport({ overall: "PASS", statuses: uniform(CORE_RULES, "PASS") }), config);
     assert.equal(result.passed, true, result.evidence);
     assert.equal(result.score, 1);
-    assert.equal(result.graderType, "template-compliance-report");
+    assert.equal(result.graderType, "publication-report");
     assert.equal(failedChecks(result).length, 0);
   });
 
   it("passes on the same report rendered as a table", async () => {
     const result = await grade(
-      report({ overall: "PASS", statuses: uniform(CORE_RULES, "PASS"), style: "table" }),
+      coreReport({ overall: "PASS", statuses: uniform(CORE_RULES, "PASS"), style: "table" }),
       config,
     );
     assert.equal(result.passed, true, result.evidence);
   });
 
   it("fails when the overall result is wrong", async () => {
-    const result = await grade(report({ overall: "FAIL", statuses: uniform(CORE_RULES, "PASS") }), config);
+    const result = await grade(coreReport({ overall: "FAIL", statuses: uniform(CORE_RULES, "PASS") }), config);
     assert.equal(result.passed, false);
     assert.deepEqual(failedChecks(result), ["overall-result", "overall-result-consistent"]);
     assert.match(result.evidence, /Expected overall result PASS, found FAIL/);
@@ -118,7 +118,7 @@ describe("PASS stimulus", () => {
 
   it("fails when the integrity statement is missing", async () => {
     const result = await grade(
-      report({ overall: "PASS", statuses: uniform(CORE_RULES, "PASS"), integrity: false }),
+      coreReport({ overall: "PASS", statuses: uniform(CORE_RULES, "PASS"), integrity: false }),
       config,
     );
     assert.equal(result.passed, false);
@@ -138,13 +138,13 @@ describe("FAIL stimulus", () => {
   const config = { overall_result: "FAIL", findings: statuses };
 
   it("passes on the expected mixed report", async () => {
-    const result = await grade(report({ overall: "FAIL", statuses }), config);
+    const result = await grade(coreReport({ overall: "FAIL", statuses }), config);
     assert.equal(result.passed, true, result.evidence);
   });
 
   it("fails when a rule that should be indeterminate is reported as FAIL", async () => {
     const drifted = { ...statuses, "AZD-CORE-004": "FAIL" };
-    const result = await grade(report({ overall: "FAIL", statuses: drifted }), config);
+    const result = await grade(coreReport({ overall: "FAIL", statuses: drifted }), config);
     assert.equal(result.passed, false);
     assert.ok(failedChecks(result).includes("finding-statuses"));
     assert.match(result.evidence, /AZD-CORE-004: expected UNABLE TO DETERMINE, found FAIL/);
@@ -159,7 +159,7 @@ describe("UNABLE TO DETERMINE stimulus", () => {
 
   it("passes on an all-indeterminate 14-rule report", async () => {
     const result = await grade(
-      report({ overall: "UNABLE TO DETERMINE", statuses: uniform(ALL_RULES, "UNABLE TO DETERMINE") }),
+      publicSubmissionReport({ overall: "UNABLE TO DETERMINE", statuses: uniform(ALL_RULES, "UNABLE TO DETERMINE") }),
       config,
     );
     assert.equal(result.passed, true, result.evidence);
@@ -168,7 +168,7 @@ describe("UNABLE TO DETERMINE stimulus", () => {
   it("fails when uncertainty is turned into a failure", async () => {
     const statuses = uniform(ALL_RULES, "UNABLE TO DETERMINE");
     statuses["AZD-AWESOME-008"] = "FAIL";
-    const result = await grade(report({ overall: "FAIL", statuses }), config);
+    const result = await grade(publicSubmissionReport({ overall: "FAIL", statuses }), config);
     assert.equal(result.passed, false);
     assert.ok(failedChecks(result).includes("overall-result"));
     assert.ok(failedChecks(result).includes("finding-statuses"));
@@ -179,7 +179,7 @@ describe("missing findings", () => {
   it("fails when an expected rule is not reported at all", async () => {
     const statuses = uniform(CORE_RULES, "PASS");
     delete statuses["AZD-CORE-006"];
-    const result = await grade(report({ overall: "PASS", statuses }), {
+    const result = await grade(coreReport({ overall: "PASS", statuses }), {
       overall_result: "PASS",
       findings: uniform(CORE_RULES, "PASS"),
     });
@@ -192,7 +192,7 @@ describe("missing findings", () => {
 describe("unexpected findings", () => {
   it("fails when an out-of-scope rule set appears", async () => {
     const statuses = { ...uniform(CORE_RULES, "PASS"), "AZD-AWESOME-001": "PASS" };
-    const result = await grade(report({ overall: "PASS", statuses }), {
+    const result = await grade(coreReport({ overall: "PASS", statuses }), {
       overall_result: "PASS",
       findings: uniform(CORE_RULES, "PASS"),
     });
@@ -203,13 +203,15 @@ describe("unexpected findings", () => {
 
   it("allows extra rules when the expectation is explicitly partial", async () => {
     const statuses = {
+      ...uniform(CORE_RULES, "PASS"),
+      ...uniform(ALL_RULES, "UNABLE TO DETERMINE"),
       "AZD-AWESOME-002": "PASS",
       "AZD-AWESOME-004": "UNABLE TO DETERMINE",
       "AZD-AWESOME-007": "UNABLE TO DETERMINE",
       "AZD-AWESOME-008": "UNABLE TO DETERMINE",
       "AZD-AWESOME-001": "PASS",
     };
-    const result = await grade(report({ overall: "UNABLE TO DETERMINE", statuses, summaryStyle: "none" }), {
+    const result = await grade(publicSubmissionReport({ overall: "UNABLE TO DETERMINE", statuses, summaryStyle: "none" }), {
       findings: {
         "AZD-AWESOME-002": "PASS",
         "AZD-AWESOME-004": "UNABLE TO DETERMINE",
@@ -223,11 +225,12 @@ describe("unexpected findings", () => {
 
   it("rejects an overall result inconsistent with partial findings", async () => {
     const statuses = {
+      ...uniform(ALL_RULES, "UNABLE TO DETERMINE"),
       "AZD-AWESOME-002": "PASS",
       "AZD-AWESOME-004": "UNABLE TO DETERMINE",
       "AZD-AWESOME-007": "UNABLE TO DETERMINE",
     };
-    const result = await grade(report({ overall: "PASS", statuses, summaryStyle: "none" }), {
+    const result = await grade(publicSubmissionReport({ overall: "PASS", statuses, summaryStyle: "none" }), {
       findings: { "AZD-AWESOME-002": "PASS" },
       exhaustive: false,
     });
@@ -238,17 +241,17 @@ describe("unexpected findings", () => {
 
   it("fails when a forbidden rule set is reported", async () => {
     const statuses = { ...uniform(CORE_RULES, "PASS"), "AZD-AWESOME-003": "PASS" };
-    const result = await grade(report({ overall: "PASS", statuses, summaryStyle: "none" }), {
+    const result = await grade(coreReport({ overall: "PASS", statuses, summaryStyle: "none" }), {
       expect_report: "optional",
       forbidden_rules: ["AZD-AWESOME-003"],
       forbidden_overall_results: ["PASS"],
     });
     assert.equal(result.passed, false);
-    assert.deepEqual(failedChecks(result), ["forbidden-overall-result", "forbidden-rules-absent"]);
+    assert.deepEqual(failedChecks(result), ["readiness-layers", "forbidden-overall-result", "forbidden-rules-absent"]);
   });
 
   it("fails when a limited-scope answer still claims overall compliance", async () => {
-    const result = await grade(report({ overall: "PASS", statuses: uniform(CORE_RULES, "PASS") }), {
+    const result = await grade(coreReport({ overall: "PASS", statuses: uniform(CORE_RULES, "PASS") }), {
       expect_report: "optional",
       forbidden_rules: ["AZD-AWESOME-001"],
       forbidden_overall_results: ["PASS"],
@@ -276,7 +279,7 @@ describe("unexpected findings", () => {
 
 describe("duplicate findings", () => {
   it("fails when a rule is reported twice", async () => {
-    const duplicated = report({ overall: "PASS", statuses: uniform(CORE_RULES, "PASS") }).replace(
+    const duplicated = coreReport({ overall: "PASS", statuses: uniform(CORE_RULES, "PASS") }).replace(
       "## Limitations and integrity",
       "### AZD-CORE-001 \u2014 catalog requirement\n\n- **Status:** PASS\n\n## Limitations and integrity",
     );
@@ -290,7 +293,7 @@ describe("duplicate findings", () => {
   });
 
   it("fails on a conflicting restatement", async () => {
-    const conflicting = report({ overall: "PASS", statuses: uniform(CORE_RULES, "PASS") }).replace(
+    const conflicting = coreReport({ overall: "PASS", statuses: uniform(CORE_RULES, "PASS") }).replace(
       "## Limitations and integrity",
       "### AZD-CORE-002 \u2014 catalog requirement\n\n- **Status:** FAIL\n\n## Limitations and integrity",
     );
@@ -306,7 +309,7 @@ describe("duplicate findings", () => {
 
 describe("malformed output", () => {
   it("fails on a finding with an unrecognised status word", async () => {
-    const malformed = report({ overall: "PASS", statuses: uniform(CORE_RULES, "PASS") }).replace(
+    const malformed = coreReport({ overall: "PASS", statuses: uniform(CORE_RULES, "PASS") }).replace(
       "- **Status:** PASS",
       "- **Status:** PASSED",
     );
@@ -328,7 +331,7 @@ describe("malformed output", () => {
 
   it("fails on an unrecognised overall verdict", async () => {
     const result = await grade(
-      report({ statuses: uniform(CORE_RULES, "PASS") }).replace(
+      coreReport({ statuses: uniform(CORE_RULES, "PASS") }).replace(
         "- **Scope:** evidence.yaml",
         "- **Overall result:** MOSTLY COMPLIANT\n- **Scope:** evidence.yaml",
       ),
@@ -343,7 +346,7 @@ describe("malformed output", () => {
 describe("summary counts", () => {
   it("fails when the declared counts contradict the findings", async () => {
     const result = await grade(
-      report({
+      coreReport({
         overall: "PASS",
         statuses: uniform(CORE_RULES, "PASS"),
         summary: { applicable: 6, pass: 5, fail: 1, unknown: 0 },
@@ -357,7 +360,7 @@ describe("summary counts", () => {
 
   it("fails when the summary section is absent", async () => {
     const result = await grade(
-      report({ overall: "PASS", statuses: uniform(CORE_RULES, "PASS"), summaryStyle: "none" }),
+      coreReport({ overall: "PASS", statuses: uniform(CORE_RULES, "PASS"), summaryStyle: "none" }),
       { overall_result: "PASS", findings: uniform(CORE_RULES, "PASS") },
     );
     assert.equal(result.passed, false);
@@ -366,7 +369,7 @@ describe("summary counts", () => {
 
   it("accepts summary counts rendered as a metric table", async () => {
     const result = await grade(
-      report({ overall: "PASS", statuses: uniform(CORE_RULES, "PASS"), summaryStyle: "table" }),
+      coreReport({ overall: "PASS", statuses: uniform(CORE_RULES, "PASS"), summaryStyle: "table" }),
       { overall_result: "PASS", findings: uniform(CORE_RULES, "PASS") },
     );
     assert.equal(result.passed, true, result.evidence);
@@ -375,6 +378,26 @@ describe("summary counts", () => {
 
 describe("non-trigger stimulus", () => {
   const config = { expect_report: false };
+
+  it("allows generic overall diagnostic statuses, including invalid status words", async () => {
+    for (const status of ["FAIL", "PASS", "UNABLE TO DETERMINE", "BLOCKED"]) {
+      const result = await grade(`# Project diagnostics\nOverall status: ${status}\nService web: build failed.`, config);
+      assert.equal(result.passed, true, result.evidence);
+    }
+  });
+
+  it("still rejects malformed actual publication reports", async () => {
+    for (const output of [
+      "# Publication report\nOverall status: BLOCKED",
+      "# Compliance Report\nOverall status: FAIL",
+      "Destination profile: invalid",
+      "### AZD-CORE-001\nStatus: BROKEN",
+      "Overall compliance: MOSTLY",
+    ]) {
+      const result = await grade(output, config);
+      assert.equal(result.passed, false, output);
+    }
+  });
 
   it("passes when the agent simply edits the template", async () => {
     const result = await grade(
@@ -386,7 +409,7 @@ describe("non-trigger stimulus", () => {
   });
 
   it("fails when the agent returns a compliance verdict anyway", async () => {
-    const result = await grade(report({ overall: "FAIL", statuses: uniform(CORE_RULES, "FAIL") }), config);
+    const result = await grade(coreReport({ overall: "FAIL", statuses: uniform(CORE_RULES, "FAIL") }), config);
     assert.equal(result.passed, false);
     assert.deepEqual(failedChecks(result), ["no-compliance-report"]);
     assert.match(result.evidence, /Expected no compliance report/);

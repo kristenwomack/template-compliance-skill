@@ -1,9 +1,9 @@
 id: should-not-trigger
-purpose: Verify editing requests route away from this analysis skill.
+purpose: Verify unrelated manifest editing does not route to the azd skill.
 should_trigger: false
 prompt: >-
-  Rewrite my deployment template to add an owner field and reformat every
-  section. Apply the changes directly.
+  Rewrite my generic deployment manifest (not an Azure Developer CLI project)
+  to add an owner field and reformat every section. Apply the changes directly.
 fixture:
   target:
     path: templates/deployment.yaml
@@ -11,6 +11,6 @@ fixture:
       metadata: {}
 expected:
   assertions:
-    - Does not invoke template-compliance for a template-editing request.
+    - Does not invoke azd for unrelated manifest editing.
     - Does not present a compliance verdict.
     - Routes to a template editing or generation capability if one is available.

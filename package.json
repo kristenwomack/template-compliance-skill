@@ -1,15 +1,17 @@
 {
-  "name": "template-compliance-skill",
+  "name": "azd-skill",
   "version": "0.1.0",
   "private": true,
-  "description": "Vally evaluation suite for the template-compliance skill.",
+  "description": "Azure Developer CLI skill with project workflows and publication assessment.",
   "scripts": {
     "test": "node --test \"evals/graders/tests/*.test.js\"",
+    "catalog:generate": "node tools/generate-catalog.mjs",
+    "catalog:check": "node tools/generate-catalog.mjs --check",
     "parity": "node evals/parity/check-legacy-parity.js",
-    "lint": "vally lint skills --eval-spec evals/eval.yaml --strict --grader-plugin ./graders/template-compliance-report.js",
-    "check": "npm run test && npm run parity && npm run lint",
-    "eval:ci": "vally eval --suite ci-gate --require-pass --junit --grader-plugin ./evals/graders/template-compliance-report.js",
-    "eval:full": "vally eval --suite full --require-pass --junit --grader-plugin ./evals/graders/template-compliance-report.js"
+    "lint": "vally lint skills --eval-spec evals/eval.yaml --strict --grader-plugin ./graders/publication-report.js",
+    "check": "npm run catalog:check && npm run test && npm run parity && npm run lint",
+    "eval:ci": "vally eval --suite ci-gate --require-pass --junit --grader-plugin ./evals/graders/publication-report.js",
+    "eval:full": "vally eval --suite full --require-pass --junit --grader-plugin ./evals/graders/publication-report.js"
   },
   "repository": {
     "type": "git",

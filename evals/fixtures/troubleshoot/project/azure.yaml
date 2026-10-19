@@ -1,0 +1,6 @@
+name: failing-app
+hooks:
+  predeploy:
+    shell: sh
+    run: ./scripts/predeploy.sh
+services: {}

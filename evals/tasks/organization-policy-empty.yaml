@@ -1,0 +1,35 @@
+id: organization-policy-empty
+purpose: Inspect ordinary project files with user-selected scope and existing requirements.
+should_trigger: true
+prompt: |
+  This is an explicit template publication assessment, not ordinary project diagnostics.
+  Check project/ for our internal catalog using internal-requirements.md as the selected organization document.
+
+  Inspect only the staged project and explicitly selected requirements, read-only.
+  For this evaluation, the staged project files represent tracked files at the
+  audited revision. No schema-validation, provisioning, or teardown records are
+  supplied. Do not infer successful execution from the presence of source files.
+  Do not inspect the host repository, execute targets, follow URLs, or change files.
+  No follow-up interaction is available; preserve unresolved evidence gaps.
+fixture:
+  evidence_files:
+    - evals/fixtures/organization-policy-empty/project/azure.yaml
+    - evals/fixtures/organization-policy-empty/project/README.md
+    - evals/fixtures/organization-policy-empty/project/infra/main.bicep
+    - evals/fixtures/organization-policy-empty/internal-requirements.md
+expected:
+  destination_profile: organization-catalog
+  readiness:
+    core: UNABLE TO DETERMINE
+    destination: NO ACTIVE APPLICABLE RULES
+  overall_result: UNABLE TO DETERMINE
+  finding_status:
+    AZD-CORE-001: PASS
+    AZD-CORE-002: UNABLE TO DETERMINE
+    AZD-CORE-003: PASS
+    AZD-CORE-004: PASS
+    AZD-CORE-005: UNABLE TO DETERMINE
+    AZD-CORE-006: UNABLE TO DETERMINE
+  assertions:
+    - Explains that the selected document contains recommendations only and cannot establish internal readiness.
+    - Does not turn optional suggestions into mandatory checks or organization PASS.

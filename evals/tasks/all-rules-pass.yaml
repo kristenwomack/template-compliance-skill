@@ -1,7 +1,7 @@
 id: all-rules-pass
 purpose: Verify positive behavior for every active repository-owned catalog rule.
 should_trigger: true
-prompt: Audit this repository for core azd and Awesome AZD publication readiness, read-only.
+prompt: Audit core azd and an in-progress Awesome AZD submission, read-only; use the public submission stage.
 fixture:
   publication_intent: explicit
   repository:
@@ -90,7 +90,7 @@ fixture:
       description: Deploy a Python web application to Azure App Service with azd.
       topics: [azd-templates, ai-azd-templates, python, appservice, bicep]
   schema_validation:
-    schema_url: https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/azd-schema
+    schema_url: https://aka.ms/azure.yaml.json
     retrieved_at: "2026-08-30T12:00:00Z"
     target_commit: a17b39f452a6d7c18d2a0f5e901b4667d24de811
     result: pass
@@ -130,14 +130,13 @@ fixture:
       errors: 0
       log_excerpt: "PSRule for Azure: 0 errors, 0 warnings."
     gallery:
+      path: direct-pr
       title: Python App Service Starter
       short_description: Deploy a Python web app to Azure App Service with Bicep and azd.
       source: https://github.com/example/python-appservice-template
       author: Example Templates Team
-      image:
-        url: https://raw.githubusercontent.com/example/python-appservice-template/a17b39f/assets/gallery.png
-        http_status: 200
-        content_type: image/png
+      authorUrl: https://github.com/example
+      uuid_uniqueness: No other gallery entry uses this UUID in the supplied complete entry listing.
       tags:
         technology: web
         language: python
@@ -150,6 +149,9 @@ fixture:
       url: https://github.com/Azure/awesome-azd/pull/9999
       catalog_rule: AZD-AWESOME-006
 expected:
+  destination_profile: public-awesome-azd
+  public_stage: submission
+  readiness: {core: PASS, destination: PASS}
   overall_result: PASS
   finding_status:
     AZD-CORE-001: PASS
@@ -167,6 +169,7 @@ expected:
     AZD-AWESOME-007: PASS
     AZD-AWESOME-008: PASS
   assertions:
+    - Direct PR metadata passes without a preview image; recommend one separately without changing counts.
     - Applies both core and collection rule sets because publication intent is explicit.
     - Every PASS cites a concrete file listing, content excerpt, metadata field, URL, commit, or recorded result.
     - Schema validation identifies the official schema URL, retrieval time, target commit, and zero-error result.

@@ -1,7 +1,7 @@
 id: all-rules-unknown
 purpose: Verify ambiguity behavior for every active repository-owned catalog rule.
 should_trigger: true
-prompt: Check core azd and Awesome AZD readiness, but do not infer inaccessible evidence.
+prompt: Check core azd and an in-progress Awesome AZD submission, without inferring inaccessible evidence; use the public submission stage.
 fixture:
   publication_intent: explicit
   repository:
@@ -22,6 +22,9 @@ fixture:
     submission_record_access: denied
     submission_authority_evidence_access: denied
 expected:
+  destination_profile: public-awesome-azd
+  public_stage: submission
+  readiness: {core: UNABLE TO DETERMINE, destination: UNABLE TO DETERMINE}
   overall_result: UNABLE TO DETERMINE
   finding_status:
     AZD-CORE-001: UNABLE TO DETERMINE
